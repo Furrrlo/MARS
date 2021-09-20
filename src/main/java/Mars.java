@@ -1,4 +1,3 @@
-
 /*
 Copyright (c) 2003-2006,  Pete Sanderson and Kenneth Vollmar
 
@@ -29,14 +28,14 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 /**
  * Portal to Mars
- * 
+ *
  * @author Pete Sanderson
  * @version March 2006
  **/
 
-    public class Mars {
-       public static void main(String[] args) {
-         new mars.MarsLaunch(args);
-      }
-   } 
+public class Mars {
+    public static void main(String[] args) {
+        new mars.MarsLaunch(args);
+    }
+}
 
