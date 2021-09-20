@@ -2,6 +2,10 @@ plugins {
     application
 }
 
+tasks.withType<Wrapper>().configureEach {
+    gradleVersion = "7.2"
+}
+
 application {
     mainClass.set("Mars")
 }
