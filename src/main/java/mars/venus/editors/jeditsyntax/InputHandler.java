@@ -6,7 +6,6 @@
  * permitted, in both source and binary form, provided that this notice
  * remains intact in all source distributions of this package.
  */
-
 package mars.venus.editors.jeditsyntax;
 
 import javax.swing.*;
@@ -16,9 +15,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
-import java.util.Enumeration;
-import java.util.EventObject;
-import java.util.Hashtable;
+import java.util.*;
 
 /**
  * An input handler converts the user's key strokes into concrete actions.
@@ -30,7 +27,7 @@ import java.util.Hashtable;
  *
  * @author Slava Pestov
  * @version $Id: InputHandler.java,v 1.14 1999/12/13 03:40:30 sp Exp $
- * @see org.syntax.jedit.DefaultInputHandler
+ * @see mars.venus.editors.jeditsyntax.DefaultInputHandler
  * <p>
  * 08/12/2002	Clipboard actions	(Oliver Henning)
  */
@@ -86,10 +83,10 @@ public abstract class InputHandler extends KeyAdapter {
     // Default action
     public static final ActionListener INSERT_CHAR = new insert_char();
 
-    private static final Hashtable actions;
+    private static final Map<String, ActionListener> actions;
 
     static {
-        actions = new Hashtable();
+        actions = new HashMap<>();
         actions.put("backspace", BACKSPACE);
         actions.put("backspace-word", BACKSPACE_WORD);
         actions.put("delete", DELETE);
@@ -142,7 +139,7 @@ public abstract class InputHandler extends KeyAdapter {
      * @param name The action name
      */
     public static ActionListener getAction(String name) {
-        return (ActionListener) actions.get(name);
+        return actions.get(name);
     }
 
     /**
@@ -151,21 +148,18 @@ public abstract class InputHandler extends KeyAdapter {
      * @param listener The action
      */
     public static String getActionName(ActionListener listener) {
-        Enumeration enumeration = getActions();
-        while (enumeration.hasMoreElements()) {
-            String name = (String) enumeration.nextElement();
-            ActionListener _listener = getAction(name);
-            if (_listener == listener)
-                return name;
-        }
-        return null;
+        return actions.entrySet().stream()
+                .filter(e -> e.getValue().equals(listener))
+                .map(Map.Entry::getKey)
+                .findFirst()
+                .orElse(null);
     }
 
     /**
      * Returns an enumeration of all available actions.
      */
-    public static Enumeration getActions() {
-        return actions.keys();
+    public static Set<String> getActions() {
+        return actions.keySet();
     }
 
     /**
@@ -176,9 +170,8 @@ public abstract class InputHandler extends KeyAdapter {
     public static JEditTextArea getTextArea(EventObject evt) {
         if (evt != null) {
             Object o = evt.getSource();
-            if (o instanceof Component) {
+            if (o instanceof Component c) {
                 // find the parent text area
-                Component c = (Component) o;
                 for (; ; ) {
                     if (c instanceof JEditTextArea)
                         return (JEditTextArea) c;
@@ -196,7 +189,7 @@ public abstract class InputHandler extends KeyAdapter {
         // this shouldn't happen
         System.err.println("BUG: getTextArea() returning null");
         System.err.println("Report this to Slava Pestov <sp@gjt.org>");
-        return null;
+        throw new AssertionError("BUG: getTextArea() returning null");
     }
 
     /**
@@ -232,7 +225,7 @@ public abstract class InputHandler extends KeyAdapter {
      * Grabs the next key typed event and invokes the specified
      * action with the key as a the action command.
      *
-     * @param action The action
+     * @param listener The action
      */
     public void grabNextKeyStroke(ActionListener listener) {
         grabAction = listener;
@@ -956,10 +949,7 @@ public abstract class InputHandler extends KeyAdapter {
             int repeatCount = textArea.getInputHandler().getRepeatCount();
 
             if (textArea.isEditable()) {
-                StringBuffer buf = new StringBuffer();
-                for (int i = 0; i < repeatCount; i++)
-                    buf.append(str);
-                textArea.overwriteSetSelectedText(buf.toString());
+                textArea.overwriteSetSelectedText(String.valueOf(str).repeat(Math.max(0, repeatCount)));
             } else {
                 textArea.getToolkit().beep();
             }

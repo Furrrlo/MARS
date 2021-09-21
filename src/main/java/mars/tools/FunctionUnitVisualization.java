@@ -6,18 +6,14 @@ import java.awt.*;
 
 public class FunctionUnitVisualization extends JFrame {
 
+    private static final int register = 1;
+    private static final int control = 2;
+    private static final int aluControl = 3;
+    private static final int alu = 4;
+
     private final JPanel contentPane;
     private final String instruction;
-    private final int register = 1;
-    private final int control = 2;
-    private final int aluControl = 3;
-    private final int alu = 4;
     private int currentUnit;
-
-    /**
-     * Launch the application.
-     */
-
 
     /**
      * Create the frame.
@@ -46,7 +42,6 @@ public class FunctionUnitVisualization extends JFrame {
             contentPane.add(reg);
             reg.startAnimation(instruction);
         }
-
     }
 
     public void run() {
@@ -57,5 +52,4 @@ public class FunctionUnitVisualization extends JFrame {
             e.printStackTrace();
         }
     }
-
 }

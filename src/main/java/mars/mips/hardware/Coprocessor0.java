@@ -1,36 +1,35 @@
-package mars.mips.hardware;
-
-import mars.Globals;
-
-import java.util.Observer;
-
 /*
 Copyright (c) 2003-2009,  Pete Sanderson and Kenneth Vollmar
 
 Developed by Pete Sanderson (psanderson@otterbein.edu)
 and Kenneth Vollmar (kenvollmar@missouristate.edu)
 
-Permission is hereby granted, free of charge, to any person obtaining 
-a copy of this software and associated documentation files (the 
-"Software"), to deal in the Software without restriction, including 
-without limitation the rights to use, copy, modify, merge, publish, 
-distribute, sublicense, and/or sell copies of the Software, and to 
-permit persons to whom the Software is furnished to do so, subject 
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+"Software"), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject
 to the following conditions:
 
-The above copyright notice and this permission notice shall be 
+The above copyright notice and this permission notice shall be
 included in all copies or substantial portions of the Software.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, 
-EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF 
-MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. 
-IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR 
-ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF 
-CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION 
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR
+ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
+CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 (MIT license, http://www.opensource.org/licenses/mit-license.html)
  */
+package mars.mips.hardware;
+
+import mars.Globals;
+
+import java.util.Observer;
 
 /**
  * Represents Coprocessor 0.  We will use only its interrupt/exception registers.
@@ -38,7 +37,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * @author Pete Sanderson
  * @version August 2005
  **/
-
 public class Coprocessor0 {
     /**
      * Coprocessor register names
@@ -53,23 +51,21 @@ public class Coprocessor0 {
     // bit 1 (exception level) not set, bit 0 (interrupt enable) set.
     public static final int DEFAULT_STATUS_VALUE = 0x0000FF11;
 
-    private static final Register[] registers =
-            {new Register("$8 (vaddr)", 8, 0),
-                    new Register("$12 (status)", 12, DEFAULT_STATUS_VALUE),
-                    new Register("$13 (cause)", 13, 0),
-                    new Register("$14 (epc)", 14, 0)
-            };
-
+    private static final Register[] registers = {
+            new Register("$8 (vaddr)", 8, 0),
+            new Register("$12 (status)", 12, DEFAULT_STATUS_VALUE),
+            new Register("$13 (cause)", 13, 0),
+            new Register("$14 (epc)", 14, 0)
+    };
 
     /**
      * Method for displaying the register values for debugging.
      **/
-
     public static void showRegisters() {
-        for (int i = 0; i < registers.length; i++) {
-            System.out.println("Name: " + registers[i].getName());
-            System.out.println("Number: " + registers[i].getNumber());
-            System.out.println("Value: " + registers[i].getValue());
+        for (Register register : registers) {
+            System.out.println("Name: " + register.getName());
+            System.out.println("Number: " + register.getNumber());
+            System.out.println("Value: " + register.getValue());
             System.out.println();
         }
     }
@@ -81,13 +77,12 @@ public class Coprocessor0 {
      * @param val The desired value for the register.
      * @return old value in register prior to update
      **/
-
     public static int updateRegister(String n, int val) {
         int oldValue = 0;
-        for (int i = 0; i < registers.length; i++) {
-            if (("$" + registers[i].getNumber()).equals(n) || registers[i].getName().equals(n)) {
-                oldValue = registers[i].getValue();
-                registers[i].setValue(val);
+        for (Register register : registers) {
+            if (("$" + register.getNumber()).equals(n) || register.getName().equals(n)) {
+                oldValue = register.getValue();
+                register.setValue(val);
                 break;
             }
         }
@@ -103,17 +98,16 @@ public class Coprocessor0 {
      **/
     public static int updateRegister(int num, int val) {
         int old = 0;
-        for (int i = 0; i < registers.length; i++) {
-            if (registers[i].getNumber() == num) {
+        for (Register register : registers) {
+            if (register.getNumber() == num) {
                 old = (Globals.getSettings().getBackSteppingEnabled())
-                        ? Globals.program.getBackStepper().addCoprocessor0Restore(num, registers[i].setValue(val))
-                        : registers[i].setValue(val);
+                        ? Globals.program.getBackStepper().addCoprocessor0Restore(num, register.setValue(val))
+                        : register.setValue(val);
                 break;
             }
         }
         return old;
     }
-
 
     /**
      * Returns the value of the register who's number is num.
@@ -121,13 +115,10 @@ public class Coprocessor0 {
      * @param num The register number.
      * @return The value of the given register.  0 for non-implemented registers
      **/
-
     public static int getValue(int num) {
-        for (int i = 0; i < registers.length; i++) {
-            if (registers[i].getNumber() == num) {
-                return registers[i].getValue();
-            }
-        }
+        for (Register register : registers)
+            if (register.getNumber() == num)
+                return register.getValue();
         return 0;
     }
 
@@ -137,13 +128,10 @@ public class Coprocessor0 {
      * @param n The string formatted register name to look for.
      * @return The number of the register represented by the string. -1 if no match.
      **/
-
     public static int getNumber(String n) {
-        for (int i = 0; i < registers.length; i++) {
-            if (("$" + registers[i].getNumber()).equals(n) || registers[i].getName().equals(n)) {
-                return registers[i].getNumber();
-            }
-        }
+        for (Register register : registers)
+            if (("$" + register.getNumber()).equals(n) || register.getName().equals(n))
+                return register.getNumber();
         return -1;
     }
 
@@ -152,7 +140,6 @@ public class Coprocessor0 {
      *
      * @return The set of registers.
      **/
-
     public static Register[] getRegisters() {
         return registers;
     }
@@ -166,13 +153,10 @@ public class Coprocessor0 {
      * @param r A coprocessor0 Register
      * @return the list position of given register, -1 if not found.
      **/
-
     public static int getRegisterPosition(Register r) {
-        for (int i = 0; i < registers.length; i++) {
-            if (registers[i] == r) {
+        for (int i = 0; i < registers.length; i++)
+            if (registers[i] == r)
                 return i;
-            }
-        }
         return -1;
     }
 
@@ -182,13 +166,10 @@ public class Coprocessor0 {
      * @param rname The register name,  in $0 format.
      * @return The register object,or null if not found.
      **/
-
     public static Register getRegister(String rname) {
-        for (int i = 0; i < registers.length; i++) {
-            if (("$" + registers[i].getNumber()).equals(rname) || registers[i].getName().equals(rname)) {
-                return registers[i];
-            }
-        }
+        for (Register register : registers)
+            if (("$" + register.getNumber()).equals(rname) || register.getName().equals(rname))
+                return register;
         return null;
     }
 
@@ -196,11 +177,9 @@ public class Coprocessor0 {
     /**
      * Method to reinitialize the values of the registers.
      **/
-
     public static void resetRegisters() {
-        for (int i = 0; i < registers.length; i++) {
-            registers[i].resetValue();
-        }
+        for (Register register : registers)
+            register.resetValue();
     }
 
     /**
@@ -208,9 +187,8 @@ public class Coprocessor0 {
      * will add the given Observer to each one.
      */
     public static void addRegistersObserver(Observer observer) {
-        for (int i = 0; i < registers.length; i++) {
-            registers[i].addObserver(observer);
-        }
+        for (Register register : registers)
+            register.addObserver(observer);
     }
 
     /**
@@ -218,9 +196,7 @@ public class Coprocessor0 {
      * will delete the given Observer from each one.
      */
     public static void deleteRegistersObserver(Observer observer) {
-        for (int i = 0; i < registers.length; i++) {
-            registers[i].deleteObserver(observer);
-        }
+        for (Register register : registers)
+            register.deleteObserver(observer);
     }
-
 }

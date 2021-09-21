@@ -30,8 +30,10 @@ package mars.assembler;
 import mars.ErrorList;
 import mars.ErrorMessage;
 import mars.Globals;
+import mars.util.Binary;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Creats a table of Symbol objects.
@@ -44,9 +46,11 @@ public class SymbolTable {
     // kernel address space so highly unlikely that any symbol will have this as
     // its associated address!
     public static final int NOT_FOUND = -1;
+
     private static final String startLabel = "main";
+
     private final String filename;
-    private ArrayList table;
+    private List<Symbol> table;
 
     /**
      * Create a new empty symbol table for given file
@@ -56,7 +60,7 @@ public class SymbolTable {
      */
     public SymbolTable(String filename) {
         this.filename = filename;
-        this.table = new ArrayList();
+        this.table = new ArrayList<>();
     }
 
     /**
@@ -77,7 +81,6 @@ public class SymbolTable {
      * @param b       The type of Symbol, true for data, false for text.
      * @param errors  List to which to add any processing errors that occur.
      **/
-
     public void addSymbol(Token token, int address, boolean b, ErrorList errors) {
         String label = token.getValue();
         if (getSymbol(label) != null) {
@@ -97,18 +100,19 @@ public class SymbolTable {
      *
      * @param token The token representing the Symbol.
      **/
-
     public void removeSymbol(Token token) {
         String label = token.getValue();
-        for (int i = 0; i < table.size(); i++) {
-            if (((Symbol) (table.get(i))).getName().equals(label)) {
-                table.remove(i);
+
+        final var iter = table.iterator();
+        while(iter.hasNext()) {
+            final var symbol = iter.next();
+            if (symbol.getName().equals(label)) {
+                iter.remove();
                 if (Globals.debug)
                     System.out.println("The symbol " + label + " has been removed from the " + this.filename + " symbol table.");
                 break;
             }
         }
-        return;
     }
 
     /**
@@ -118,11 +122,9 @@ public class SymbolTable {
      * @return The memory address of the label given, or NOT_FOUND if not found in symbol table.
      **/
     public int getAddress(String s) {
-        for (int i = 0; i < table.size(); i++) {
-            if (((Symbol) (table.get(i))).getName().equals(s)) {
-                return ((Symbol) table.get(i)).getAddress();
-            }
-        }
+        for (Symbol symbol : table)
+            if (symbol.getName().equals(s))
+                return symbol.getAddress();
         return NOT_FOUND;
     }
 
@@ -145,13 +147,10 @@ public class SymbolTable {
      * @param s target String
      * @return Symbol object for requested target, null if not found in symbol table.
      **/
-
     public Symbol getSymbol(String s) {
-        for (int i = 0; i < table.size(); i++) {
-            if (((Symbol) (table.get(i))).getName().equals(s)) {
-                return (Symbol) table.get(i);
-            }
-        }
+        for (Symbol symbol : table)
+            if (symbol.getName().equals(s))
+                return symbol;
         return null;
     }
 
@@ -161,19 +160,16 @@ public class SymbolTable {
      * @param s String representing address
      * @return Symbol object having requested address, null if address not found in symbol table.
      **/
-
     public Symbol getSymbolGivenAddress(String s) {
-        int address = 0;
+        int address;
         try {
-            address = mars.util.Binary.stringToInt(s);// DPS 2-Aug-2010: was Integer.parseInt(s) but croaked on hex
+            address = Binary.stringToInt(s);// DPS 2-Aug-2010: was Integer.parseInt(s) but croaked on hex
         } catch (NumberFormatException e) {
             return null;
         }
-        for (int i = 0; i < table.size(); i++) {
-            if (((Symbol) (table.get(i))).getAddress() == address) {
-                return (Symbol) table.get(i);
-            }
-        }
+        for (Symbol symbol : table)
+            if (symbol.getAddress() == address)
+                return symbol;
         return null;
     }
 
@@ -194,14 +190,11 @@ public class SymbolTable {
      *
      * @return An ArrayList of Symbol objects.
      **/
-
-    public ArrayList getDataSymbols() {
-        ArrayList list = new ArrayList();
-        for (int i = 0; i < table.size(); i++) {
-            if (((Symbol) table.get(i)).getType()) {
-                list.add(table.get(i));
-            }
-        }
+    public List<Symbol> getDataSymbols() {
+        List<Symbol> list = new ArrayList<>();
+        for (Symbol symbol : table)
+            if (symbol.getType())
+                list.add(symbol);
         return list;
     }
 
@@ -210,14 +203,11 @@ public class SymbolTable {
      *
      * @return An ArrayList of Symbol objects.
      **/
-
-    public ArrayList getTextSymbols() {
-        ArrayList list = new ArrayList();
-        for (int i = 0; i < table.size(); i++) {
-            if (!((Symbol) table.get(i)).getType()) {
-                list.add(table.get(i));
-            }
-        }
+    public List<Symbol> getTextSymbols() {
+        List<Symbol> list = new ArrayList<>();
+        for (Symbol symbol : table)
+            if (!symbol.getType())
+                list.add(symbol);
         return list;
     }
 
@@ -226,13 +216,8 @@ public class SymbolTable {
      *
      * @return An ArrayList of Symbol objects.
      **/
-
-    public ArrayList getAllSymbols() {
-        ArrayList list = new ArrayList();
-        for (int i = 0; i < table.size(); i++) {
-            list.add(table.get(i));
-        }
-        return list;
+    public List<Symbol> getAllSymbols() {
+        return new ArrayList<>(table);
     }
 
     /**
@@ -240,7 +225,6 @@ public class SymbolTable {
      *
      * @return Number of symbol table entries.
      **/
-
     public int getSize() {
         return table.size();
     }
@@ -248,9 +232,8 @@ public class SymbolTable {
     /**
      * Creates a fresh arrayList for a new table.
      **/
-
     public void clear() {
-        table = new ArrayList();
+        table = new ArrayList<>();
     }
 
     /**
@@ -262,13 +245,11 @@ public class SymbolTable {
      * @param replacementAddress Any entry that has originalAddress will have its
      *                           address updated to this value.  Does nothing if none do.
      */
-
     public void fixSymbolTableAddress(int originalAddress, int replacementAddress) {
         Symbol label = getSymbolGivenAddress(Integer.toString(originalAddress));
         while (label != null) {
             label.setAddress(replacementAddress);
             label = getSymbolGivenAddress(Integer.toString(originalAddress));
         }
-        return;
     }
 }

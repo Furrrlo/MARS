@@ -24,11 +24,11 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 (MIT license, http://www.opensource.org/licenses/mit-license.html)
  */
-
 package mars.tools;//.bhtsim;
 
 import javax.swing.table.AbstractTableModel;
-import java.util.Vector;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Simulates the actual functionality of a Branch History Table (BHT).
@@ -52,8 +52,6 @@ import java.util.Vector;
  *
  * @author ingo.kofler@itec.uni-klu.ac.at
  */
-
-//@SuppressWarnings("serial")
 public class BHTableModel extends AbstractTableModel {
 
     /**
@@ -64,11 +62,11 @@ public class BHTableModel extends AbstractTableModel {
      * type of the table columns
      */
     //@SuppressWarnings("unchecked")
-    private final Class[] m_columnClasses = {Integer.class, String.class, String.class, Integer.class, Integer.class, Double.class};
+    private final List<Class<?>> m_columnClasses = List.of(Integer.class, String.class, String.class, Integer.class, Integer.class, Double.class);
     /**
      * vector holding the entries of the BHT
      */
-    private Vector m_entries;
+    private List<BHTEntry> m_entries;
     /**
      * number of entries in the BHT
      */
@@ -77,7 +75,6 @@ public class BHTableModel extends AbstractTableModel {
      * number of past branch events to remember
      */
     private int m_historySize;
-
 
     /**
      * Constructs a new BHT with given number of entries and history size.
@@ -112,13 +109,12 @@ public class BHTableModel extends AbstractTableModel {
      * @param i the index of the column
      * @return class representing the type of the i-th column
      */
-    public Class getColumnClass(int i) {
-        if (i < 0 || i > m_columnClasses.length)
-            throw new IllegalArgumentException("Illegal column index " + i + " (must be in range 0.." + (m_columnClasses.length - 1) + ")");
+    public Class<?> getColumnClass(int i) {
+        if (i < 0 || i > m_columnClasses.size())
+            throw new IllegalArgumentException("Illegal column index " + i + " (must be in range 0.." + (m_columnClasses.size() - 1) + ")");
 
-        return m_columnClasses[i];
+        return m_columnClasses.get(i);
     }
-
 
     /**
      * Returns the number of columns.
@@ -130,7 +126,6 @@ public class BHTableModel extends AbstractTableModel {
         return 6;
     }
 
-
     /**
      * Returns the number of entries of the BHT.
      * Required by the TableModel interface.
@@ -140,7 +135,6 @@ public class BHTableModel extends AbstractTableModel {
     public int getRowCount() {
         return m_entryCnt;
     }
-
 
     /**
      * Returns the value of the cell at the given row and column
@@ -152,19 +146,18 @@ public class BHTableModel extends AbstractTableModel {
      */
     public Object getValueAt(int row, int col) {
 
-        BHTEntry e = (BHTEntry) m_entries.elementAt(row);
+        BHTEntry e = m_entries.get(row);
         if (e == null) return "";
 
-        if (col == 0) return new Integer(row);
+        if (col == 0) return row;
         if (col == 1) return e.getHistoryAsStr();
         if (col == 2) return e.getPredictionAsStr();
-        if (col == 3) return new Integer(e.getStatsPredCorrect());
-        if (col == 4) return new Integer(e.getStatsPredIncorrect());
-        if (col == 5) return new Double(e.getStatsPredPrecision());
+        if (col == 3) return e.getStatsPredCorrect();
+        if (col == 4) return e.getStatsPredIncorrect();
+        if (col == 5) return e.getStatsPredPrecision();
 
         return "";
     }
-
 
     /**
      * Initializes the BHT with the given size and history.
@@ -185,7 +178,7 @@ public class BHTableModel extends AbstractTableModel {
         m_entryCnt = numEntries;
         m_historySize = historySize;
 
-        m_entries = new Vector();
+        m_entries = new ArrayList<>();
 
         for (int i = 0; i < m_entryCnt; i++) {
             m_entries.add(new BHTEntry(m_historySize, initVal));
@@ -194,7 +187,6 @@ public class BHTableModel extends AbstractTableModel {
         // refresh the table(s)
         fireTableStructureChanged();
     }
-
 
     /**
      * Returns the index into the BHT for a given branch instruction address.
@@ -210,7 +202,6 @@ public class BHTableModel extends AbstractTableModel {
         return (address >> 2) % m_entryCnt;
     }
 
-
     /**
      * Retrieve the prediction for the i-th BHT entry.
      *
@@ -221,23 +212,20 @@ public class BHTableModel extends AbstractTableModel {
         if (index < 0 || index > m_entryCnt)
             throw new IllegalArgumentException("Only indexes in the range 0 to " + (m_entryCnt - 1) + " allowed");
 
-        return ((BHTEntry) m_entries.elementAt(index)).getPrediction();
+        return m_entries.get(index).getPrediction();
     }
-
 
     /**
      * Updates the BHT entry with the outcome of the branch instruction.
      * This causes a change in the model and signals to update the connected table(s).
      *
      * @param index       the index of the entry in the BHT
-     * @param branchTaken
      */
     public void updatePredictionAtIdx(int index, boolean branchTaken) {
         if (index < 0 || index > m_entryCnt)
             throw new IllegalArgumentException("Only indexes in the range 0 to " + (m_entryCnt - 1) + " allowed");
 
-        ((BHTEntry) m_entries.elementAt(index)).updatePrediction(branchTaken);
+        m_entries.get(index).updatePrediction(branchTaken);
         fireTableRowsUpdated(index, index);
     }
-
 }

@@ -8,8 +8,6 @@ import mars.util.Binary;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.Observable;
@@ -22,7 +20,7 @@ import java.util.Random;
  * Players will read and write MIPS memory-mapped locations to move and regain energy.
  * See accompanying documentation for memory-mapped addresses, rules of the game, etc.
  */
-
+@SuppressWarnings("unused")
 public class ScavengerHunt implements Observer, MarsTool {
     private static final int GRAPHIC_WIDTH = 712;
     private static final int GRAPHIC_HEIGHT = 652;
@@ -129,6 +127,7 @@ public class ScavengerHunt implements Observer, MarsTool {
      * must not write to those memory locations in order to prevent an infinite cycle of events.
      * This method observes certain locations and then may (and does) write to OTHER locations.
      */
+    @SuppressWarnings({"StatementWithEmptyBody", "ConstantConditions"})
     public void update(Observable o, Object arg) {
         MemoryAccessNotice notice;
         int address;
@@ -216,7 +215,6 @@ public class ScavengerHunt implements Observer, MarsTool {
                         toolReadPlayerData(playerID, OFFSET_MOVE_TO_X) + ", " +
                         toolReadPlayerData(playerID, OFFSET_MOVE_TO_Y) + ")" );
             */
-
             energyLevel = toolReadPlayerData(playerID, OFFSET_ENERGY); // find if player has energy
             if (energyLevel <= 0)  // No energy. Player not allowed to move
             {
@@ -291,10 +289,7 @@ public class ScavengerHunt implements Observer, MarsTool {
                         toolReadPlayerData(playerID, OFFSET_WHERE_AM_I_Y) + "), wants to go to (" +
                         toolReadPlayerData(playerID, OFFSET_MOVE_TO_X) + "," +
                         toolReadPlayerData(playerID, OFFSET_MOVE_TO_Y) + ")");
-
-                return;
             }
-
         } // end if Player wrote nonzero data to his/her assigned MoveReady location
 
 
@@ -368,7 +363,6 @@ public class ScavengerHunt implements Observer, MarsTool {
                                 Binary.intToHexString(address) +
                                 " -- not implemented!");
                     */
-
             JOptionPane.showMessageDialog(null,
                     "ScavengerHunt.update(): Player " + playerID + " writing outside assigned mem. loc. at address " +
                             Binary.intToHexString(address) +
@@ -560,7 +554,7 @@ public class ScavengerHunt implements Observer, MarsTool {
 
             for (int j = 0; j < NUM_LOCATIONS; j++)  // Initialize the locations this player goes to
             {
-                toolWritePlayerData(i, OFFSET_LOC_ARRAY + (j * 8) + 0, loc[j].X);  // Set the same locations for each player
+                toolWritePlayerData(i, OFFSET_LOC_ARRAY + (j * 8) /* + 0 */, loc[j].X);  // Set the same locations for each player
                 toolWritePlayerData(i, OFFSET_LOC_ARRAY + (j * 8) + 4, loc[j].Y);  // Set the same locations for each player
             }
 
@@ -575,13 +569,13 @@ public class ScavengerHunt implements Observer, MarsTool {
 
     // Used to define (X,Y) coordinate of a location to which ScavengerHunt players
     // will travel.
-    private class Location {
+    private static class Location {
         public int X;
         public int Y;
     }
 
     // private inner class to provide the data on each player needed for display
-    private class PlayerData {
+    private static class PlayerData {
         int whereAmIX = START_AND_END_LOCATION;   // Read only. Memory Address:  Base
         int whereAmIY = START_AND_END_LOCATION;   // Read only. Memory Address:  Base + 0x4
         //int moveToX;    //  Memory Address:  Base + 0x8
@@ -686,19 +680,14 @@ public class ScavengerHunt implements Observer, MarsTool {
             graphicArea = new ScavengerHuntDisplay(GRAPHIC_WIDTH, GRAPHIC_HEIGHT);
             JPanel buttonPanel = new JPanel();
             JButton resetButton = new JButton("Reset");
-            resetButton.addActionListener(
-                    new ActionListener() {
-                        public void actionPerformed(ActionEvent e) {
-                            graphicArea.clear();
+            resetButton.addActionListener(e -> {
+                graphicArea.clear();
 
-                            // TBD ------- TBD
-                            // Reset actions here
-                            initializeScavengerData();
-                            //JOptionPane.showMessageDialog(null, "Reset needs to be implemented!" );
-
-                        }
-
-                    });
+                // TBD ------- TBD
+                // Reset actions here
+                initializeScavengerData();
+                //JOptionPane.showMessageDialog(null, "Reset needs to be implemented!" );
+            });
             buttonPanel.add(resetButton);
 
 
@@ -726,28 +715,23 @@ public class ScavengerHunt implements Observer, MarsTool {
 
         } // end ScavengerHuntRunnable() constructor
 
+        @SuppressWarnings("BusyWait")
         public void run() {
-
             double tempAngle;
-
-            // infinite loop: play the Scavenger Hunt game
-            do {
-
-                // Pause to slow down the redisplay of the game. This is separate from
-                // the execution speed of the MIPS program, so the display may lag behind
-                // the state of the MIPS program.
-                try {
+            try {
+                // infinite loop: play the Scavenger Hunt game
+                while (!Thread.currentThread().isInterrupted()) {
+                    // Pause to slow down the redisplay of the game. This is separate from
+                    // the execution speed of the MIPS program, so the display may lag behind
+                    // the state of the MIPS program.
                     // System.out.println(" Hello from the ScavengerHuntRunnable runner, sleeping here ...");
                     // System.out.print(".");
                     Thread.sleep(100);   // millisec
-                } catch (InterruptedException exception) {// no action
+                    panel.repaint(); // show new ScavengerHunt position
                 }
-
-                panel.repaint(); // show new ScavengerHunt position
-            } while (true);
-
+            } catch (InterruptedException exception) {// no action
+            }
         } // end run method of ScavengerHuntRunnable class
-
     } // end ScavengerHuntRunnable class
 
     /**
@@ -760,12 +744,10 @@ public class ScavengerHunt implements Observer, MarsTool {
         private final int height;
         private boolean clearTheDisplay = true;
 
-
         public ScavengerHuntDisplay(int tw, int th) {
             // System.out.println("ScavengerHuntDisplay.constructor: starting....");
             width = tw;
             height = th;
-
         }
 
         public void redraw() {

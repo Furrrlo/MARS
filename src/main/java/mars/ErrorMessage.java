@@ -1,35 +1,37 @@
-package mars;
-
-import java.util.ArrayList;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 /*
 Copyright (c) 2003-2012,  Pete Sanderson and Kenneth Vollmar
 
 Developed by Pete Sanderson (psanderson@otterbein.edu)
 and Kenneth Vollmar (kenvollmar@missouristate.edu)
 
-Permission is hereby granted, free of charge, to any person obtaining 
-a copy of this software and associated documentation files (the 
-"Software"), to deal in the Software without restriction, including 
-without limitation the rights to use, copy, modify, merge, publish, 
-distribute, sublicense, and/or sell copies of the Software, and to 
-permit persons to whom the Software is furnished to do so, subject 
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+"Software"), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject
 to the following conditions:
 
-The above copyright notice and this permission notice shall be 
+The above copyright notice and this permission notice shall be
 included in all copies or substantial portions of the Software.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, 
-EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF 
-MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. 
-IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR 
-ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF 
-CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION 
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR
+ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
+CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 (MIT license, http://www.opensource.org/licenses/mit-license.html)
  */
+package mars;
+
+import mars.assembler.SourceLine;
+
+import java.util.ArrayList;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Represents occurrance of an error detected during tokenizing, assembly or simulation.
@@ -37,7 +39,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * @author Pete Sanderson
  * @version August 2003
  **/
-
 public class ErrorMessage {
     /**
      * Constant to indicate this message is warning not error
@@ -47,6 +48,7 @@ public class ErrorMessage {
      * Constant to indicate this message is error not warning
      */
     public static final boolean ERROR = false;
+
     private final boolean isWarning; // allow for warnings too (added Nov 2006)
     private final String filename; // name of source file  (added Oct 2006)
     private final int line;     // line in source code where error detected
@@ -78,7 +80,6 @@ public class ErrorMessage {
      * @param position              Position within line being processed when error occurred.  Normally is starting
      *                              position of source token.
      * @param message               String containing appropriate error message.
-     * @param macroExpansionHistory
      * @deprecated Newer constructors replace the String filename parameter with a MIPSprogram parameter to provide more information.
      **/
     // Added macroExpansionHistory Dec 2012
@@ -120,7 +121,6 @@ public class ErrorMessage {
      *                          position of source token.
      * @param message           String containing appropriate error message.
      **/
-
     public ErrorMessage(MIPSprogram sourceMIPSprogram, int line, int position, String message) {
         this(ERROR, sourceMIPSprogram, line, position, message);
     }
@@ -137,7 +137,6 @@ public class ErrorMessage {
      *                          position of source token.
      * @param message           String containing appropriate error message.
      **/
-
     public ErrorMessage(boolean isWarning, MIPSprogram sourceMIPSprogram, int line, int position, String message) {
         this.isWarning = isWarning;
         if (sourceMIPSprogram == null) {
@@ -148,7 +147,7 @@ public class ErrorMessage {
                 this.filename = sourceMIPSprogram.getFilename();
                 this.line = line;
             } else {
-                mars.assembler.SourceLine sourceLine = sourceMIPSprogram.getSourceLineList().get(line - 1);
+                SourceLine sourceLine = sourceMIPSprogram.getSourceLineList().get(line - 1);
                 this.filename = sourceLine.getFilename();
                 this.line = sourceLine.getLineNumber();
             }
@@ -204,7 +203,7 @@ public class ErrorMessage {
         Pattern pattern = Pattern.compile("<\\d+>");
         Matcher matcher = pattern.matcher(string);
         String verify = string.trim();
-        ArrayList<Integer> macroHistory = new ArrayList<Integer>();
+        ArrayList<Integer> macroHistory = new ArrayList<>();
         while (matcher.find()) {
             String match = matcher.group();
             if (verify.indexOf(match) == 0) {
@@ -237,7 +236,6 @@ public class ErrorMessage {
      *
      * @return Returns line number in source program where error occurred.
      */
-
     public int getLine() {
         return line;
     }
@@ -247,7 +245,6 @@ public class ErrorMessage {
      *
      * @return Returns position within line of source program where error occurred.
      */
-
     public int getPosition() {
         return position;
     }
@@ -257,7 +254,6 @@ public class ErrorMessage {
      *
      * @return Returns String containing textual error message.
      */
-
     public String getMessage() {
         return message;
     }

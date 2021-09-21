@@ -1,4 +1,5 @@
-/* HardcopyWriter class comes from the book "Java Examples in a Nutshell,
+/*
+ * HardcopyWriter class comes from the book "Java Examples in a Nutshell,
  * 3rd Edition" by David Flanagan.  Publisher is O'Reilly, ISBN is
  * 0-596-00620-9.  Published Jan 2004.  Web page for the book is:
  *  http://www.oreilly.com/catalog/jenut3/
@@ -35,7 +36,8 @@ import java.util.Date;
 import java.util.Properties;
 import java.util.TimeZone;
 
-/* HardcopyWriter class from the book "Java Examples in a Nutshell,
+/*
+ * HardcopyWriter class from the book "Java Examples in a Nutshell,
  * 3rd Edition" by David Flanagan.  Publisher is O'Reilly, ISBN is
  * 0-596-00620-9.  Published Jan 2004.  Web page for the book is:
  *  http://www.oreilly.com/catalog/jenut3/
@@ -43,9 +45,10 @@ import java.util.TimeZone;
  * A character output stream that sends output to a printer.  I made only
  * a couple minor changes -- Pete Sanderson
  **/
+@SuppressWarnings("SynchronizeOnNonFinalField")
 public class HardcopyWriter extends Writer {
     // A static variable that holds user preferences between print jobs
-    protected static Properties printprops = new Properties();
+    protected static final Properties printprops = new Properties();
     // These are the instance variables for the class
     protected PrintJob job; // The PrintJob object in use
     protected Graphics page; // Graphics object for current page
@@ -101,7 +104,7 @@ public class HardcopyWriter extends Writer {
         }
         if (job == null)
             throw new PrintCanceledException("User cancelled print request");
-        /*******************************************************
+        /* ******************************************************
          SANDERSON OVERRIDE 8-17-2004:
          I didn't like the results produced by the code below, so am commenting
          it out and just setting pagedpi to 72.  This assures, among other things,
@@ -164,7 +167,6 @@ public class HardcopyWriter extends Writer {
     /**
      * A program that prints the specified file using HardcopyWriter
      **/
-
     public static void main(String[] args) {
         try {
             if (args.length != 1)
@@ -187,7 +189,7 @@ public class HardcopyWriter extends Writer {
             in.close();
             out.close();
         } catch (Exception e) {
-            System.err.println(e);
+            e.printStackTrace();
             System.err.println("Usage: " +
                     "java HardcopyWriter$PrintFile <filename>");
             System.exit(1);
@@ -272,14 +274,13 @@ public class HardcopyWriter extends Writer {
     public void setFontStyle(int style) {
         synchronized (this.lock) {
             // Try to set a new font, but restore current one if it fails
-            Font current = font;
             try {
                 font = new Font("Monospaced", style, fontsize);
-            } catch (Exception e) {
-                font = current;
+            } catch (Exception ignored) {
             }
             // If a page is pending, set the new font. Otherwise newpage( ) will
-            if (page != null) page.setFont(font);
+            if (page != null)
+                page.setFont(font);
         }
     }
 

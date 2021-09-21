@@ -7,7 +7,6 @@
  * permitted, in both source and binary form, provided that this notice
  * remains intact in all source distributions of this package.
  */
-
 package mars.venus.editors.jeditsyntax;
 
 import mars.venus.editors.jeditsyntax.tokenmarker.Token;
@@ -83,7 +82,7 @@ public class KeywordMap {
      * Adds a key-value mapping.
      *
      * @param keyword The key
-     * @Param id The value
+     * @param id The value
      */
     public void add(String keyword, byte id) {
         int key = getStringMapKey(keyword);
@@ -121,7 +120,7 @@ public class KeywordMap {
     }
 
     // private members
-    class Keyword {
+    static class Keyword {
         public char[] keyword;
         public byte id;
         public Keyword next;

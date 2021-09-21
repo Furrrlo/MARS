@@ -1,3 +1,30 @@
+/*
+Copyright (c) 2003-2006,  Pete Sanderson and Kenneth Vollmar
+
+Developed by Pete Sanderson (psanderson@otterbein.edu)
+and Kenneth Vollmar (kenvollmar@missouristate.edu)
+
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+"Software"), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject
+to the following conditions:
+
+The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR
+ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
+CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+(MIT license, http://www.opensource.org/licenses/mit-license.html)
+ */
 package mars.mips.instructions;
 
 import mars.Globals;
@@ -7,34 +34,8 @@ import mars.util.FilenameFinder;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-
-/*
-Copyright (c) 2003-2006,  Pete Sanderson and Kenneth Vollmar
-
-Developed by Pete Sanderson (psanderson@otterbein.edu)
-and Kenneth Vollmar (kenvollmar@missouristate.edu)
-
-Permission is hereby granted, free of charge, to any person obtaining 
-a copy of this software and associated documentation files (the 
-"Software"), to deal in the Software without restriction, including 
-without limitation the rights to use, copy, modify, merge, publish, 
-distribute, sublicense, and/or sell copies of the Software, and to 
-permit persons to whom the Software is furnished to do so, subject 
-to the following conditions:
-
-The above copyright notice and this permission notice shall be 
-included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, 
-EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF 
-MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. 
-IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR 
-ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF 
-CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION 
-WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-
-(MIT license, http://www.opensource.org/licenses/mit-license.html)
- */
+import java.util.List;
+import java.util.Map;
 
 
 /****************************************************************************/
@@ -44,7 +45,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * functions. This is adapted from the ToolLoader class, which is in turn adapted
  * from Bret Barker's GameServer class from the book "Developing Games In Java".
  */
-
 class SyscallLoader {
 
     private static final String CLASS_PREFIX = "mars.mips.instructions.syscalls.";
@@ -53,7 +53,7 @@ class SyscallLoader {
     private static final String SYSCALL_ABSTRACT = "AbstractSyscall.class";
     private static final String CLASS_EXTENSION = "class";
 
-    private ArrayList syscallList;
+    private List<Syscall> syscallList;
 
     /*
      *  Dynamically loads Syscalls into an ArrayList.  This method is adapted from
@@ -62,13 +62,11 @@ class SyscallLoader {
      *  in Java".  Also see the "loadMarsTools()" method from ToolLoader class.
      */
     void loadSyscalls() {
-        syscallList = new ArrayList();
+        syscallList = new ArrayList<>();
         // grab all class files in the same directory as Syscall
-        ArrayList candidates = FilenameFinder.getFilenameList(this.getClass().getClassLoader(),
-                SYSCALLS_DIRECTORY_PATH, CLASS_EXTENSION);
-        HashMap syscalls = new HashMap();
-        for (int i = 0; i < candidates.size(); i++) {
-            String file = (String) candidates.get(i);
+        List<String> candidates = FilenameFinder.getFilenameList(this.getClass().getClassLoader(), SYSCALLS_DIRECTORY_PATH, CLASS_EXTENSION);
+        Map<String, String> syscalls = new HashMap<>();
+        for (String file : candidates) {
             // Do not add class if already encountered (happens if run in MARS development directory)
             if (syscalls.containsKey(file)) {
                 continue;
@@ -80,11 +78,11 @@ class SyscallLoader {
                 try {
                     // grab the class, make sure it implements Syscall, instantiate, add to list
                     String syscallClassName = CLASS_PREFIX + file.substring(0, file.indexOf(CLASS_EXTENSION) - 1);
-                    Class clas = Class.forName(syscallClassName);
+                    Class<?> clas = Class.forName(syscallClassName);
                     if (!Syscall.class.isAssignableFrom(clas)) {
                         continue;
                     }
-                    Syscall syscall = (Syscall) clas.newInstance();
+                    Syscall syscall = (Syscall) clas.getDeclaredConstructor().newInstance();
                     if (findSyscall(syscall.getNumber()) == null) {
                         syscallList.add(syscall);
                     } else {
@@ -99,20 +97,15 @@ class SyscallLoader {
             }
         }
         syscallList = processSyscallNumberOverrides(syscallList);
-        return;
     }
 
     // Will get any syscall number override specifications from MARS config file and
     // process them.  This will alter syscallList entry for affected names.
-    private ArrayList processSyscallNumberOverrides(ArrayList syscallList) {
-        ArrayList overrides = new Globals().getSyscallOverrides();
-        SyscallNumberOverride override;
-        Syscall syscall;
-        for (int index = 0; index < overrides.size(); index++) {
-            override = (SyscallNumberOverride) overrides.get(index);
+    private List<Syscall> processSyscallNumberOverrides(List<Syscall> syscallList) {
+        List<SyscallNumberOverride> overrides = new Globals().getSyscallOverrides();
+        for (SyscallNumberOverride override : overrides) {
             boolean match = false;
-            for (int i = 0; i < syscallList.size(); i++) {
-                syscall = (Syscall) syscallList.get(i);
+            for (Syscall syscall : syscallList) {
                 if (override.getName().equals(syscall.getName())) {
                     // we have a match to service name, assign new number
                     syscall.setNumber(override.getNumber());
@@ -134,9 +127,9 @@ class SyscallLoader {
         Syscall syscallA, syscallB;
         boolean duplicates = false;
         for (int i = 0; i < syscallList.size(); i++) {
-            syscallA = (Syscall) syscallList.get(i);
+            syscallA = syscallList.get(i);
             for (int j = i + 1; j < syscallList.size(); j++) {
-                syscallB = (Syscall) syscallList.get(j);
+                syscallB = syscallList.get(j);
                 if (syscallA.getNumber() == syscallB.getNumber()) {
                     System.out.println("Error: syscalls " + syscallA.getName() + " and " +
                             syscallB.getName() + " are both assigned same number " + syscallA.getNumber());
@@ -156,12 +149,11 @@ class SyscallLoader {
      */
     Syscall findSyscall(int number) {
         // linear search is OK since number of syscalls is small.
-        Syscall service, match = null;
+        Syscall match = null;
         if (syscallList == null) {
             loadSyscalls();
         }
-        for (int index = 0; index < syscallList.size(); index++) {
-            service = (Syscall) syscallList.get(index);
+        for (Syscall service : syscallList) {
             if (service.getNumber() == number) {
                 match = service;
             }

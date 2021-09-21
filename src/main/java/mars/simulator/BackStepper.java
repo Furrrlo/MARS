@@ -1,3 +1,30 @@
+/*
+Copyright (c) 2003-2006,  Pete Sanderson and Kenneth Vollmar
+
+Developed by Pete Sanderson (psanderson@otterbein.edu)
+and Kenneth Vollmar (kenvollmar@missouristate.edu)
+
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+"Software"), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject
+to the following conditions:
+
+The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR
+ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
+CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+(MIT license, http://www.opensource.org/licenses/mit-license.html)
+ */
 package mars.simulator;
 
 import mars.Globals;
@@ -7,41 +34,12 @@ import mars.mips.hardware.Coprocessor1;
 import mars.mips.hardware.RegisterFile;
 import mars.mips.instructions.Instruction;
 
-/*
-Copyright (c) 2003-2006,  Pete Sanderson and Kenneth Vollmar
-
-Developed by Pete Sanderson (psanderson@otterbein.edu)
-and Kenneth Vollmar (kenvollmar@missouristate.edu)
-
-Permission is hereby granted, free of charge, to any person obtaining 
-a copy of this software and associated documentation files (the 
-"Software"), to deal in the Software without restriction, including 
-without limitation the rights to use, copy, modify, merge, publish, 
-distribute, sublicense, and/or sell copies of the Software, and to 
-permit persons to whom the Software is furnished to do so, subject 
-to the following conditions:
-
-The above copyright notice and this permission notice shall be 
-included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, 
-EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF 
-MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. 
-IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR 
-ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF 
-CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION 
-WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-
-(MIT license, http://www.opensource.org/licenses/mit-license.html)
- */
-
 /**
  * Used to "step backward" through execution, undoing each instruction.
  *
  * @author Pete Sanderson
  * @version February 2006
  */
-
 public class BackStepper {
     // The types of "undo" actions.  Under 1.5, these would be enumerated type.
     // These fit better in the BackStep class below but inner classes cannot have static members.
@@ -123,7 +121,6 @@ public class BackStepper {
      * Carry out a "back step", which will undo the latest execution step.
      * Does nothing if backstepping not enabled or if there are no steps to undo.
      */
-
     // Note that there may be more than one "step" in an instruction execution; for
     // instance the multiply, divide, and double-precision floating point operations
     // all store their result in register pairs which results in two store operations.
@@ -193,7 +190,6 @@ public class BackStepper {
     /* Convenience method called below to get program counter value.  If it needs to be
      * be modified (e.g. to subtract 4) that can be done here in one place.
      */
-
     private int pc() {
         // PC incremented prior to instruction simulation, so need to adjust for that.
         return RegisterFile.getProgramCounter() - Instruction.INSTRUCTION_LENGTH;
@@ -345,9 +341,8 @@ public class BackStepper {
         return 0;
     }
 
-
     // Represents a "back step" (undo action) on the stack.
-    private class BackStep {
+    private static class BackStep {
         private int action;  // what do do MEMORY_RESTORE_WORD, etc
         private int pc;      // program counter value when original step occurred
         private ProgramStatement ps;   // statement whose action is being "undone" here
@@ -399,7 +394,7 @@ public class BackStepper {
     // regardless of how many steps are executed.  This will speed things up a bit
     // and make life easier for the garbage collector.
 
-    private class BackstepStack {
+    private static class BackstepStack {
         private final int capacity;
         private final BackStep[] stack;
         private int size;

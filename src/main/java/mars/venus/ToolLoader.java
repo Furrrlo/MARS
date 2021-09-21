@@ -1,3 +1,30 @@
+/*
+Copyright (c) 2003-2006,  Pete Sanderson and Kenneth Vollmar
+
+Developed by Pete Sanderson (psanderson@otterbein.edu)
+and Kenneth Vollmar (kenvollmar@missouristate.edu)
+
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+"Software"), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject
+to the following conditions:
+
+The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR
+ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
+CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+(MIT license, http://www.opensource.org/licenses/mit-license.html)
+ */
 package mars.venus;
 
 import mars.tools.MarsTool;
@@ -8,34 +35,7 @@ import java.awt.event.KeyEvent;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.HashMap;
-	
-	/*
-Copyright (c) 2003-2006,  Pete Sanderson and Kenneth Vollmar
-
-Developed by Pete Sanderson (psanderson@otterbein.edu)
-and Kenneth Vollmar (kenvollmar@missouristate.edu)
-
-Permission is hereby granted, free of charge, to any person obtaining 
-a copy of this software and associated documentation files (the 
-"Software"), to deal in the Software without restriction, including 
-without limitation the rights to use, copy, modify, merge, publish, 
-distribute, sublicense, and/or sell copies of the Software, and to 
-permit persons to whom the Software is furnished to do so, subject 
-to the following conditions:
-
-The above copyright notice and this permission notice shall be 
-included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, 
-EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF 
-MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. 
-IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR 
-ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF 
-CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION 
-WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-
-(MIT license, http://www.opensource.org/licenses/mit-license.html)
- */
+import java.util.List;
 
 /**
  * This class provides functionality to bring external Mars tools into the Mars
@@ -49,7 +49,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * @author Pete Sanderson with help from Bret Barker
  * @version August 2005
  */
-
 public class ToolLoader {
 
     private static final String CLASS_PREFIX = "mars.tools.";
@@ -69,16 +68,13 @@ public class ToolLoader {
      */
     public JMenu buildToolsMenu() {
         JMenu menu = null;
-        ArrayList marsToolList = loadMarsTools();
+        List<MarsToolClassAndInstance> marsToolList = loadMarsTools();
         if (!marsToolList.isEmpty()) {
             menu = new JMenu(TOOLS_MENU_NAME);
             menu.setMnemonic(KeyEvent.VK_T);
             // traverse array list and build menu
-            MarsToolClassAndInstance listItem;
-            for (int i = 0; i < marsToolList.size(); i++) {
-                listItem = (MarsToolClassAndInstance) marsToolList.get(i);
+            for (MarsToolClassAndInstance listItem : marsToolList)
                 menu.add(new ToolAction(listItem.marsToolClass, listItem.marsToolInstance.getName()));
-            }
         }
         return menu;
     }
@@ -102,10 +98,9 @@ public class ToolLoader {
      *  as a ZipFile, get the ZipEntry enumeration, find the class files in the tools
      *  folder, then continue as before.
      */
-    private ArrayList loadMarsTools() {
-        ArrayList toolList = new ArrayList();
-        ArrayList candidates = FilenameFinder.getFilenameList(this.getClass().getClassLoader(),
-                TOOLS_DIRECTORY_PATH, CLASS_EXTENSION);
+    private List<MarsToolClassAndInstance> loadMarsTools() {
+        List<MarsToolClassAndInstance> toolList = new ArrayList<>();
+        List<String> candidates = FilenameFinder.getFilenameList(this.getClass().getClassLoader(), TOOLS_DIRECTORY_PATH, CLASS_EXTENSION);
         // Add any tools stored externally, as listed in Config.properties file.
         // This needs some work, because mars.Globals.getExternalTools() returns
         // whatever is in the properties file entry.  Since the class file will
@@ -113,9 +108,8 @@ public class ToolLoader {
         // it correctly.  Not sure how to create a Class object given an absolute
         // pathname.
         //candidates.addAll(mars.Globals.getExternalTools());  // this by itself is not enough...
-        HashMap tools = new HashMap();
-        for (int i = 0; i < candidates.size(); i++) {
-            String file = (String) candidates.get(i);
+        HashMap<String, String> tools = new HashMap<>();
+        for (String file : candidates) {
             // Do not add class if already encountered (happens if run in MARS development directory)
             if (tools.containsKey(file)) {
                 continue;
@@ -126,13 +120,13 @@ public class ToolLoader {
                 try {
                     // grab the class, make sure it implements MarsTool, instantiate, add to menu
                     String toolClassName = CLASS_PREFIX + file.substring(0, file.indexOf(CLASS_EXTENSION) - 1);
-                    Class clas = Class.forName(toolClassName);
+                    Class<?> clas = Class.forName(toolClassName);
                     if (!MarsTool.class.isAssignableFrom(clas) ||
                             Modifier.isAbstract(clas.getModifiers()) ||
                             Modifier.isInterface(clas.getModifiers())) {
                         continue;
                     }
-                    toolList.add(new MarsToolClassAndInstance(clas, (MarsTool) clas.newInstance()));
+                    toolList.add(new MarsToolClassAndInstance(clas, (MarsTool) clas.getDeclaredConstructor().newInstance()));
                 } catch (Exception e) {
                     System.out.println("Error instantiating MarsTool from file " + file + ": " + e);
                 }
@@ -142,11 +136,11 @@ public class ToolLoader {
     }
 
 
-    private class MarsToolClassAndInstance {
-        Class marsToolClass;
+    private static class MarsToolClassAndInstance {
+        Class<?> marsToolClass;
         MarsTool marsToolInstance;
 
-        MarsToolClassAndInstance(Class marsToolClass, MarsTool marsToolInstance) {
+        MarsToolClassAndInstance(Class<?> marsToolClass, MarsTool marsToolInstance) {
             this.marsToolClass = marsToolClass;
             this.marsToolInstance = marsToolInstance;
         }

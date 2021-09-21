@@ -28,6 +28,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 package mars.assembler;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Class representing MIPS assembler directives.  If Java had enumerated types, these
@@ -39,6 +40,8 @@ import java.util.ArrayList;
  * @version August 2003
  **/
 public final class Directives {
+
+    private static final List<Directives> directiveList = new ArrayList<>();
 
     public static final Directives DATA = new Directives(".data", "Subsequent items stored in Data segment at next available address");
     public static final Directives TEXT = new Directives(".text", "Subsequent items (instructions) stored in Text segment at next available address");
@@ -63,7 +66,7 @@ public final class Directives {
     public static final Directives END_MACRO = new Directives(".end_macro", "End macro definition.  See .macro");
     /*  INCLUDE added by DPS 11 Jan 2013 */
     public static final Directives INCLUDE = new Directives(".include", "Insert the contents of the specified file.  Put filename in quotes.");
-    private static final ArrayList directiveList = new ArrayList();
+
     private final String descriptor;
     private final String description; // help text
 
@@ -86,11 +89,8 @@ public final class Directives {
      * @param str A String containing candidate directive name (e.g. ".ascii")
      * @return If match is found, returns matching Directives object, else returns <tt>null</tt>.
      **/
-
     public static Directives matchDirective(String str) {
-        Directives match;
-        for (int i = 0; i < directiveList.size(); i++) {
-            match = (Directives) directiveList.get(i);
+        for (Directives match : directiveList) {
             if (str.equalsIgnoreCase(match.descriptor)) {
                 return match;
             }
@@ -106,15 +106,14 @@ public final class Directives {
      * @param str A String
      * @return If match is found, returns ArrayList of matching Directives objects, else returns <tt>null</tt>.
      **/
-
-    public static ArrayList prefixMatchDirectives(String str) {
-        ArrayList matches = null;
-        for (int i = 0; i < directiveList.size(); i++) {
-            if (((Directives) directiveList.get(i)).descriptor.toLowerCase().startsWith(str.toLowerCase())) {
+    public static List<Directives> prefixMatchDirectives(String str) {
+        List<Directives> matches = null;
+        for (Directives directives : directiveList) {
+            if (directives.descriptor.toLowerCase().startsWith(str.toLowerCase())) {
                 if (matches == null) {
-                    matches = new ArrayList();
+                    matches = new ArrayList<>();
                 }
-                matches.add(directiveList.get(i));
+                matches.add(directives);
             }
         }
         return matches;
@@ -125,7 +124,7 @@ public final class Directives {
      *
      * @return MIPS Directive
      **/
-    public static ArrayList getDirectiveList() {
+    public static List<Directives> getDirectiveList() {
         return directiveList;
     }
 
@@ -154,7 +153,6 @@ public final class Directives {
      *
      * @return String representing Directive: its MIPS name
      **/
-
     public String toString() {
         return this.descriptor;
     }
@@ -164,7 +162,6 @@ public final class Directives {
      *
      * @return name of this MIPS directive as a String
      **/
-
     public String getName() {
         return this.descriptor;
     }
@@ -174,7 +171,6 @@ public final class Directives {
      *
      * @return description of this MIPS directive (for help purposes)
      **/
-
     public String getDescription() {
         return this.description;
     }

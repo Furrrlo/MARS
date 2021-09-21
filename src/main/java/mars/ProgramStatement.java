@@ -1,3 +1,30 @@
+/*
+Copyright (c) 2003-2013,  Pete Sanderson and Kenneth Vollmar
+
+Developed by Pete Sanderson (psanderson@otterbein.edu)
+and Kenneth Vollmar (kenvollmar@missouristate.edu)
+
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+"Software"), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject
+to the following conditions:
+
+The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR
+ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
+CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+(MIT license, http://www.opensource.org/licenses/mit-license.html)
+ */
 package mars;
 
 import mars.assembler.SymbolTable;
@@ -10,36 +37,10 @@ import mars.mips.instructions.BasicInstruction;
 import mars.mips.instructions.BasicInstructionFormat;
 import mars.mips.instructions.Instruction;
 import mars.util.Binary;
+import mars.venus.NumberDisplayBaseChooser;
 
 import java.util.ArrayList;
-
-/*
-Copyright (c) 2003-2013,  Pete Sanderson and Kenneth Vollmar
-
-Developed by Pete Sanderson (psanderson@otterbein.edu)
-and Kenneth Vollmar (kenvollmar@missouristate.edu)
-
-Permission is hereby granted, free of charge, to any person obtaining 
-a copy of this software and associated documentation files (the 
-"Software"), to deal in the Software without restriction, including 
-without limitation the rights to use, copy, modify, merge, publish, 
-distribute, sublicense, and/or sell copies of the Software, and to 
-permit persons to whom the Software is furnished to do so, subject 
-to the following conditions:
-
-The above copyright notice and this permission notice shall be 
-included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, 
-EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF 
-MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. 
-IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR 
-ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF 
-CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION 
-WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-
-(MIT license, http://www.opensource.org/licenses/mit-license.html)
- */
+import java.util.List;
 
 /**
  * Represents one assembly/machine statement.  This represents the "bare machine" level.
@@ -49,10 +50,9 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * @author Pete Sanderson and Jason Bumgarner
  * @version August 2003
  */
-
-
 public class ProgramStatement {
     private static final String invalidOperator = "<INVALID>";
+
     private final MIPSprogram sourceMIPSprogram;
     private final TokenList originalTokenList;
     private final TokenList strippedTokenList;
@@ -124,7 +124,7 @@ public class ProgramStatement {
             this.operands = null;
             this.numOperands = 0;
             this.instruction = (binaryStatement == 0) // this is a "nop" statement
-                    ? (Instruction) Globals.instructionSet.matchOperator("nop").get(0)
+                    ? Globals.instructionSet.matchOperator("nop").get(0)
                     : null;
         } else {
             this.operands = new int[4];
@@ -170,7 +170,7 @@ public class ProgramStatement {
     public void buildBasicStatementFromBasicInstruction(ErrorList errors) {
         Token token = strippedTokenList.get(0);
         String basicStatementElement = token.getValue() + " ";
-        String basic = basicStatementElement;
+        StringBuilder basic = new StringBuilder(basicStatementElement);
         basicStatementList.addString(basicStatementElement); // the operator
         TokenTypes tokenType, nextTokenType;
         String tokenValue;
@@ -182,7 +182,7 @@ public class ProgramStatement {
             tokenValue = token.getValue();
             if (tokenType == TokenTypes.REGISTER_NUMBER) {
                 basicStatementElement = tokenValue;
-                basic += basicStatementElement;
+                basic.append(basicStatementElement);
                 basicStatementList.addString(basicStatementElement);
                 try {
                     registerNumber = RegisterFile.getUserRegister(tokenValue).getNumber();
@@ -195,7 +195,7 @@ public class ProgramStatement {
             } else if (tokenType == TokenTypes.REGISTER_NAME) {
                 registerNumber = RegisterFile.getNumber(tokenValue);
                 basicStatementElement = "$" + registerNumber;
-                basic += basicStatementElement;
+                basic.append(basicStatementElement);
                 basicStatementList.addString(basicStatementElement);
                 if (registerNumber < 0) {
                     // should never happen; should be caught before now...
@@ -206,7 +206,7 @@ public class ProgramStatement {
             } else if (tokenType == TokenTypes.FP_REGISTER_NAME) {
                 registerNumber = Coprocessor1.getRegisterNumber(tokenValue);
                 basicStatementElement = "$f" + registerNumber;
-                basic += basicStatementElement;
+                basic.append(basicStatementElement);
                 basicStatementList.addString(basicStatementElement);
                 if (registerNumber < 0) {
                     // should never happen; should be caught before now...
@@ -249,7 +249,7 @@ public class ProgramStatement {
                     }
                 }
                 //////////////////////////////////////////////////////////////////////
-                basic += address;
+                basic.append(address);
                 if (absoluteAddress) { // record as address if absolute, value if relative
                     basicStatementList.addAddress(address);
                 } else {
@@ -261,7 +261,7 @@ public class ProgramStatement {
 
                 int tempNumeric = Binary.stringToInt(tokenValue);
 
-                /***************************************************************************
+                /* **************************************************************************
                  *  MODIFICATION AND COMMENT, DPS 3-July-2008
                  *
                  * The modifications of January 2005 documented below are being rescinded.
@@ -302,13 +302,13 @@ public class ProgramStatement {
                  *        }
                  **************************  END DPS 3-July-2008 COMMENTS *******************************/
 
-                basic += tempNumeric;
+                basic.append(tempNumeric);
                 basicStatementList.addValue(tempNumeric);
                 this.operands[this.numOperands++] = tempNumeric;
                 ///// End modification 1/7/05 KENV   ///////////////////////////////////////////
             } else {
                 basicStatementElement = tokenValue;
-                basic += basicStatementElement;
+                basic.append(basicStatementElement);
                 basicStatementList.addString(basicStatementElement);
             }
             // add separator if not at end of token list AND neither current nor 
@@ -318,12 +318,12 @@ public class ProgramStatement {
                 if (tokenType != TokenTypes.LEFT_PAREN && tokenType != TokenTypes.RIGHT_PAREN &&
                         nextTokenType != TokenTypes.LEFT_PAREN && nextTokenType != TokenTypes.RIGHT_PAREN) {
                     basicStatementElement = ",";
-                    basic += basicStatementElement;
+                    basic.append(basicStatementElement);
                     basicStatementList.addString(basicStatementElement);
                 }
             }
         }
-        this.basicAssemblyStatement = basic;
+        this.basicAssemblyStatement = basic.toString();
     } //buildBasicStatementFromBasicInstruction()
 
 
@@ -371,9 +371,7 @@ public class ProgramStatement {
                 this.insertBinaryCode(this.operands[i], Instruction.operandMask[i], errors);
         }
         this.binaryStatement = Binary.binaryStringToInt(this.machineStatement);
-        return;
     } // buildMachineStatementFromBasicStatement(
-
 
     /////////////////////////////////////////////////////////////////////////////
 
@@ -382,31 +380,34 @@ public class ProgramStatement {
      *
      * @return A String representing the ProgramStatement.
      **/
-
     public String toString() {
         // a crude attempt at string formatting.  Where's C when you need it?
         String blanks = "                               ";
-        String result = "[" + this.textAddress + "]";
+        StringBuilder result = new StringBuilder("[" + this.textAddress + "]");
         if (this.basicAssemblyStatement != null) {
             int firstSpace = this.basicAssemblyStatement.indexOf(" ");
-            result += blanks.substring(0, 16 - result.length()) + this.basicAssemblyStatement.substring(0, firstSpace);
-            result += blanks.substring(0, 24 - result.length()) + this.basicAssemblyStatement.substring(firstSpace + 1);
+            result.append(blanks, 0, 16 - result.length()).append(this.basicAssemblyStatement, 0, firstSpace);
+            result.append(blanks, 0, 24 - result.length()).append(this.basicAssemblyStatement.substring(firstSpace + 1));
         } else {
-            result += blanks.substring(0, 16 - result.length()) + "0x" + Integer.toString(this.binaryStatement, 16);
+            result.append(blanks, 0, 16 - result.length()).append("0x").append(Integer.toString(this.binaryStatement, 16));
         }
-        result += blanks.substring(0, 40 - result.length()) + ";  "; // this.source;
+        result.append(blanks, 0, 40 - result.length()).append(";  "); // this.source;
         if (operands != null) {
             for (int i = 0; i < this.numOperands; i++)
                 // result += operands[i] + " ";
-                result += Integer.toString(operands[i], 16) + " ";
+                result.append(Integer.toString(operands[i], 16)).append(" ");
         }
         if (this.machineStatement != null) {
-            result += "[" + Binary.binaryStringToHexString(this.machineStatement) + "]";
-            result += "  " + this.machineStatement.substring(0, 6) + "|" + this.machineStatement.substring(6, 11) + "|" +
-                    this.machineStatement.substring(11, 16) + "|" + this.machineStatement.substring(16, 21) + "|" +
-                    this.machineStatement.substring(21, 26) + "|" + this.machineStatement.substring(26, 32);
+            result.append("[").append(Binary.binaryStringToHexString(this.machineStatement)).append("]");
+            result.append("  ")
+                    .append(this.machineStatement, 0, 6).append("|")
+                    .append(this.machineStatement, 6, 11).append("|")
+                    .append(this.machineStatement, 11, 16).append("|")
+                    .append(this.machineStatement, 16, 21).append("|")
+                    .append(this.machineStatement, 21, 26).append("|")
+                    .append(this.machineStatement, 26, 32);
         }
-        return result;
+        return result.toString();
     } // toString()
 
     /**
@@ -432,7 +433,6 @@ public class ProgramStatement {
      *
      * @return The MIPS source statement.
      **/
-
     public String getSource() {
         return source;
     }
@@ -443,7 +443,6 @@ public class ProgramStatement {
      *
      * @param src a MIPS source statement.
      **/
-
     public void setSource(String src) {
         source = src;
     }
@@ -453,7 +452,6 @@ public class ProgramStatement {
      *
      * @return The MIPS source statement line number.
      **/
-
     public int getSourceLine() {
         return sourceLine;
     }
@@ -464,7 +462,6 @@ public class ProgramStatement {
      *
      * @return The Basic Assembly statement.
      **/
-
     public String getBasicAssemblyStatement() {
         return basicAssemblyStatement;
     }
@@ -474,7 +471,6 @@ public class ProgramStatement {
      *
      * @param statement A String containing equivalent Basic Assembly statement.
      **/
-
     public void setBasicAssemblyStatement(String statement) {
         basicAssemblyStatement = statement;
     }
@@ -496,7 +492,6 @@ public class ProgramStatement {
      *
      * @return The String version of 32-bit binary machine code.
      **/
-
     public String getMachineStatement() {
         return machineStatement;
     }
@@ -507,7 +502,6 @@ public class ProgramStatement {
      *
      * @param statement A String containing equivalent machine code.
      **/
-
     public void setMachineStatement(String statement) {
         machineStatement = statement;
     }
@@ -526,7 +520,6 @@ public class ProgramStatement {
      *
      * @param binaryCode An int containing equivalent binary machine code.
      **/
-
     public void setBinaryStatement(int binaryCode) {
         binaryStatement = binaryCode;
     }
@@ -608,7 +601,6 @@ public class ProgramStatement {
         if (endPos < this.machineStatement.length() - 1)
             state = state + this.machineStatement.substring(endPos + 1);
         this.machineStatement = state;
-        return;
     } // insertBinaryCode()
 
 
@@ -619,7 +611,10 @@ public class ProgramStatement {
      *   used by the constructor that is given only the int address and binary code.  It is not
      *   intended to be used when source code is available.  DPS 11-July-2013
      */
-    private BasicStatementList buildBasicStatementListFromBinaryCode(int binary, BasicInstruction instr, int[] operands, int numOperands) {
+    private BasicStatementList buildBasicStatementListFromBinaryCode(@SuppressWarnings("unused") int binary,
+                                                                     BasicInstruction instr,
+                                                                     int[] operands,
+                                                                     int numOperands) {
         BasicStatementList statementList = new BasicStatementList();
         int tokenListCounter = 1;  // index 0 is operator; operands start at index 1
         if (instr == null) {
@@ -683,12 +678,12 @@ public class ProgramStatement {
     //
     //  DPS 29-July-2010
 
-    private class BasicStatementList {
+    private static class BasicStatementList {
 
-        private final ArrayList list;
+        private final List<ListElement> list;
 
         BasicStatementList() {
-            list = new ArrayList();
+            list = new ArrayList<>();
         }
 
         void addString(String string) {
@@ -704,24 +699,27 @@ public class ProgramStatement {
         }
 
         public String toString() {
-            int addressBase = (Globals.getSettings().getBooleanSetting(Settings.DISPLAY_ADDRESSES_IN_HEX)) ? mars.venus.NumberDisplayBaseChooser.HEXADECIMAL : mars.venus.NumberDisplayBaseChooser.DECIMAL;
-            int valueBase = (Globals.getSettings().getBooleanSetting(Settings.DISPLAY_VALUES_IN_HEX)) ? mars.venus.NumberDisplayBaseChooser.HEXADECIMAL : mars.venus.NumberDisplayBaseChooser.DECIMAL;
+            int addressBase = (Globals.getSettings().getBooleanSetting(Settings.DISPLAY_ADDRESSES_IN_HEX)) ?
+                    NumberDisplayBaseChooser.HEXADECIMAL :
+                    NumberDisplayBaseChooser.DECIMAL;
+            int valueBase = (Globals.getSettings().getBooleanSetting(Settings.DISPLAY_VALUES_IN_HEX)) ?
+                    NumberDisplayBaseChooser.HEXADECIMAL :
+                    NumberDisplayBaseChooser.DECIMAL;
 
-            StringBuffer result = new StringBuffer();
-            for (int i = 0; i < list.size(); i++) {
-                ListElement e = (ListElement) list.get(i);
+            StringBuilder result = new StringBuilder();
+            for (ListElement e : list) {
                 switch (e.type) {
                     case 0:
                         result.append(e.sValue);
                         break;
                     case 1:
-                        result.append(mars.venus.NumberDisplayBaseChooser.formatNumber(e.iValue, addressBase));
+                        result.append(NumberDisplayBaseChooser.formatNumber(e.iValue, addressBase));
                         break;
                     case 2:
-                        if (valueBase == mars.venus.NumberDisplayBaseChooser.HEXADECIMAL) {
-                            result.append(mars.util.Binary.intToHexString(e.iValue)); // 13-July-2011, was: intToHalfHexString()
+                        if (valueBase == NumberDisplayBaseChooser.HEXADECIMAL) {
+                            result.append(Binary.intToHexString(e.iValue)); // 13-July-2011, was: intToHalfHexString()
                         } else {
-                            result.append(mars.venus.NumberDisplayBaseChooser.formatNumber(e.iValue, valueBase));
+                            result.append(NumberDisplayBaseChooser.formatNumber(e.iValue, valueBase));
                         }
                     default:
                         break;
@@ -730,7 +728,7 @@ public class ProgramStatement {
             return result.toString();
         }
 
-        private class ListElement {
+        private static class ListElement {
             int type;
             String sValue;
             int iValue;

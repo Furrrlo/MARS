@@ -1,3 +1,30 @@
+/*
+Copyright (c) 2003-2009,  Pete Sanderson and Kenneth Vollmar
+
+Developed by Pete Sanderson (psanderson@otterbein.edu)
+and Kenneth Vollmar (kenvollmar@missouristate.edu)
+
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+"Software"), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject
+to the following conditions:
+
+The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR
+ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
+CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+(MIT license, http://www.opensource.org/licenses/mit-license.html)
+ */
 package mars.venus;
 
 import mars.util.EditorFont;
@@ -5,42 +32,13 @@ import mars.util.EditorFont;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.util.Vector;
-	
-	/*
-Copyright (c) 2003-2009,  Pete Sanderson and Kenneth Vollmar
-
-Developed by Pete Sanderson (psanderson@otterbein.edu)
-and Kenneth Vollmar (kenvollmar@missouristate.edu)
-
-Permission is hereby granted, free of charge, to any person obtaining 
-a copy of this software and associated documentation files (the 
-"Software"), to deal in the Software without restriction, including 
-without limitation the rights to use, copy, modify, merge, publish, 
-distribute, sublicense, and/or sell copies of the Software, and to 
-permit persons to whom the Software is furnished to do so, subject 
-to the following conditions:
-
-The above copyright notice and this permission notice shall be 
-included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, 
-EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF 
-MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. 
-IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR 
-ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF 
-CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION 
-WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-
-(MIT license, http://www.opensource.org/licenses/mit-license.html)
- */
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Abstract class for a font selection dialog.
@@ -50,7 +48,7 @@ public abstract class AbstractFontSettingDialog extends JDialog {
     private static final String SEPARATOR = "___SEPARATOR____";
     protected Font currentFont;
     JDialog editorDialog;
-    JComboBox fontFamilySelector, fontStyleSelector;
+    JComboBox<String> fontFamilySelector, fontStyleSelector;
     JSlider fontSizeSelector;
     JSpinner fontSizeSpinSelector;
     JLabel fontSample;
@@ -96,7 +94,7 @@ public abstract class AbstractFontSettingDialog extends JDialog {
         // with a horizontal line separating the two groups.
         String[][] fullList = {commonFontFamilies, allFontFamilies};
 
-        fontFamilySelector = new JComboBox(makeVectorData(fullList));
+        fontFamilySelector = new JComboBox<>(makeVectorData(fullList).toArray(new String[0]));
         fontFamilySelector.setRenderer(new ComboBoxRenderer());
         fontFamilySelector.addActionListener(new BlockComboListener(fontFamilySelector));
         fontFamilySelector.setSelectedItem(currentFont.getFamily());
@@ -105,39 +103,28 @@ public abstract class AbstractFontSettingDialog extends JDialog {
         fontFamilySelector.setToolTipText("Short list of common font families followed by complete list.");
 
         String[] fontStyles = EditorFont.getFontStyleStrings();
-        fontStyleSelector = new JComboBox(fontStyles);
+        fontStyleSelector = new JComboBox<>(fontStyles);
         fontStyleSelector.setSelectedItem(EditorFont.styleIntToStyleString(currentFont.getStyle()));
         fontStyleSelector.setEditable(false);
         fontStyleSelector.setToolTipText("List of available font styles.");
 
         fontSizeSelector = new JSlider(EditorFont.MIN_SIZE, EditorFont.MAX_SIZE, currentFont.getSize());
         fontSizeSelector.setToolTipText("Use slider to select font size from " + EditorFont.MIN_SIZE + " to " + EditorFont.MAX_SIZE + ".");
-        fontSizeSelector.addChangeListener(
-                new ChangeListener() {
-                    public void stateChanged(ChangeEvent e) {
-                        Integer value = new Integer(((JSlider) e.getSource()).getValue());
-                        fontSizeSpinSelector.setValue(value);
-                        fontSample.setFont(getFont());
-                    }
-                });
+        fontSizeSelector.addChangeListener(e -> {
+            Integer value = ((JSlider) e.getSource()).getValue();
+            fontSizeSpinSelector.setValue(value);
+            fontSample.setFont(getFont());
+        });
         SpinnerNumberModel fontSizeSpinnerModel = new SpinnerNumberModel(currentFont.getSize(), EditorFont.MIN_SIZE, EditorFont.MAX_SIZE, 1);
         fontSizeSpinSelector = new JSpinner(fontSizeSpinnerModel);
         fontSizeSpinSelector.setToolTipText("Current font size in points.");
-        fontSizeSpinSelector.addChangeListener(
-                new ChangeListener() {
-                    public void stateChanged(ChangeEvent e) {
-                        Object value = ((JSpinner) e.getSource()).getValue();
-                        fontSizeSelector.setValue(((Integer) value).intValue());
-                        fontSample.setFont(getFont());
-                    }
-                });
+        fontSizeSpinSelector.addChangeListener(e -> {
+            Object value = ((JSpinner) e.getSource()).getValue();
+            fontSizeSelector.setValue((Integer) value);
+            fontSample.setFont(getFont());
+        });
         // Action listener to update sample when family or style selected
-        ActionListener updateSample =
-                new ActionListener() {
-                    public void actionPerformed(ActionEvent e) {
-                        fontSample.setFont(getFont());
-                    }
-                };
+        ActionListener updateSample = e -> fontSample.setFont(getFont());
         fontFamilySelector.addActionListener(updateSample);
         fontStyleSelector.addActionListener(updateSample);
 
@@ -191,9 +178,8 @@ public abstract class AbstractFontSettingDialog extends JDialog {
         fontFamilySelector.setSelectedItem(initialFontFamily);
         fontStyleSelector.setSelectedItem(initialFontStyle);
         fontSizeSelector.setValue(EditorFont.sizeStringToSizeInt(initialFontSize));
-        fontSizeSpinSelector.setValue(new Integer(EditorFont.sizeStringToSizeInt(initialFontSize)));
+        fontSizeSpinSelector.setValue(EditorFont.sizeStringToSizeInt(initialFontSize));
     }
-
 
     /////////////////////////////////////////////////////////////////////
     //
@@ -217,15 +203,15 @@ public abstract class AbstractFontSettingDialog extends JDialog {
 
     // Given an array of string arrays, will produce a Vector contenating
     // the arrays with a separator between each.
-    private Vector makeVectorData(String[][] str) {
+    private List<String> makeVectorData(String[][] str) {
         boolean needSeparator = false;
-        Vector data = new Vector();
-        for (int i = 0; i < str.length; i++) {
+        List<String> data = new ArrayList<>();
+        for (String[] strings : str) {
             if (needSeparator) {
-                data.addElement(SEPARATOR);
+                data.add(SEPARATOR);
             }
-            for (int j = 0; j < str[i].length; j++) {
-                data.addElement(str[i][j]);
+            for (String string : strings) {
+                data.add(string);
                 needSeparator = true;
             }
         }
@@ -233,7 +219,7 @@ public abstract class AbstractFontSettingDialog extends JDialog {
     }
 
     // Required renderer for handling the separator bar.
-    private class ComboBoxRenderer extends JLabel implements ListCellRenderer {
+    private static class ComboBoxRenderer extends JLabel implements ListCellRenderer<String> {
         JSeparator separator;
 
         public ComboBoxRenderer() {
@@ -242,9 +228,8 @@ public abstract class AbstractFontSettingDialog extends JDialog {
             separator = new JSeparator(JSeparator.HORIZONTAL);
         }
 
-        public Component getListCellRendererComponent(JList list,
-                                                      Object value, int index, boolean isSelected, boolean cellHasFocus) {
-            String str = (value == null) ? "" : value.toString();
+        public Component getListCellRendererComponent(JList list, String value, int index, boolean isSelected, boolean cellHasFocus) {
+            String str = (value == null) ? "" : value;
             if (SEPARATOR.equals(str)) {
                 return separator;
             }
@@ -262,11 +247,11 @@ public abstract class AbstractFontSettingDialog extends JDialog {
     }
 
     // Required listener to handle the separator bar.
-    private class BlockComboListener implements ActionListener {
-        JComboBox combo;
+    private static class BlockComboListener implements ActionListener {
+        JComboBox<String> combo;
         Object currentItem;
 
-        BlockComboListener(JComboBox combo) {
+        BlockComboListener(JComboBox<String> combo) {
             this.combo = combo;
             combo.setSelectedIndex(0);
             currentItem = combo.getSelectedItem();

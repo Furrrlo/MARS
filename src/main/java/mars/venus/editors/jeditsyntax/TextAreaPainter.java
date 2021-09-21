@@ -8,7 +8,6 @@
  * permitted, in both source and binary form, provided that this notice
  * remains intact in all source distributions of this package.
  */
-
 package mars.venus.editors.jeditsyntax;
 
 import mars.venus.editors.jeditsyntax.tokenmarker.Token;
@@ -128,7 +127,7 @@ public class TextAreaPainter extends JComponent implements TabExpander {
      * Returns the syntax styles used to paint colorized text. Entry <i>n</i>
      * will be used to paint tokens with id = <i>n</i>.
      *
-     * @see org.syntax.jedit.Token
+     * @see mars.venus.editors.jeditsyntax.tokenmarker.Token
      */
     public final SyntaxStyle[] getStyles() {
         return styles;
@@ -139,7 +138,7 @@ public class TextAreaPainter extends JComponent implements TabExpander {
      * will be used to paint tokens with id = <i>n</i>.
      *
      * @param styles The syntax styles
-     * @see org.syntax.jedit.Token
+     * @see mars.venus.editors.jeditsyntax.tokenmarker.Token
      */
     public final void setStyles(SyntaxStyle[] styles) {
         this.styles = styles;
@@ -523,7 +522,7 @@ public class TextAreaPainter extends JComponent implements TabExpander {
         gfx.setColor(defaultColor);
 
         y += fm.getHeight();
-        x = Utilities.drawTabbedText(currentLine, x, y, gfx, this, 0);
+        x = (int) Utilities.drawTabbedText(currentLine, (float) x, (float) y, (Graphics2D) gfx, this, 0);
 
         if (eolMarkers) {
             gfx.setColor(eolMarkerColor);
@@ -533,7 +532,8 @@ public class TextAreaPainter extends JComponent implements TabExpander {
 
     //      private int count=0;
     protected void paintSyntaxLine(Graphics gfx, TokenMarker tokenMarker,
-                                   int line, Font defaultFont, Color defaultColor, int x, int y) {//System.out.println("paintSyntaxLine line "+ line);
+                                   int line, Font defaultFont, Color defaultColor, int x, int y) {
+        //System.out.println("paintSyntaxLine line "+ line);
         textArea.getLineText(currentLineIndex, currentLine);
         currentLineTokens = tokenMarker.markTokens(currentLine,
                 currentLineIndex);
@@ -559,7 +559,8 @@ public class TextAreaPainter extends JComponent implements TabExpander {
         }
     }
 
-    protected void paintHighlight(Graphics gfx, int line, int y) {//System.out.println("paintHighlight "+ (++count));
+    protected void paintHighlight(Graphics gfx, int line, int y) {
+        //System.out.println("paintHighlight "+ (++count));
         if (line >= textArea.getSelectionStartLine()
                 && line <= textArea.getSelectionEndLine())
             paintLineHighlight(gfx, line, y);
@@ -574,7 +575,8 @@ public class TextAreaPainter extends JComponent implements TabExpander {
             paintCaret(gfx, line, y);
     }
 
-    protected void paintLineHighlight(Graphics gfx, int line, int y) {//System.out.println("paintLineHighlight "+ (++count));
+    protected void paintLineHighlight(Graphics gfx, int line, int y) {
+        //System.out.println("paintLineHighlight "+ (++count));
         int height = fm.getHeight();
         y += fm.getLeading() + fm.getMaxDescent();
 
@@ -623,8 +625,7 @@ public class TextAreaPainter extends JComponent implements TabExpander {
             }
 
             // "inlined" min/max()
-            gfx.fillRect(x1 > x2 ? x2 : x1, y, x1 > x2 ?
-                    (x1 - x2) : (x2 - x1), height);
+            gfx.fillRect(Math.min(x1, x2), y, x1 > x2 ? (x1 - x2) : (x2 - x1), height);
         }
 
     }

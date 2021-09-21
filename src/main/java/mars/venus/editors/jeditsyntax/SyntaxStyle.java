@@ -6,7 +6,6 @@
  * permitted, in both source and binary form, provided that this notice
  * remains intact in all source distributions of this package.
  */
-
 package mars.venus.editors.jeditsyntax;
 
 import java.awt.*;
@@ -56,7 +55,6 @@ public class SyntaxStyle {
      *
      * @return String containing hex-coded color value.
      */
-
     public String getColorAsHexString() {
         return mars.util.Binary.intToHexString(color.getRed() << 16 | color.getGreen() << 8 | color.getBlue());
     }

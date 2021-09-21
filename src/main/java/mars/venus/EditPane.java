@@ -1,3 +1,30 @@
+/*
+Copyright (c) 2003-2011,  Pete Sanderson and Kenneth Vollmar
+
+Developed by Pete Sanderson (psanderson@otterbein.edu)
+and Kenneth Vollmar (kenvollmar@missouristate.edu)
+
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+"Software"), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject
+to the following conditions:
+
+The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR
+ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
+CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+(MIT license, http://www.opensource.org/licenses/mit-license.html)
+ */
 package mars.venus;
 
 import mars.Globals;
@@ -12,41 +39,11 @@ import javax.swing.event.DocumentListener;
 import javax.swing.undo.CompoundEdit;
 import javax.swing.undo.UndoManager;
 import java.awt.*;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.Observable;
 import java.util.Observer;
-
-/*
-Copyright (c) 2003-2011,  Pete Sanderson and Kenneth Vollmar
-
-Developed by Pete Sanderson (psanderson@otterbein.edu)
-and Kenneth Vollmar (kenvollmar@missouristate.edu)
-
-Permission is hereby granted, free of charge, to any person obtaining 
-a copy of this software and associated documentation files (the 
-"Software"), to deal in the Software without restriction, including 
-without limitation the rights to use, copy, modify, merge, publish, 
-distribute, sublicense, and/or sell copies of the Software, and to 
-permit persons to whom the Software is furnished to do so, subject 
-to the following conditions:
-
-The above copyright notice and this permission notice shall be 
-included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, 
-EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF 
-MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. 
-IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR 
-ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF 
-CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION 
-WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-
-(MIT license, http://www.opensource.org/licenses/mit-license.html)
- */
 
 /**
  * Represents one file opened for editing.  Maintains required internal structures.
@@ -56,10 +53,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  * @author Sanderson and Bumgarner
  */
-
 public class EditPane extends JPanel implements Observer {
 
-    private static final int count = 0;
     /**
      * Form string with source code line numbers.
      * Resulting string is HTML, for which JLabel will happily honor <br> to do
@@ -67,13 +62,6 @@ public class EditPane extends JPanel implements Observer {
      * one line number per line.
      */
     private static final String spaces = "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
-    /**
-     * Given byte stream position in text being edited, calculate its column and line
-     * number coordinates.
-     *
-     * @param stream position of character
-     * @return position Its column and line number coordinate as a Point.
-     */
     private static final char newline = '\n';
     private final MARSTextEditingArea sourceCode;
     private final VenusUI mainUI;
@@ -88,7 +76,6 @@ public class EditPane extends JPanel implements Observer {
     /**
      * Constructor for the EditPane class.
      */
-
     public EditPane(VenusUI appFrame) {
         super(new BorderLayout());
         this.mainUI = appFrame;
@@ -178,23 +165,20 @@ public class EditPane extends JPanel implements Observer {
         lineNumbers.setVisible(true);
 
         // Listener fires when "Show Line Numbers" check box is clicked.
-        showLineNumbers.addItemListener(
-                new ItemListener() {
-                    public void itemStateChanged(ItemEvent e) {
-                        if (showLineNumbers.isSelected()) {
-                            lineNumbers.setText(getLineNumbersList(sourceCode.getDocument()));
-                            lineNumbers.setVisible(true);
-                        } else {
-                            lineNumbers.setText("");
-                            lineNumbers.setVisible(false);
-                        }
-                        sourceCode.revalidate(); // added 16 Jan 2012 to assure label redrawn.
-                        Globals.getSettings().setEditorLineNumbersDisplayed(showLineNumbers.isSelected());
-                        // needed because caret disappears when checkbox clicked
-                        sourceCode.setCaretVisible(true);
-                        sourceCode.requestFocusInWindow();
-                    }
-                });
+        showLineNumbers.addItemListener(e -> {
+            if (showLineNumbers.isSelected()) {
+                lineNumbers.setText(getLineNumbersList(sourceCode.getDocument()));
+                lineNumbers.setVisible(true);
+            } else {
+                lineNumbers.setText("");
+                lineNumbers.setVisible(false);
+            }
+            sourceCode.revalidate(); // added 16 Jan 2012 to assure label redrawn.
+            Globals.getSettings().setEditorLineNumbersDisplayed(showLineNumbers.isSelected());
+            // needed because caret disappears when checkbox clicked
+            sourceCode.setCaretVisible(true);
+            sourceCode.requestFocusInWindow();
+        });
 
         JPanel editInfo = new JPanel(new BorderLayout());
         caretPositionLabel = new JLabel();
@@ -211,7 +195,6 @@ public class EditPane extends JPanel implements Observer {
      * @param s        String containing text
      * @param editable set true if code is editable else false
      */
-
     public void setSourceCode(String s, boolean editable) {
         sourceCode.setSourceCode(s, editable);
     }
@@ -229,16 +212,16 @@ public class EditPane extends JPanel implements Observer {
     }
 
     public String getLineNumbersList(javax.swing.text.Document doc) {
-        StringBuffer lineNumberList = new StringBuffer("<html>");
+        StringBuilder lineNumberList = new StringBuilder("<html>");
         int lineCount = doc.getDefaultRootElement().getElementCount(); //this.getSourceLineCount();
         int digits = Integer.toString(lineCount).length();
         for (int i = 1; i <= lineCount; i++) {
             String lineStr = Integer.toString(i);
             int leadingSpaces = digits - lineStr.length();
             if (leadingSpaces == 0) {
-                lineNumberList.append(lineStr + "&nbsp;<br>");
+                lineNumberList.append(lineStr).append("&nbsp;<br>");
             } else {
-                lineNumberList.append(spaces.substring(0, leadingSpaces * 6) + lineStr + "&nbsp;<br>");
+                lineNumberList.append(spaces, 0, leadingSpaces * 6).append(lineStr).append("&nbsp;<br>");
             }
         }
         lineNumberList.append("<br></html>");
@@ -250,7 +233,6 @@ public class EditPane extends JPanel implements Observer {
      * Do this by counting newline characters then adding one if last line does
      * not end with newline character.
      */
-
     /*  IMPLEMENTATION NOTE:
      * Tried repeatedly to use StringTokenizer to count lines but got bad results
      * on empty lines (consecutive delimiters) even when returning delimiter as token.
@@ -263,7 +245,7 @@ public class EditPane extends JPanel implements Observer {
             while (bufStringReader.readLine() != null) {
                 lineNums++;
             }
-        } catch (IOException e) {
+        } catch (IOException ignored) {
         }
         return lineNums;
     }
@@ -281,7 +263,6 @@ public class EditPane extends JPanel implements Observer {
      * Get the editing status for this EditPane's associated document.
      * This will be one of the constants from class FileStatus.
      */
-
     public int getFileStatus() {
         return this.fileStatus.getFileStatus();
     }
@@ -290,7 +271,7 @@ public class EditPane extends JPanel implements Observer {
      * Set the editing status for this EditPane's associated document.
      * For the argument, use one of the constants from class FileStatus.
      *
-     * @param FileStatus the status constant from class FileStatus
+     * @param fileStatus the status constant from class FileStatus
      */
     public void setFileStatus(int fileStatus) {
         this.fileStatus.setFileStatus(fileStatus);
@@ -334,7 +315,6 @@ public class EditPane extends JPanel implements Observer {
     /**
      * Delegates to text area's requestFocusInWindow method.
      */
-
     public void tellEditingComponentToRequestFocusInWindow() {
         this.sourceCode.requestFocusInWindow();
     }
@@ -439,7 +419,7 @@ public class EditPane extends JPanel implements Observer {
     /**
      * enable or disable checkbox that controls display of line numbers
      *
-     * @param enable True to enable box, false to disable.
+     * @param enabled True to enable box, false to disable.
      */
     public void setShowLineNumbersEnabled(boolean enabled) {
         showLineNumbers.setEnabled(enabled);
@@ -466,6 +446,13 @@ public class EditPane extends JPanel implements Observer {
         caretPositionLabel.setText("Line: " + p.y + " Column: " + p.x);
     }
 
+    /**
+     * Given byte stream position in text being edited, calculate its column and line
+     * number coordinates.
+     *
+     * @param position position of character
+     * @return Its column and line number coordinate as a Point.
+     */
     public Point convertStreamPositionToLineColumn(int position) {
         String textStream = sourceCode.getText();
         int line = 1;

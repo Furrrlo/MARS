@@ -1,35 +1,35 @@
-package mars;
-
-import java.io.File;
-import java.util.ArrayList;
-
 /*
 Copyright (c) 2003-2012,  Pete Sanderson and Kenneth Vollmar
 
 Developed by Pete Sanderson (psanderson@otterbein.edu)
 and Kenneth Vollmar (kenvollmar@missouristate.edu)
 
-Permission is hereby granted, free of charge, to any person obtaining 
-a copy of this software and associated documentation files (the 
-"Software"), to deal in the Software without restriction, including 
-without limitation the rights to use, copy, modify, merge, publish, 
-distribute, sublicense, and/or sell copies of the Software, and to 
-permit persons to whom the Software is furnished to do so, subject 
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+"Software"), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject
 to the following conditions:
 
-The above copyright notice and this permission notice shall be 
+The above copyright notice and this permission notice shall be
 included in all copies or substantial portions of the Software.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, 
-EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF 
-MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. 
-IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR 
-ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF 
-CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION 
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR
+ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
+CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 (MIT license, http://www.opensource.org/licenses/mit-license.html)
  */
+package mars;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Maintains list of generated error messages, regardless of source (tokenizing, parsing,
@@ -39,23 +39,23 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * @version August 2003
  **/
 public class ErrorList {
+
     public static final String ERROR_MESSAGE_PREFIX = "Error";
     public static final String WARNING_MESSAGE_PREFIX = "Warning";
     public static final String FILENAME_PREFIX = " in ";
     public static final String LINE_PREFIX = " line ";
     public static final String POSITION_PREFIX = " column ";
     public static final String MESSAGE_SEPARATOR = ": ";
-    private final ArrayList messages;
+
+    private final ArrayList<ErrorMessage> messages;
     private int errorCount;
     private int warningCount;
-
 
     /**
      * Constructor for ErrorList
      **/
-
     public ErrorList() {
-        messages = new ArrayList();
+        messages = new ArrayList<>();
         errorCount = 0;
         warningCount = 0;
     }
@@ -65,7 +65,7 @@ public class ErrorList {
      *
      * @return ArrayList of ErrorMessage objects
      */
-    public ArrayList getErrorMessages() {
+    public List<ErrorMessage> getErrorMessages() {
         return messages;
     }
 
@@ -107,7 +107,9 @@ public class ErrorList {
             return;
         }
         if (errorCount == getErrorLimit()) {
-            messages.add(new ErrorMessage((MIPSprogram) null, mess.getLine(), mess.getPosition(), "Error Limit of " + getErrorLimit() + " exceeded."));
+            messages.add(new ErrorMessage((MIPSprogram) null,
+                    mess.getLine(), mess.getPosition(),
+                    "Error Limit of " + getErrorLimit() + " exceeded."));
             errorCount++; // subsequent errors will not be added; see if statement above
             return;
         }
@@ -125,7 +127,6 @@ public class ErrorList {
      *
      * @return Number of error messages in list.
      **/
-
     public int errorCount() {
         return this.errorCount;
     }
@@ -135,7 +136,6 @@ public class ErrorList {
      *
      * @return Number of warning messages in list.
      **/
-
     public int warningCount() {
         return this.warningCount;
     }
@@ -145,7 +145,6 @@ public class ErrorList {
      *
      * @return True if error limit exceeded, false otherwise.
      **/
-
     public boolean errorLimitExceeded() {
         return this.errorCount > getErrorLimit();
     }
@@ -156,7 +155,6 @@ public class ErrorList {
      *
      * @return error limit.
      **/
-
     public int getErrorLimit() {
         return Globals.maximumErrorMessages;
     }
@@ -190,19 +188,18 @@ public class ErrorList {
 
     // Produces either error or warning report.
     private String generateReport(boolean isWarning) {
-        StringBuffer report = new StringBuffer();
+        StringBuilder report = new StringBuilder();
         String reportLine;
-        for (int i = 0; i < messages.size(); i++) {
-            ErrorMessage m = (ErrorMessage) messages.get(i);
-            if ((isWarning && m.isWarning()) || (!isWarning && !m.isWarning())) {
+        for (ErrorMessage message : messages) {
+            if ((isWarning && message.isWarning()) || (!isWarning && !message.isWarning())) {
                 reportLine = ((isWarning) ? WARNING_MESSAGE_PREFIX : ERROR_MESSAGE_PREFIX) + FILENAME_PREFIX;
-                if (m.getFilename().length() > 0)
-                    reportLine = reportLine + (new File(m.getFilename()).getPath()); //.getName());
-                if (m.getLine() > 0)
-                    reportLine = reportLine + LINE_PREFIX + m.getMacroExpansionHistory() + m.getLine();
-                if (m.getPosition() > 0)
-                    reportLine = reportLine + POSITION_PREFIX + m.getPosition();
-                reportLine = reportLine + MESSAGE_SEPARATOR + m.getMessage() + "\n";
+                if (message.getFilename().length() > 0)
+                    reportLine = reportLine + (new File(message.getFilename()).getPath()); //.getName());
+                if (message.getLine() > 0)
+                    reportLine = reportLine + LINE_PREFIX + message.getMacroExpansionHistory() + message.getLine();
+                if (message.getPosition() > 0)
+                    reportLine = reportLine + POSITION_PREFIX + message.getPosition();
+                reportLine = reportLine + MESSAGE_SEPARATOR + message.getMessage() + "\n";
                 report.append(reportLine);
             }
         }

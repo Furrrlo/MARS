@@ -1,3 +1,30 @@
+/*
+Copyright (c) 2003-2006,  Pete Sanderson and Kenneth Vollmar
+
+Developed by Pete Sanderson (psanderson@otterbein.edu)
+and Kenneth Vollmar (kenvollmar@missouristate.edu)
+
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+"Software"), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject
+to the following conditions:
+
+The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR
+ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
+CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+(MIT license, http://www.opensource.org/licenses/mit-license.html)
+ */
 package mars.venus;
 
 import mars.Globals;
@@ -6,34 +33,6 @@ import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import java.awt.*;
-	
-	/*
-Copyright (c) 2003-2006,  Pete Sanderson and Kenneth Vollmar
-
-Developed by Pete Sanderson (psanderson@otterbein.edu)
-and Kenneth Vollmar (kenvollmar@missouristate.edu)
-
-Permission is hereby granted, free of charge, to any person obtaining 
-a copy of this software and associated documentation files (the 
-"Software"), to deal in the Software without restriction, including 
-without limitation the rights to use, copy, modify, merge, publish, 
-distribute, sublicense, and/or sell copies of the Software, and to 
-permit persons to whom the Software is furnished to do so, subject 
-to the following conditions:
-
-The above copyright notice and this permission notice shall be 
-included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, 
-EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF 
-MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. 
-IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR 
-ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF 
-CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION 
-WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-
-(MIT license, http://www.opensource.org/licenses/mit-license.html)
- */
 
 /**
  * Class for the Run speed slider control.  One is created and can be obtained using
@@ -42,7 +41,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * @author Pete Sanderson
  * @version August 2005
  */
-
 public class RunSpeedPanel extends JPanel {
     /**
      * Constant that represents unlimited run speed.  Compare with return value of
@@ -64,8 +62,8 @@ public class RunSpeedPanel extends JPanel {
             26, 27, 28, 29, 30, UNLIMITED_SPEED, UNLIMITED_SPEED, // 31-37
             UNLIMITED_SPEED, UNLIMITED_SPEED, UNLIMITED_SPEED // 38-40
     };
-    private JLabel sliderLabel = null;
-    private JSlider runSpeedSlider = null;
+    private final JLabel sliderLabel;
+    private final JSlider runSpeedSlider;
     private volatile int runSpeedIndex = SPEED_INDEX_MAX;
 
     /*
@@ -94,7 +92,6 @@ public class RunSpeedPanel extends JPanel {
      *
      * @return the run speed panel
      */
-
     public static RunSpeedPanel getInstance() {
         if (runSpeedPanel == null) {
             runSpeedPanel = new RunSpeedPanel();
@@ -109,7 +106,6 @@ public class RunSpeedPanel extends JPanel {
      *
      * @return run speed setting in instructions/second.
      */
-
     public double getRunSpeed() {
         return speedTable[runSpeedIndex];
     }
@@ -136,7 +132,6 @@ public class RunSpeedPanel extends JPanel {
     /*
      *  Both revises label as user slides and updates current index when sliding stops.
      */
-
     private class RunSpeedListener implements ChangeListener {
         public void stateChanged(ChangeEvent e) {
             JSlider source = (JSlider) e.getSource();

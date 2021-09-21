@@ -46,7 +46,6 @@ import java.util.Observable;
  *
  * @author Felipe Lessa <felipe.lessa@gmail.com>
  */
-//@SuppressWarnings("serial")
 public class InstructionCounter extends AbstractMarsToolAndApplication {
     private static final String name = "Instruction Counter";
     private static final String version = "Version 1.0 (Felipe Lessa)";
@@ -99,12 +98,12 @@ public class InstructionCounter extends AbstractMarsToolAndApplication {
         super(name + ", " + version, heading);
     }
 
-    //	@Override
+    @Override
     public String getName() {
         return name;
     }
 
-    //	@Override
+    @Override
     protected JComponent buildMainDisplayArea() {
         // Create everything
         JPanel panel = new JPanel(new GridBagLayout());
@@ -183,12 +182,12 @@ public class InstructionCounter extends AbstractMarsToolAndApplication {
         return panel;
     }
 
-    //	@Override
+    @Override
     protected void addAsObserver() {
         addAsObserver(Memory.textBaseAddress, Memory.textLimitAddress);
     }
 
-    //	@Override
+    @Override
     protected void processMIPSUpdate(Observable resource, AccessNotice notice) {
         if (!notice.accessIsFromMIPS()) return;
         if (notice.getAccessType() != AccessNotice.READ) return;
@@ -215,20 +214,20 @@ public class InstructionCounter extends AbstractMarsToolAndApplication {
         updateDisplay();
     }
 
-    //	@Override
+    @Override
     protected void initializePreGUI() {
         counter = counterR = counterI = counterJ = 0;
         lastAddress = -1;
     }
 
-    // @Override
+    @Override
     protected void reset() {
         counter = counterR = counterI = counterJ = 0;
         lastAddress = -1;
         updateDisplay();
     }
 
-    //	@Override
+    @Override
     protected void updateDisplay() {
         counterField.setText(String.valueOf(counter));
 

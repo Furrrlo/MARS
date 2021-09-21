@@ -1,3 +1,30 @@
+/*
+Copyright (c) 2003-2010,  Pete Sanderson and Kenneth Vollmar
+
+Developed by Pete Sanderson (psanderson@otterbein.edu)
+and Kenneth Vollmar (kenvollmar@missouristate.edu)
+
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+"Software"), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject
+to the following conditions:
+
+The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR
+ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
+CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+(MIT license, http://www.opensource.org/licenses/mit-license.html)
+ */
 package mars.venus;
 
 import mars.*;
@@ -9,38 +36,10 @@ import mars.util.FilenameFinder;
 import mars.util.SystemIO;
 
 import javax.swing.*;
-import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.io.File;
 import java.util.ArrayList;
- 
- /*
-Copyright (c) 2003-2010,  Pete Sanderson and Kenneth Vollmar
-
-Developed by Pete Sanderson (psanderson@otterbein.edu)
-and Kenneth Vollmar (kenvollmar@missouristate.edu)
-
-Permission is hereby granted, free of charge, to any person obtaining 
-a copy of this software and associated documentation files (the 
-"Software"), to deal in the Software without restriction, including 
-without limitation the rights to use, copy, modify, merge, publish, 
-distribute, sublicense, and/or sell copies of the Software, and to 
-permit persons to whom the Software is furnished to do so, subject 
-to the following conditions:
-
-The above copyright notice and this permission notice shall be 
-included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, 
-EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF 
-MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. 
-IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR 
-ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF 
-CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION 
-WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-
-(MIT license, http://www.opensource.org/licenses/mit-license.html)
- */
+import java.util.List;
 
 /**
  * Action class for the Run -> Assemble menu item (and toolbar icon)
@@ -49,7 +48,7 @@ public class RunAssembleAction extends GuiAction {
 
     // Threshold for adding filename to printed message of files being assembled.
     private static final int LINE_LENGTH_LIMIT = 60;
-    private static ArrayList MIPSprogramsToAssemble;
+    private static List<MIPSprogram> MIPSprogramsToAssemble;
     private static boolean extendedAssemblerEnabled;
     private static boolean warningsAreErrors;
 
@@ -59,7 +58,7 @@ public class RunAssembleAction extends GuiAction {
     }
 
     // These are both used by RunResetAction to re-assemble under identical conditions.
-    static ArrayList getMIPSprogramsToAssemble() {
+    static List<MIPSprogram> getMIPSprogramsToAssemble() {
         return MIPSprogramsToAssemble;
     }
 
@@ -73,7 +72,7 @@ public class RunAssembleAction extends GuiAction {
 
     public void actionPerformed(ActionEvent e) {
         String name = this.getValue(Action.NAME).toString();
-        Component editPane = mainUI.getMainPane().getEditPane();
+//        Component editPane = mainUI.getMainPane().getEditPane();
         ExecutePane executePane = mainUI.getMainPane().getExecutePane();
         RegistersPane registersPane = mainUI.getRegistersPane();
         extendedAssemblerEnabled = Globals.getSettings().getExtendedAssemblerEnabled();
@@ -84,12 +83,12 @@ public class RunAssembleAction extends GuiAction {
             }
             try {
                 Globals.program = new MIPSprogram();
-                ArrayList filesToAssemble;
+                List<String> filesToAssemble;
                 if (Globals.getSettings().getAssembleAllEnabled()) {// setting calls for multiple file assembly
                     filesToAssemble = FilenameFinder.getFilenameList(
                             new File(FileStatus.getName()).getParent(), Globals.fileExtensions);
                 } else {
-                    filesToAssemble = new ArrayList();
+                    filesToAssemble = new ArrayList<>();
                     filesToAssemble.add(FileStatus.getName());
                 }
                 String exceptionHandler = null;
@@ -101,8 +100,7 @@ public class RunAssembleAction extends GuiAction {
                 MIPSprogramsToAssemble = Globals.program.prepareFilesForAssembly(filesToAssemble, FileStatus.getFile().getPath(), exceptionHandler);
                 mainUI.messagesPane.postMarsMessage(buildFileNameList(name + ": assembling ", MIPSprogramsToAssemble));
                 // added logic to receive any warnings and output them.... DPS 11/28/06
-                ErrorList warnings = Globals.program.assemble(MIPSprogramsToAssemble, extendedAssemblerEnabled,
-                        warningsAreErrors);
+                ErrorList warnings = Globals.program.assemble(MIPSprogramsToAssemble, extendedAssemblerEnabled, warningsAreErrors);
                 if (warnings.warningsOccurred()) {
                     mainUI.messagesPane.postMarsMessage(warnings.generateWarningReport());
                 }
@@ -136,9 +134,8 @@ public class RunAssembleAction extends GuiAction {
                 mainUI.messagesPane.postMarsMessage(
                         name + ": operation completed with errors.\n\n");
                 // Select editor line containing first error, and corresponding error message.
-                ArrayList errorMessages = pe.errors().getErrorMessages();
-                for (int i = 0; i < errorMessages.size(); i++) {
-                    ErrorMessage em = (ErrorMessage) errorMessages.get(i);
+                List<ErrorMessage> errorMessages = pe.errors().getErrorMessages();
+                for (ErrorMessage em : errorMessages) {
                     // No line or position may mean File Not Found (e.g. exception file). Don't try to open. DPS 3-Oct-2010
                     if (em.getLine() == 0 && em.getPosition() == 0) {
                         continue;
@@ -164,15 +161,15 @@ public class RunAssembleAction extends GuiAction {
 
     // Handy little utility for building comma-separated list of filenames
     // while not letting line length get out of hand.
-    private String buildFileNameList(String preamble, ArrayList programList) {
-        String result = preamble;
+    private String buildFileNameList(String preamble, List<MIPSprogram> programList) {
+        StringBuilder result = new StringBuilder(preamble);
         int lineLength = result.length();
         for (int i = 0; i < programList.size(); i++) {
-            String filename = ((MIPSprogram) programList.get(i)).getFilename();
-            result += filename + ((i < programList.size() - 1) ? ", " : "");
+            String filename = programList.get(i).getFilename();
+            result.append(filename).append((i < programList.size() - 1) ? ", " : "");
             lineLength += filename.length();
             if (lineLength > LINE_LENGTH_LIMIT) {
-                result += "\n";
+                result.append("\n");
                 lineLength = 0;
             }
         }

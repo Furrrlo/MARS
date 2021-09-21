@@ -33,7 +33,7 @@ import mars.Globals;
 import mars.mips.instructions.Instruction;
 import mars.util.Binary;
 
-import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Provides utility method related to MIPS operand formats.
@@ -56,7 +56,6 @@ public class OperandFormat {
      * @return Returns <tt>true</tt> if the programmer's statement matches the MIPS
      * specification, else returns <tt>false</tt>.
      */
-
     static boolean tokenOperandMatch(TokenList candidateList, Instruction inst, ErrorList errors) {
         if (!numOperandsCheck(candidateList, inst, errors))
             return false;
@@ -68,17 +67,15 @@ public class OperandFormat {
      * first such Instruction that has an exact operand match.  If none match,
      * return the first Instruction and let client deal with operand mismatches.
      */
-    static Instruction bestOperandMatch(TokenList tokenList, ArrayList instrMatches) {
+    static Instruction bestOperandMatch(TokenList tokenList, List<Instruction> instrMatches) {
         if (instrMatches == null)
             return null;
         if (instrMatches.size() == 1)
-            return (Instruction) instrMatches.get(0);
-        for (int i = 0; i < instrMatches.size(); i++) {
-            Instruction potentialMatch = (Instruction) instrMatches.get(i);
+            return instrMatches.get(0);
+        for (Instruction potentialMatch : instrMatches)
             if (tokenOperandMatch(tokenList, potentialMatch, new ErrorList()))
                 return potentialMatch;
-        }
-        return (Instruction) instrMatches.get(0);
+        return instrMatches.get(0);
     }
 
     // Simply check to see if numbers of operands are correct and generate error message if not.
@@ -168,8 +165,8 @@ public class OperandFormat {
             }
         }
 
-        /********  nice little debugging code to see which operand format
-         ********  the operands for this source code instruction matched.
+        /* *******  nice little debugging code to see which operand format
+         * *******  the operands for this source code instruction matched.
          System.out.print("Candidate: ");
          for (int i=1; i<spec.size(); i++) {
          System.out.print(cand.get(i).getValue()+" ");
@@ -180,7 +177,6 @@ public class OperandFormat {
          }
          System.out.println();
          */
-
         return true;
     }
 
@@ -188,7 +184,5 @@ public class OperandFormat {
     private static void generateMessage(Token token, String mess, ErrorList errors) {
         errors.add(new ErrorMessage(token.getSourceMIPSprogram(), token.getSourceLine(), token.getStartPos(),
                 "\"" + token.getValue() + "\": " + mess));
-        return;
     }
-
 }

@@ -6,11 +6,12 @@
   * permitted, in both source and binary form, provided that this notice
   * remains intact in all source distributions of this package.
   */
-
  package mars.venus.editors.jeditsyntax.tokenmarker;
 
+ import mars.venus.editors.jeditsyntax.PopupHelpItem;
+
  import javax.swing.text.Segment;
- import java.util.ArrayList;
+ import java.util.List;
 
  /**
   * A token marker that splits lines of text into tokens. Each token carries
@@ -24,7 +25,7 @@
   *
   * @author Slava Pestov
   * @version $Id: TokenMarker.java,v 1.32 1999/12/13 03:40:30 sp Exp $
-  * @see org.syntax.jedit.Token
+  * @see mars.venus.editors.jeditsyntax.tokenmarker.Token
   */
  public abstract class TokenMarker {
      /**
@@ -206,8 +207,7 @@
              return;
          int len = index + lines;
          length -= lines;
-         System.arraycopy(lineInfo, len, lineInfo,
-                 index, lineInfo.length - len);
+         System.arraycopy(lineInfo, len, lineInfo, index, lineInfo.length - len);
      }
 
      /**
@@ -235,7 +235,7 @@
       * @param tokenText the source String that matched to the token
       * @return ArrayList containing PopupHelpItem objects, one per match.
       */
-     public ArrayList getTokenExactMatchHelp(Token token, String tokenText) {
+     public List<PopupHelpItem> getTokenExactMatchHelp(Token token, String tokenText) {
          return null;
      }
 
@@ -245,13 +245,13 @@
       * This default definition returns null;
       * override it in language-specific subclasses.
       *
-      * @param line      String containing current line
-      * @param tokenList first Token on the current line
-      * @param token     the pertinent Token object
-      * @param tokenText the source String that matched to the token
+      * @param line          String containing current line
+      * @param tokenList     first Token on the current line
+      * @param tokenAtOffset the pertinent Token object
+      * @param tokenText     the source String that matched to the token
       * @return ArrayList containing PopupHelpItem objects, one per match.
       */
-     public ArrayList getTokenPrefixMatchHelp(String line, Token tokenList, Token tokenAtOffset, String tokenText) {
+     public List<PopupHelpItem> getTokenPrefixMatchHelp(String line, Token tokenList, Token tokenAtOffset, String tokenText) {
          return null;
      }
 
@@ -310,7 +310,7 @@
      /**
       * Inner class for storing information about tokenized lines.
       */
-     public class LineInfo {
+     public static class LineInfo {
          /**
           * The id of the last token of the line.
           */

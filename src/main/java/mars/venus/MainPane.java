@@ -1,3 +1,30 @@
+/*
+Copyright (c) 2003-2006,  Pete Sanderson and Kenneth Vollmar
+
+Developed by Pete Sanderson (psanderson@otterbein.edu)
+and Kenneth Vollmar (kenvollmar@missouristate.edu)
+
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+"Software"), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject
+to the following conditions:
+
+The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR
+ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
+CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+(MIT license, http://www.opensource.org/licenses/mit-license.html)
+ */
 package mars.venus;
 
 import mars.Globals;
@@ -5,37 +32,7 @@ import mars.Globals;
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-import javax.swing.plaf.basic.BasicTabbedPaneUI;
 import java.awt.*;
-
-	
-	/*
-Copyright (c) 2003-2006,  Pete Sanderson and Kenneth Vollmar
-
-Developed by Pete Sanderson (psanderson@otterbein.edu)
-and Kenneth Vollmar (kenvollmar@missouristate.edu)
-
-Permission is hereby granted, free of charge, to any person obtaining 
-a copy of this software and associated documentation files (the 
-"Software"), to deal in the Software without restriction, including 
-without limitation the rights to use, copy, modify, merge, publish, 
-distribute, sublicense, and/or sell copies of the Software, and to 
-permit persons to whom the Software is furnished to do so, subject 
-to the following conditions:
-
-The above copyright notice and this permission notice shall be 
-included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, 
-EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF 
-MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. 
-IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR 
-ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF 
-CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION 
-WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-
-(MIT license, http://www.opensource.org/licenses/mit-license.html)
- */
 
 /**
  * Creates the tabbed areas in the UI and also created the internal windows that
@@ -43,7 +40,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  * @author Sanderson and Bumgarner
  **/
-
 public class MainPane extends JTabbedPane {
     private final VenusUI mainUI;
     EditPane editTab;
@@ -53,15 +49,14 @@ public class MainPane extends JTabbedPane {
     /**
      * Constructor for the MainPane class.
      **/
-
     public MainPane(VenusUI appFrame, Editor editor, RegistersWindow regs,
                     Coprocessor1Window cop1Regs, Coprocessor0Window cop0Regs) {
         super();
         this.mainUI = appFrame;
         this.setTabPlacement(JTabbedPane.TOP); //LEFT);
-        if (this.getUI() instanceof BasicTabbedPaneUI) {
-            BasicTabbedPaneUI ui = (BasicTabbedPaneUI) this.getUI();
-        }
+//        if (this.getUI() instanceof BasicTabbedPaneUI) {
+//            BasicTabbedPaneUI ui = (BasicTabbedPaneUI) this.getUI();
+//        }
         editTabbedPane = new EditTabbedPane(appFrame, editor, this);
         executeTab = new ExecutePane(appFrame, regs, cop1Regs, cop0Regs);
         String editTabTitle = "Edit"; //"<html><center>&nbsp;<br>E<br>d<br>i<br>t<br>&nbsp;</center></html>";
@@ -140,5 +135,4 @@ public class MainPane extends JTabbedPane {
     public ExecutePane getExecuteTab() {
         return executeTab;
     }
-
 }

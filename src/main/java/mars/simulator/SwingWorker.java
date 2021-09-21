@@ -1,13 +1,12 @@
-package mars.simulator;
-
-import javax.swing.*;
-
 /*-----------------------------------------------------
  * This file downloaded from the Sun Microsystems URL given below.
  *
  * I will subclass it to create worker thread for running
  * MIPS simulated execution.
  */
+package mars.simulator;
+
+import javax.swing.*;
 
 /**
  * This is the 3rd version of SwingWorker (also known as
@@ -32,11 +31,7 @@ public abstract class SwingWorker {
      * @param useSwing Set true if MARS is running from GUI, false otherwise.
      */
     public SwingWorker(final boolean useSwing) {
-        final Runnable doFinished = new Runnable() {
-            public void run() {
-                finished();
-            }
-        };
+        final Runnable doFinished = this::finished;
 
         Runnable doConstruct = new Runnable() {
             public void run() {

@@ -1,3 +1,30 @@
+/*
+Copyright (c) 2003-2009,  Pete Sanderson and Kenneth Vollmar
+
+Developed by Pete Sanderson (psanderson@otterbein.edu)
+and Kenneth Vollmar (kenvollmar@missouristate.edu)
+
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+"Software"), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject
+to the following conditions:
+
+The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR
+ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
+CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+(MIT license, http://www.opensource.org/licenses/mit-license.html)
+ */
 package mars.venus;
 
 import mars.Globals;
@@ -16,34 +43,6 @@ import java.awt.event.WindowEvent;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
-	
-	/*
-Copyright (c) 2003-2009,  Pete Sanderson and Kenneth Vollmar
-
-Developed by Pete Sanderson (psanderson@otterbein.edu)
-and Kenneth Vollmar (kenvollmar@missouristate.edu)
-
-Permission is hereby granted, free of charge, to any person obtaining 
-a copy of this software and associated documentation files (the 
-"Software"), to deal in the Software without restriction, including 
-without limitation the rights to use, copy, modify, merge, publish, 
-distribute, sublicense, and/or sell copies of the Software, and to 
-permit persons to whom the Software is furnished to do so, subject 
-to the following conditions:
-
-The above copyright notice and this permission notice shall be 
-included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, 
-EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF 
-MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. 
-IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR 
-ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF 
-CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION 
-WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-
-(MIT license, http://www.opensource.org/licenses/mit-license.html)
- */
 
 /**
  * Action class for the Settings menu item for text editor settings.
@@ -117,9 +116,9 @@ public class SettingsMemoryConfigurationAction extends GuiAction {
         private Component buildConfigChooser() {
             JPanel chooserPanel = new JPanel(new GridLayout(4, 1));
             ButtonGroup choices = new ButtonGroup();
-            Iterator configurationsIterator = MemoryConfigurations.getConfigurationsIterator();
+            Iterator<MemoryConfiguration> configurationsIterator = MemoryConfigurations.getConfigurationsIterator();
             while (configurationsIterator.hasNext()) {
-                MemoryConfiguration config = (MemoryConfiguration) configurationsIterator.next();
+                MemoryConfiguration config = configurationsIterator.next();
                 ConfigurationButton button = new ConfigurationButton(config);
                 button.addActionListener(this);
                 if (button.isSelected()) {
@@ -183,37 +182,19 @@ public class SettingsMemoryConfigurationAction extends GuiAction {
             Box controlPanel = Box.createHorizontalBox();
             JButton okButton = new JButton("Apply and Close");
             okButton.setToolTipText(SettingsHighlightingAction.CLOSE_TOOL_TIP_TEXT);
-            okButton.addActionListener(
-                    new ActionListener() {
-                        public void actionPerformed(ActionEvent e) {
-                            performApply();
-                            performClose();
-                        }
-                    });
+            okButton.addActionListener(e -> {
+                performApply();
+                performClose();
+            });
             JButton applyButton = new JButton("Apply");
             applyButton.setToolTipText(SettingsHighlightingAction.APPLY_TOOL_TIP_TEXT);
-            applyButton.addActionListener(
-                    new ActionListener() {
-                        public void actionPerformed(ActionEvent e) {
-                            performApply();
-                        }
-                    });
+            applyButton.addActionListener(e -> performApply());
             JButton cancelButton = new JButton("Cancel");
             cancelButton.setToolTipText(SettingsHighlightingAction.CANCEL_TOOL_TIP_TEXT);
-            cancelButton.addActionListener(
-                    new ActionListener() {
-                        public void actionPerformed(ActionEvent e) {
-                            performClose();
-                        }
-                    });
+            cancelButton.addActionListener(e -> performClose());
             JButton resetButton = new JButton("Reset");
             resetButton.setToolTipText(SettingsHighlightingAction.RESET_TOOL_TIP_TEXT);
-            resetButton.addActionListener(
-                    new ActionListener() {
-                        public void actionPerformed(ActionEvent e) {
-                            performReset();
-                        }
-                    });
+            resetButton.addActionListener(e -> performReset());
             controlPanel.add(Box.createHorizontalGlue());
             controlPanel.add(okButton);
             controlPanel.add(Box.createHorizontalGlue());
@@ -257,7 +238,6 @@ public class SettingsMemoryConfigurationAction extends GuiAction {
             setConfigDisplay(this.selectedConfigurationButton.getConfiguration());
         }
 
-
         // Set name values in JLabels and address values in the JTextFields
         private void setConfigDisplay(MemoryConfiguration config) {
             String[] configurationItemNames = config.getConfigurationItemNames();
@@ -268,24 +248,23 @@ public class SettingsMemoryConfigurationAction extends GuiAction {
             // results.  There can be duplicate addresses, so I concatenate the name
             // onto the address to make each key unique.  Then slice off the name upon
             // extraction.
-            TreeMap treeSortedByAddress = new TreeMap();
-            for (int i = 0; i < configurationItemValues.length; i++) {
+            Map<String, String> treeSortedByAddress = new TreeMap<>();
+            for (int i = 0; i < configurationItemValues.length; i++)
                 treeSortedByAddress.put(Binary.intToHexString(configurationItemValues[i]) + configurationItemNames[i], configurationItemNames[i]);
-            }
-            Iterator setSortedByAddress = treeSortedByAddress.entrySet().iterator();
-            Map.Entry pair;
+
+            Iterator<Map.Entry<String, String>> setSortedByAddress = treeSortedByAddress.entrySet().iterator();
             int addressStringLength = Binary.intToHexString(configurationItemValues[0]).length();
             for (int i = 0; i < configurationItemValues.length; i++) {
-                pair = (Map.Entry) setSortedByAddress.next();
-                nameDisplay[i].setText((String) pair.getValue());
-                addressDisplay[i].setText(((String) pair.getKey()).substring(0, addressStringLength));
+                var pair = setSortedByAddress.next();
+                nameDisplay[i].setText(pair.getValue());
+                addressDisplay[i].setText(pair.getKey().substring(0, addressStringLength));
             }
         }
 
     }
 
     // Handy class to connect button to its configuration...
-    private class ConfigurationButton extends JRadioButton {
+    private static class ConfigurationButton extends JRadioButton {
         private final MemoryConfiguration configuration;
 
         public ConfigurationButton(MemoryConfiguration config) {
@@ -296,7 +275,5 @@ public class SettingsMemoryConfigurationAction extends GuiAction {
         public MemoryConfiguration getConfiguration() {
             return configuration;
         }
-
     }
-
 }

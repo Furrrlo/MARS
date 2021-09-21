@@ -1,34 +1,33 @@
-package mars.mips.hardware;
-
-import java.util.Observable;
-
 /*
 Copyright (c) 2003-2006,  Pete Sanderson and Kenneth Vollmar
 
 Developed by Pete Sanderson (psanderson@otterbein.edu)
 and Kenneth Vollmar (kenvollmar@missouristate.edu)
 
-Permission is hereby granted, free of charge, to any person obtaining 
-a copy of this software and associated documentation files (the 
-"Software"), to deal in the Software without restriction, including 
-without limitation the rights to use, copy, modify, merge, publish, 
-distribute, sublicense, and/or sell copies of the Software, and to 
-permit persons to whom the Software is furnished to do so, subject 
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+"Software"), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject
 to the following conditions:
 
-The above copyright notice and this permission notice shall be 
+The above copyright notice and this permission notice shall be
 included in all copies or substantial portions of the Software.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, 
-EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF 
-MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. 
-IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR 
-ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF 
-CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION 
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR
+ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
+CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 (MIT license, http://www.opensource.org/licenses/mit-license.html)
  */
+package mars.mips.hardware;
+
+import java.util.Observable;
 
 /**
  * Abstraction to represent a register of a MIPS Assembler.
@@ -36,7 +35,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * @author Jason Bumgarner, Jason Shrewsbury, Ben Sherman
  * @version June 2003
  **/
-
 public class Register extends Observable {
     private final String name;
     private final int number;
@@ -54,7 +52,6 @@ public class Register extends Observable {
      * @param num The number of the register.
      * @param val The inital (and reset) value of the register.
      */
-
     public Register(String n, int num, int val) {
         name = n;
         number = num;
@@ -67,7 +64,6 @@ public class Register extends Observable {
      *
      * @return name The name of the Register.
      */
-
     public String getName() {
         return name;
     }
@@ -78,12 +74,10 @@ public class Register extends Observable {
      *
      * @return value The value of the Register.
      */
-
     public synchronized int getValue() {
         notifyAnyObservers(AccessNotice.READ);
         return value;
     }
-
 
     /**
      * Returns the value of the Register.  Observers are not notified.
@@ -91,18 +85,15 @@ public class Register extends Observable {
      *
      * @return value The value of the Register.
      */
-
     public synchronized int getValueNoNotify() {
         return value;
     }
-
 
     /**
      * Returns the reset value of the Register.
      *
      * @return The reset (initial) value of the Register.
      */
-
     public int getResetValue() {
         return resetValue;
     }
@@ -112,7 +103,6 @@ public class Register extends Observable {
      *
      * @return number The number of the Register.
      */
-
     public int getNumber() {
         return number;
     }
@@ -124,7 +114,6 @@ public class Register extends Observable {
      * @param val Value to set the Register to.
      * @return previous value of register
      */
-
     public synchronized int setValue(int val) {
         int old = value;
         value = val;
@@ -136,7 +125,6 @@ public class Register extends Observable {
      * Resets the value of the register to the value it was constructed with.
      * Observers are not notified.
      */
-
     public synchronized void resetValue() {
         value = resetValue;
     }
@@ -145,7 +133,6 @@ public class Register extends Observable {
      * Change the register's reset value; the value to which it will be
      * set when <tt>resetValue()</tt> is called.
      */
-
     public synchronized void changeResetValue(int reset) {
         resetValue = reset;
     }
@@ -159,6 +146,4 @@ public class Register extends Observable {
             this.notifyObservers(new RegisterAccessNotice(type, this.name));
         }
     }
-
-
 }

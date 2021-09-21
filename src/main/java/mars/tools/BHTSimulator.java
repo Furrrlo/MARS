@@ -24,7 +24,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 (MIT license, http://www.opensource.org/licenses/mit-license.html)
  */
-
 package mars.tools;
 
 import mars.ProgramStatement;
@@ -33,10 +32,8 @@ import mars.mips.hardware.*;
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.Objects;
 import java.util.Observable;
-//import mars.tools.bhtsim.BHTSimGUI;
-//import mars.tools.bhtsim.BHTableModel;
-
 
 /**
  * A MARS tool for simulating branch prediction with a Branch History Table (BHT)
@@ -121,6 +118,7 @@ public class BHTSimulator extends AbstractMarsToolAndApplication implements Acti
      * @param stmt the statement to investigate
      * @return true, if stmt is a branch instruction, otherwise false
      */
+    @SuppressWarnings("ConstantConditions")
     protected static boolean isBranchInstruction(ProgramStatement stmt) {
 
         int opCode = stmt.getBinaryStatement() >>> (32 - 6);
@@ -153,37 +151,22 @@ public class BHTSimulator extends AbstractMarsToolAndApplication implements Acti
 
         if (opCode == 0x01) {
             switch (funct) {
-                case 0x00:
-                    return valRS < 0; // bltz
-                case 0x01:
-                    return valRS >= 0; // bgez
-                case 0x02:
-                    return valRS < 0; // bltzl
-                case 0x03:
-                    return valRS >= 0; // bgezl
+                case 0x00: // bltz
+                case 0x02: // bltzl
+                    return valRS < 0;
+                case 0x01: // bgez
+                case 0x03: // bgezl
+                    return valRS >= 0;
             }
         }
 
-        switch (opCode) {
-            case 0x04:
-                return valRS == valRT;
-            case 0x05:
-                return valRS != valRT;
-            case 0x06:
-                return valRS <= 0;
-            case 0x07:
-                return valRS >= 0;
-            case 0x14:
-                return valRS == valRT;
-            case 0x15:
-                return valRS != valRT;
-            case 0x16:
-                return valRS <= 0;
-            case 0x17:
-                return valRS >= 0;
-        }
-
-        return true;
+        return switch (opCode) {
+            case 0x04, 0x14 -> valRS == valRT;
+            case 0x05, 0x15 -> valRS != valRT;
+            case 0x06, 0x16 -> valRS <= 0;
+            case 0x07, 0x17 -> valRS >= 0;
+            default -> true;
+        };
     }
 
     /**
@@ -217,8 +200,8 @@ public class BHTSimulator extends AbstractMarsToolAndApplication implements Acti
         m_bhtModel = new BHTableModel(BHTSimulator.BHT_DEFAULT_SIZE, BHTSimulator.BHT_DEFAULT_HISTORY, BHT_DEFAULT_INITVAL);
 
         m_gui.getTabBHT().setModel(m_bhtModel);
-        m_gui.getCbBHThistory().setSelectedItem(new Integer(BHTSimulator.BHT_DEFAULT_HISTORY));
-        m_gui.getCbBHTentries().setSelectedItem(new Integer(BHTSimulator.BHT_DEFAULT_SIZE));
+        m_gui.getCbBHThistory().setSelectedItem(BHTSimulator.BHT_DEFAULT_HISTORY);
+        m_gui.getCbBHTentries().setSelectedItem(BHTSimulator.BHT_DEFAULT_SIZE);
 
         m_gui.getCbBHTentries().addActionListener(this);
         m_gui.getCbBHThistory().addActionListener(this);
@@ -251,7 +234,9 @@ public class BHTSimulator extends AbstractMarsToolAndApplication implements Acti
     public void actionPerformed(ActionEvent event) {
         // change of the BHT size or BHT bit configuration
         // resets the simulator
-        if (event.getSource() == m_gui.getCbBHTentries() || event.getSource() == m_gui.getCbBHThistory() || event.getSource() == m_gui.getCbBHTinitVal()) {
+        if (event.getSource() == m_gui.getCbBHTentries() ||
+                event.getSource() == m_gui.getCbBHThistory() ||
+                event.getSource() == m_gui.getCbBHTinitVal()) {
             resetSimulator();
         }
     }
@@ -264,9 +249,11 @@ public class BHTSimulator extends AbstractMarsToolAndApplication implements Acti
         m_gui.getTfAddress().setText("");
         m_gui.getTfIndex().setText("");
         m_gui.getTaLog().setText("");
-        m_bhtModel.initBHT(((Integer) m_gui.getCbBHTentries().getSelectedItem()).intValue(),
-                ((Integer) m_gui.getCbBHThistory().getSelectedItem()).intValue(),
-                m_gui.getCbBHTinitVal().getSelectedItem().equals(BHTSimGUI.BHT_TAKE_BRANCH));
+        Integer selected;
+        m_bhtModel.initBHT(
+                (selected = (Integer) m_gui.getCbBHTentries().getSelectedItem()) != null ? selected : 32,
+                (selected = (Integer) m_gui.getCbBHThistory().getSelectedItem()) != null ? selected : 2,
+                Objects.equals(m_gui.getCbBHTinitVal().getSelectedItem(), BHTSimGUI.BHT_TAKE_BRANCH));
 
         m_pendingBranchInstAddress = 0;
         m_lastBranchTaken = false;
@@ -339,16 +326,13 @@ public class BHTSimulator extends AbstractMarsToolAndApplication implements Acti
      * @param resource the observed resource
      * @param notice   signals the type of access (memory, register etc.)
      */
+    @Override
     protected void processMIPSUpdate(Observable resource, AccessNotice notice) {
 
         if (!notice.accessIsFromMIPS()) return;
 
 
-        if (notice.getAccessType() == AccessNotice.READ && notice instanceof MemoryAccessNotice) {
-
-            // now it is safe to make a cast of the notice
-            MemoryAccessNotice memAccNotice = (MemoryAccessNotice) notice;
-
+        if (notice.getAccessType() == AccessNotice.READ && notice instanceof MemoryAccessNotice memAccNotice) {
             try {
                 // access the statement in the text segment without notifying other tools etc.
                 ProgramStatement stmt = Memory.getInstance().getStatementNoNotify(memAccNotice.getAddress());

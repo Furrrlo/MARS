@@ -1,3 +1,30 @@
+/*
+Copyright (c) 2003-2008,  Pete Sanderson and Kenneth Vollmar
+
+Developed by Pete Sanderson (psanderson@otterbein.edu)
+and Kenneth Vollmar (kenvollmar@missouristate.edu)
+
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+"Software"), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject
+to the following conditions:
+
+The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR
+ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
+CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+(MIT license, http://www.opensource.org/licenses/mit-license.html)
+ */
 package mars.simulator;
 
 import mars.Globals;
@@ -7,35 +34,9 @@ import mars.mips.hardware.Register;
 import mars.mips.hardware.RegisterFile;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.StringTokenizer;
-	
-	/*
-Copyright (c) 2003-2008,  Pete Sanderson and Kenneth Vollmar
-
-Developed by Pete Sanderson (psanderson@otterbein.edu)
-and Kenneth Vollmar (kenvollmar@missouristate.edu)
-
-Permission is hereby granted, free of charge, to any person obtaining 
-a copy of this software and associated documentation files (the 
-"Software"), to deal in the Software without restriction, including 
-without limitation the rights to use, copy, modify, merge, publish, 
-distribute, sublicense, and/or sell copies of the Software, and to 
-permit persons to whom the Software is furnished to do so, subject 
-to the following conditions:
-
-The above copyright notice and this permission notice shall be 
-included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, 
-EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF 
-MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. 
-IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR 
-ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF 
-CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION 
-WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-
-(MIT license, http://www.opensource.org/licenses/mit-license.html)
- */
 
 /**
  * Models Program Arguments, one or more strings provided to the MIPS
@@ -45,10 +46,9 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * @author Pete Sanderson
  * @version July 2008
  **/
-
 public class ProgramArgumentList {
 
-    ArrayList programArgumentList;
+    List<String> programArgumentList;
 
     /**
      * Constructor that parses string to produce list.  Delimiters
@@ -59,7 +59,7 @@ public class ProgramArgumentList {
      */
     public ProgramArgumentList(String args) {
         StringTokenizer st = new StringTokenizer(args);
-        programArgumentList = new ArrayList(st.countTokens());
+        programArgumentList = new ArrayList<>(st.countTokens());
         while (st.hasMoreTokens()) {
             programArgumentList.add(st.nextToken());
         }
@@ -78,15 +78,13 @@ public class ProgramArgumentList {
      * Constructor that gets list from section of String array, one
      * argument per element.
      *
-     * @param args          Array of String, each element containing one argument
+     * @param list          Array of String, each element containing one argument
      * @param startPosition Index of array element containing the first argument; all remaining
      *                      elements are assumed to contain an argument.
      */
     public ProgramArgumentList(String[] list, int startPosition) {
-        programArgumentList = new ArrayList(list.length - startPosition);
-        for (int i = startPosition; i < list.length; i++) {
-            programArgumentList.add(list[i]);
-        }
+        programArgumentList = new ArrayList<>(list.length - startPosition);
+        programArgumentList.addAll(Arrays.asList(list).subList(startPosition, list.length));
     }
 
     /**
@@ -94,7 +92,7 @@ public class ProgramArgumentList {
      *
      * @param list ArrayList of String, each element containing one argument
      */
-    public ProgramArgumentList(ArrayList list) {
+    public ProgramArgumentList(List<String> list) {
         this(list, 0);
     }
 
@@ -103,15 +101,15 @@ public class ProgramArgumentList {
      * Constructor that gets list from section of String ArrayList, one
      * argument per element.
      *
-     * @param args          ArrayList of String, each element containing one argument
+     * @param list          ArrayList of String, each element containing one argument
      * @param startPosition Index of array element containing the first argument; all remaining
      *                      elements are assumed to contain an argument.
      */
-    public ProgramArgumentList(ArrayList list, int startPosition) {
+    public ProgramArgumentList(List<String> list, int startPosition) {
         if (list == null || list.size() < startPosition) {
-            programArgumentList = new ArrayList(0);
+            programArgumentList = new ArrayList<>(0);
         } else {
-            programArgumentList = new ArrayList(list.size() - startPosition);
+            programArgumentList = new ArrayList<>(list.size() - startPosition);
             for (int i = startPosition; i < list.size(); i++) {
                 programArgumentList.add(list.get(i));
             }
@@ -159,7 +157,7 @@ public class ProgramArgumentList {
         int[] argStartAddress = new int[programArgumentList.size()];
         try { // needed for all memory writes
             for (int i = 0; i < programArgumentList.size(); i++) {
-                programArgument = (String) programArgumentList.get(i);
+                programArgument = programArgumentList.get(i);
                 Globals.memory.set(highAddress, 0, 1);  // trailing null byte for each argument
                 highAddress--;
                 for (int j = programArgument.length() - 1; j >= 0; j--) {
@@ -200,7 +198,6 @@ public class ProgramArgumentList {
             System.out.println("Internal Error: Memory write error occurred while storing program arguments! " + aee);
             System.exit(0);
         }
-        return;
     }
 
 

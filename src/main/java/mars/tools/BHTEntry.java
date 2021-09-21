@@ -24,7 +24,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 (MIT license, http://www.opensource.org/licenses/mit-license.html)
  */
-
 package mars.tools;//.bhtsim;
 
 /**
@@ -43,7 +42,6 @@ package mars.tools;//.bhtsim;
  *
  * @author ingo.kofler@itec.uni-klu.ac.at
  */
-
 public class BHTEntry {
 
     /**
@@ -66,7 +64,6 @@ public class BHTEntry {
      */
     private int m_correct;
 
-
     /**
      * Constructs a BHT entry with a given history size.
      * <p>
@@ -85,7 +82,6 @@ public class BHTEntry {
         m_correct = m_incorrect = 0;
     }
 
-
     /**
      * Returns the branch prediction based on the history.
      *
@@ -94,7 +90,6 @@ public class BHTEntry {
     public boolean getPrediction() {
         return m_prediction;
     }
-
 
     /**
      * Updates the entry's history and prediction.
@@ -107,11 +102,9 @@ public class BHTEntry {
     public void updatePrediction(boolean branchTaken) {
 
         // update history
-        for (int i = 0; i < m_history.length - 1; i++) {
-            m_history[i] = m_history[i + 1];
-        }
+        if (m_history.length - 1 >= 0)
+            System.arraycopy(m_history, 1, m_history, 0, m_history.length - 1);
         m_history[m_history.length - 1] = branchTaken;
-
 
         // if the prediction was correct, update stats and keep prediction
         if (branchTaken == m_prediction) {
@@ -121,18 +114,17 @@ public class BHTEntry {
 
             // check if the prediction should change
             boolean changePrediction = true;
-
-            for (int i = 0; i < m_history.length; i++) {
-                if (m_history[i] != branchTaken)
+            for (boolean b : m_history) {
+                if (b != branchTaken) {
                     changePrediction = false;
+                    break;
+                }
             }
 
             if (changePrediction)
                 m_prediction = !m_prediction;
-
         }
     }
-
 
     /**
      * Get the absolute number of mispredictions.
@@ -143,7 +135,6 @@ public class BHTEntry {
         return m_incorrect;
     }
 
-
     /**
      * Get the absolute number of correct predictions.
      *
@@ -152,7 +143,6 @@ public class BHTEntry {
     public int getStatsPredCorrect() {
         return m_correct;
     }
-
 
     /**
      * Get the percentage of correct predictions.
@@ -164,7 +154,6 @@ public class BHTEntry {
         return (sum == 0) ? 0 : m_correct * 100.0 / sum;
     }
 
-
     /***
      * Builds a string representation of the BHT entry's history.
      * The history is a sequence of flags that signal if the branch was taken (T) or not taken (NT).
@@ -172,15 +161,14 @@ public class BHTEntry {
      * @return a string representation of the BHT entry's history
      */
     public String getHistoryAsStr() {
-        String result = "";
-
+        StringBuilder result = new StringBuilder();
         for (int i = 0; i < m_history.length; i++) {
-            if (i > 0) result = result + ", ";
-            result += m_history[i] ? "T" : "NT";
+            if (i > 0)
+                result.append(", ");
+            result.append(m_history[i] ? "T" : "NT");
         }
-        return result;
+        return result.toString();
     }
-
 
     /***
      * Returns a string representation of the BHT entry's current prediction.

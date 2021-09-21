@@ -32,6 +32,7 @@ import mars.*;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -62,7 +63,6 @@ public class Tokenizer {
     /**
      * Simple constructor. Initializes empty error list.
      */
-
     public Tokenizer() {
         this(null);
     }
@@ -85,13 +85,12 @@ public class Tokenizer {
      * @return An ArrayList representing the tokenized program.  Each list member is a TokenList
      * that represents a tokenized source statement from the MIPS program.
      **/
-
-    public ArrayList tokenize(MIPSprogram p) throws ProcessingException {
+    public List<TokenList> tokenize(MIPSprogram p) throws ProcessingException {
         sourceMIPSprogram = p;
-        equivalents = new HashMap<String, String>(); // DPS 11-July-2012
-        ArrayList tokenList = new ArrayList();
-        //ArrayList source = p.getSourceList();
-        ArrayList<SourceLine> source = processIncludes(p, new HashMap<String, String>()); // DPS 9-Jan-2013
+        equivalents = new HashMap<>(); // DPS 11-July-2012
+        List<TokenList> tokenList = new ArrayList<>();
+        //List<String> source = p.getSourceList();
+        List<SourceLine> source = processIncludes(p, new HashMap<>()); // DPS 9-Jan-2013
         p.setSourceLineList(source);
         TokenList currentLineTokens;
         String sourceLine;
@@ -104,7 +103,7 @@ public class Tokenizer {
             // not the same object as the original line.  Thus I can use != instead of !equals()
             // This IF statement will replace original source with source modified by .eqv substitution.
             // Not needed by assembler, but looks better in the Text Segment Display.
-            if (sourceLine.length() > 0 && sourceLine != currentLineTokens.getProcessedLine()) {
+            if (sourceLine.length() > 0 && !sourceLine.equals(currentLineTokens.getProcessedLine())) {
                 source.set(i, new SourceLine(currentLineTokens.getProcessedLine(), source.get(i).getMIPSprogram(), source.get(i).getLineNumber()));
             }
         }
@@ -123,10 +122,10 @@ public class Tokenizer {
     // includes both direct and indirect.
     // DPS 11-Jan-2013
     private ArrayList<SourceLine> processIncludes(MIPSprogram program, Map<String, String> inclFiles) throws ProcessingException {
-        ArrayList source = program.getSourceList();
-        ArrayList<SourceLine> result = new ArrayList<SourceLine>(source.size());
+        List<String> source = program.getSourceList();
+        ArrayList<SourceLine> result = new ArrayList<>(source.size());
         for (int i = 0; i < source.size(); i++) {
-            String line = (String) source.get(i);
+            String line = source.get(i);
             TokenList tl = tokenizeLine(program, i + 1, line, false);
             boolean hasInclude = false;
             for (int ii = 0; ii < tl.size(); ii++) {
@@ -179,9 +178,8 @@ public class Tokenizer {
      * @throws ProcessingException This occurs only if the instruction specification itself
      *                             contains one or more lexical (i.e. token) errors.
      **/
-
     public TokenList tokenizeExampleInstruction(String example) throws ProcessingException {
-        TokenList result = new TokenList();
+        TokenList result;
         result = tokenizeLine(sourceMIPSprogram, 0, example, false);
         if (errors.errorsOccurred()) {
             throw new ProcessingException(errors);
@@ -215,7 +213,6 @@ public class Tokenizer {
      *
      * Given all the above, it is just as easy to "roll my own" as to use StringTokenizer
      */
-
     // Modified for release 4.3, to preserve existing API.
     public TokenList tokenizeLine(int lineNum, String theLine) {
         return tokenizeLine(sourceMIPSprogram, lineNum, theLine, true);
@@ -248,7 +245,7 @@ public class Tokenizer {
      * @param lineNum          line number from source code (used in error message)
      * @param theLine          String containing source code
      * @param callerErrorList  errors will go into this list instead of tokenizer's list.
-     * @param doEqvSubstitutse boolean param set true to perform .eqv substitutions, else false
+     * @param doEqvSubstitutes boolean param set true to perform .eqv substitutions, else false
      * @return the generated token list for that line
      **/
     public TokenList tokenizeLine(int lineNum, String theLine, ErrorList callerErrorList, boolean doEqvSubstitutes) {
@@ -533,9 +530,7 @@ public class Tokenizer {
         }
         Token toke = new Token(type, value, program, line, tokenStartPos);
         tokenList.add(toke);
-        return;
     }
-
 
     // If passed a candidate character literal, attempt to translate it into integer constant.
     // If the translation fails, return original value.
@@ -561,8 +556,9 @@ public class Tokenizer {
                 if (intValue >= 0 && intValue <= 255) {
                     return Integer.toString(intValue);
                 }
-            } catch (NumberFormatException nfe) {
-            } // if not valid octal, will fall through and reject
+            } catch (NumberFormatException ignored) {
+                // if not valid octal, will fall through and reject
+            }
         }
         return value;
     }

@@ -1,4 +1,3 @@
-
 /*
 Copyright (c) 2003-2006,  Pete Sanderson and Kenneth Vollmar
 
@@ -37,6 +36,7 @@ package mars.assembler;
 public class Symbol {
     public static final boolean TEXT_SYMBOL = false;
     public static final boolean DATA_SYMBOL = true;
+
     private final String name;
     private final boolean data; // boolean true if data symbol false if text symbol.
     private int address;
@@ -48,7 +48,6 @@ public class Symbol {
      * @param address The memroy address that the Symbol refers to.
      * @param data    The type of Symbol that it is.
      **/
-
     public Symbol(String name, int address, boolean data) {
         this.name = name;
         this.address = address;
@@ -60,7 +59,6 @@ public class Symbol {
      *
      * @return The address of the Symbol.
      **/
-
     public int getAddress() {
         return this.address;
     }
@@ -70,10 +68,8 @@ public class Symbol {
      *
      * @param newAddress The revised address of the Symbol.
      **/
-
     public void setAddress(int newAddress) {
         this.address = newAddress;
-        return;
     }
 
     /**
@@ -81,7 +77,6 @@ public class Symbol {
      *
      * @return The label of the Symbol.
      **/
-
     public String getName() {
         return this.name;
     }
@@ -91,7 +86,6 @@ public class Symbol {
      *
      * @return The type of the data.
      **/
-
     public boolean getType() {
         return this.data;
     }

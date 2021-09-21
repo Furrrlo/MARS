@@ -114,7 +114,6 @@ public final class DataTypes {
      * @return Returns length in bytes for values of that type.  If type is not numeric
      * (or not implemented yet), returns 0.
      **/
-
     public static int getLengthInBytes(Directives direct) {
         if (direct == Directives.FLOAT)
             return FLOAT_SIZE;

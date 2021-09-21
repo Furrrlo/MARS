@@ -1,3 +1,30 @@
+/*
+Copyright (c) 2003-2010,  Pete Sanderson and Kenneth Vollmar
+
+Developed by Pete Sanderson (psanderson@otterbein.edu)
+and Kenneth Vollmar (kenvollmar@missouristate.edu)
+
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+"Software"), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject
+to the following conditions:
+
+The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR
+ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
+CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+(MIT license, http://www.opensource.org/licenses/mit-license.html)
+ */
 package mars.venus;
 
 import mars.ErrorList;
@@ -12,46 +39,15 @@ import javax.swing.text.NavigationFilter;
 import javax.swing.text.Position.Bias;
 import javax.swing.undo.UndoableEdit;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.concurrent.ArrayBlockingQueue;
-
-/*
-Copyright (c) 2003-2010,  Pete Sanderson and Kenneth Vollmar
-
-Developed by Pete Sanderson (psanderson@otterbein.edu)
-and Kenneth Vollmar (kenvollmar@missouristate.edu)
-
-Permission is hereby granted, free of charge, to any person obtaining 
-a copy of this software and associated documentation files (the 
-"Software"), to deal in the Software without restriction, including 
-without limitation the rights to use, copy, modify, merge, publish, 
-distribute, sublicense, and/or sell copies of the Software, and to 
-permit persons to whom the Software is furnished to do so, subject 
-to the following conditions:
-
-The above copyright notice and this permission notice shall be 
-included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, 
-EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF 
-MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. 
-IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR 
-ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF 
-CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION 
-WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-
-(MIT license, http://www.opensource.org/licenses/mit-license.html)
- */
 
 /**
  * Creates the message window at the bottom of the UI.
  *
  * @author Team JSpim
  **/
-
 public class MessagesPane extends JTabbedPane {
     // These constants are designed to keep scrolled contents of the
     // two message areas from becoming overwhelmingly large (which
@@ -61,13 +57,13 @@ public class MessagesPane extends JTabbedPane {
     // must obviously be smaller than the former.
     public static final int MAXIMUM_SCROLLED_CHARACTERS = Globals.maximumMessageCharacters;
     public static final int NUMBER_OF_CHARACTERS_TO_CUT = Globals.maximumMessageCharacters / 10; // 10%
+
     JTextArea assemble, run;
     JPanel assembleTab, runTab;
 
     /**
      * Constructor for the class, sets up two fresh tabbed text areas for program feedback.
      **/
-
     public MessagesPane() {
         super();
         this.setMinimumSize(new Dimension(0, 0));
@@ -85,87 +81,77 @@ public class MessagesPane extends JTabbedPane {
 
         JButton assembleTabClearButton = new JButton("Clear");
         assembleTabClearButton.setToolTipText("Clear the Mars Messages area");
-        assembleTabClearButton.addActionListener(
-                new ActionListener() {
-                    public void actionPerformed(ActionEvent e) {
-                        assemble.setText("");
-                    }
-                });
+        assembleTabClearButton.addActionListener(e -> assemble.setText(""));
         assembleTab = new JPanel(new BorderLayout());
         assembleTab.add(createBoxForButton(assembleTabClearButton), BorderLayout.WEST);
         assembleTab.add(new JScrollPane(assemble, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
                 ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED), BorderLayout.CENTER);
-        assemble.addMouseListener(
-                new MouseAdapter() {
-                    public void mouseClicked(MouseEvent e) {
-                        String text;
-                        int lineStart = 0;
-                        int lineEnd = 0;
-                        try {
-                            int line = assemble.getLineOfOffset(assemble.viewToModel(e.getPoint()));
-                            lineStart = assemble.getLineStartOffset(line);
-                            lineEnd = assemble.getLineEndOffset(line);
-                            text = assemble.getText(lineStart, lineEnd - lineStart);
-                        } catch (BadLocationException ble) {
-                            text = "";
+        assemble.addMouseListener(new MouseAdapter() {
+            public void mouseClicked(MouseEvent e) {
+                String text;
+                int lineStart = 0;
+                int lineEnd = 0;
+                try {
+                    int line = assemble.getLineOfOffset(assemble.viewToModel2D(e.getPoint()));
+                    lineStart = assemble.getLineStartOffset(line);
+                    lineEnd = assemble.getLineEndOffset(line);
+                    text = assemble.getText(lineStart, lineEnd - lineStart);
+                } catch (BadLocationException ble) {
+                    text = "";
+                }
+                if (text.length() > 0) {
+                    // If error or warning, parse out the line and column number.
+                    if (text.startsWith(ErrorList.ERROR_MESSAGE_PREFIX) || text.startsWith(ErrorList.WARNING_MESSAGE_PREFIX)) {
+                        assemble.select(lineStart, lineEnd);
+                        assemble.setSelectionColor(Color.YELLOW);
+                        assemble.repaint();
+                        int separatorPosition = text.indexOf(ErrorList.MESSAGE_SEPARATOR);
+                        if (separatorPosition >= 0) {
+                            text = text.substring(0, separatorPosition);
                         }
-                        if (text.length() > 0) {
-                            // If error or warning, parse out the line and column number.
-                            if (text.startsWith(ErrorList.ERROR_MESSAGE_PREFIX) || text.startsWith(ErrorList.WARNING_MESSAGE_PREFIX)) {
-                                assemble.select(lineStart, lineEnd);
-                                assemble.setSelectionColor(Color.YELLOW);
-                                assemble.repaint();
-                                int separatorPosition = text.indexOf(ErrorList.MESSAGE_SEPARATOR);
-                                if (separatorPosition >= 0) {
-                                    text = text.substring(0, separatorPosition);
-                                }
-                                String[] stringTokens = text.split("\\s"); // tokenize with whitespace delimiter
-                                String lineToken = ErrorList.LINE_PREFIX.trim();
-                                String columnToken = ErrorList.POSITION_PREFIX.trim();
-                                String lineString = "";
-                                String columnString = "";
-                                for (int i = 0; i < stringTokens.length; i++) {
-                                    if (stringTokens[i].equals(lineToken) && i < stringTokens.length - 1)
-                                        lineString = stringTokens[i + 1];
-                                    if (stringTokens[i].equals(columnToken) && i < stringTokens.length - 1)
-                                        columnString = stringTokens[i + 1];
-                                }
-                                int line = 0;
-                                int column = 0;
-                                try {
-                                    line = Integer.parseInt(lineString);
-                                } catch (NumberFormatException nfe) {
-                                    line = 0;
-                                }
-                                try {
-                                    column = Integer.parseInt(columnString);
-                                } catch (NumberFormatException nfe) {
-                                    column = 0;
-                                }
-                                // everything between FILENAME_PREFIX and LINE_PREFIX is filename.
-                                int fileNameStart = text.indexOf(ErrorList.FILENAME_PREFIX) + ErrorList.FILENAME_PREFIX.length();
-                                int fileNameEnd = text.indexOf(ErrorList.LINE_PREFIX);
-                                String fileName = "";
-                                if (fileNameStart < fileNameEnd && fileNameStart >= ErrorList.FILENAME_PREFIX.length()) {
-                                    fileName = text.substring(fileNameStart, fileNameEnd).trim();
-                                }
-                                if (fileName != null && fileName.length() > 0) {
-                                    selectEditorTextLine(fileName, line, column);
-                                    selectErrorMessage(fileName, line, column);
-                                }
-                            }
+                        String[] stringTokens = text.split("\\s"); // tokenize with whitespace delimiter
+                        String lineToken = ErrorList.LINE_PREFIX.trim();
+                        String columnToken = ErrorList.POSITION_PREFIX.trim();
+                        String lineString = "";
+                        String columnString = "";
+                        for (int i = 0; i < stringTokens.length; i++) {
+                            if (stringTokens[i].equals(lineToken) && i < stringTokens.length - 1)
+                                lineString = stringTokens[i + 1];
+                            if (stringTokens[i].equals(columnToken) && i < stringTokens.length - 1)
+                                columnString = stringTokens[i + 1];
+                        }
+                        int line;
+                        try {
+                            line = Integer.parseInt(lineString);
+                        } catch (NumberFormatException nfe) {
+                            line = 0;
+                        }
+                        int column;
+                        try {
+                            column = Integer.parseInt(columnString);
+                        } catch (NumberFormatException nfe) {
+                            column = 0;
+                        }
+                        // everything between FILENAME_PREFIX and LINE_PREFIX is filename.
+                        int fileNameStart = text.indexOf(ErrorList.FILENAME_PREFIX) + ErrorList.FILENAME_PREFIX.length();
+                        int fileNameEnd = text.indexOf(ErrorList.LINE_PREFIX);
+
+                        String fileName = "";
+                        if (fileNameStart < fileNameEnd && fileNameStart >= ErrorList.FILENAME_PREFIX.length())
+                            fileName = text.substring(fileNameStart, fileNameEnd).trim();
+
+                        if (fileName.length() > 0) {
+                            selectEditorTextLine(fileName, line, column);
+                            selectErrorMessage(fileName, line, column);
                         }
                     }
-                });
+                }
+            }
+        });
 
         JButton runTabClearButton = new JButton("Clear");
         runTabClearButton.setToolTipText("Clear the Run I/O area");
-        runTabClearButton.addActionListener(
-                new ActionListener() {
-                    public void actionPerformed(ActionEvent e) {
-                        run.setText("");
-                    }
-                });
+        runTabClearButton.addActionListener(e -> run.setText(""));
         runTab = new JPanel(new BorderLayout());
         runTab.add(createBoxForButton(runTabClearButton), BorderLayout.WEST);
         runTab.add(new JScrollPane(run, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
@@ -203,9 +189,7 @@ public class MessagesPane extends JTabbedPane {
         String errorReportSubstring = new java.io.File(fileName).getName() + ErrorList.LINE_PREFIX + line + ErrorList.POSITION_PREFIX + column;
         int textPosition = assemble.getText().lastIndexOf(errorReportSubstring);
         if (textPosition >= 0) {
-            int textLine = 0;
-            int lineStart = 0;
-            int lineEnd = 0;
+            int textLine, lineStart, lineEnd;
             try {
                 textLine = assemble.getLineOfOffset(textPosition);
                 lineStart = assemble.getLineStartOffset(textLine);
@@ -219,7 +203,6 @@ public class MessagesPane extends JTabbedPane {
             }
         }
     }
-
 
     /**
      * Will select the specified line in an editor tab.  If the file is open
@@ -305,23 +288,20 @@ public class MessagesPane extends JTabbedPane {
     // DPS, 23 Aug 2005.
     public void postRunMessage(String message) {
         final String mess = message;
-        SwingUtilities.invokeLater(
-                new Runnable() {
-                    public void run() {
-                        setSelectedComponent(runTab);
-                        run.append(mess);
-                        // can do some crude cutting here.  If the document gets "very large",
-                        // let's cut off the oldest text. This will limit scrolling but the limit
-                        // can be set reasonably high.
-                        if (run.getDocument().getLength() > MAXIMUM_SCROLLED_CHARACTERS) {
-                            try {
-                                run.getDocument().remove(0, NUMBER_OF_CHARACTERS_TO_CUT);
-                            } catch (BadLocationException ble) {
-                                // only if NUMBER_OF_CHARACTERS_TO_CUT > MAXIMUM_SCROLLED_CHARACTERS
-                            }
-                        }
-                    }
-                });
+        SwingUtilities.invokeLater(() -> {
+            setSelectedComponent(runTab);
+            run.append(mess);
+            // can do some crude cutting here.  If the document gets "very large",
+            // let's cut off the oldest text. This will limit scrolling but the limit
+            // can be set reasonably high.
+            if (run.getDocument().getLength() > MAXIMUM_SCROLLED_CHARACTERS) {
+                try {
+                    run.getDocument().remove(0, NUMBER_OF_CHARACTERS_TO_CUT);
+                } catch (BadLocationException ble) {
+                    // only if NUMBER_OF_CHARACTERS_TO_CUT > MAXIMUM_SCROLLED_CHARACTERS
+                }
+            }
+        });
     }
 
     /**
@@ -384,75 +364,64 @@ public class MessagesPane extends JTabbedPane {
     // Thread class for obtaining user input in the Run I/O window (MessagesPane)
     // Written by Ricardo Fernández Pascual [rfernandez@ditec.um.es] December 2009.
     class Asker implements Runnable {
-        ArrayBlockingQueue<String> resultQueue = new ArrayBlockingQueue<String>(1);
+        ArrayBlockingQueue<String> resultQueue = new ArrayBlockingQueue<>(1);
         int initialPos;
-        final NavigationFilter navigationFilter =
-                new NavigationFilter() {
-                    public void moveDot(FilterBypass fb, int dot, Bias bias) {
-                        if (dot < initialPos) {
-                            dot = Math.min(initialPos, run.getDocument().getLength());
-                        }
-                        fb.moveDot(dot, bias);
-                    }
+        final NavigationFilter navigationFilter = new NavigationFilter() {
+            public void moveDot(FilterBypass fb, int dot, Bias bias) {
+                if (dot < initialPos) {
+                    dot = Math.min(initialPos, run.getDocument().getLength());
+                }
+                fb.moveDot(dot, bias);
+            }
 
-                    public void setDot(FilterBypass fb, int dot, Bias bias) {
-                        if (dot < initialPos) {
-                            dot = Math.min(initialPos, run.getDocument().getLength());
-                        }
-                        fb.setDot(dot, bias);
-                    }
-                };
+            public void setDot(FilterBypass fb, int dot, Bias bias) {
+                if (dot < initialPos) {
+                    dot = Math.min(initialPos, run.getDocument().getLength());
+                }
+                fb.setDot(dot, bias);
+            }
+        };
         int maxLen;
-        final DocumentListener listener =
-                new DocumentListener() {
-                    public void insertUpdate(final DocumentEvent e) {
-                        EventQueue.invokeLater(
-                                new Runnable() {
-                                    public void run() {
-                                        try {
-                                            String inserted = e.getDocument().getText(e.getOffset(), e.getLength());
-                                            int i = inserted.indexOf('\n');
-                                            if (i >= 0) {
-                                                int offset = e.getOffset() + i;
-                                                if (offset + 1 == e.getDocument().getLength()) {
-                                                    returnResponse();
-                                                } else {
-                                                    // remove the '\n' and put it at the end
-                                                    e.getDocument().remove(offset, 1);
-                                                    e.getDocument().insertString(e.getDocument().getLength(), "\n", null);
-                                                    // insertUpdate will be called again, since we have inserted the '\n' at the end
-                                                }
-                                            } else if (maxLen >= 0 && e.getDocument().getLength() - initialPos >= maxLen) {
-                                                returnResponse();
-                                            }
-                                        } catch (BadLocationException ex) {
-                                            returnResponse();
-                                        }
+        final DocumentListener listener = new DocumentListener() {
+            public void insertUpdate(final DocumentEvent e) {
+                EventQueue.invokeLater(
+                        () -> {
+                            try {
+                                String inserted = e.getDocument().getText(e.getOffset(), e.getLength());
+                                int i = inserted.indexOf('\n');
+                                if (i >= 0) {
+                                    int offset = e.getOffset() + i;
+                                    if (offset + 1 == e.getDocument().getLength()) {
+                                        returnResponse();
+                                    } else {
+                                        // remove the '\n' and put it at the end
+                                        e.getDocument().remove(offset, 1);
+                                        e.getDocument().insertString(e.getDocument().getLength(), "\n", null);
+                                        // insertUpdate will be called again, since we have inserted the '\n' at the end
                                     }
-                                });
-                    }
+                                } else if (maxLen >= 0 && e.getDocument().getLength() - initialPos >= maxLen) {
+                                    returnResponse();
+                                }
+                            } catch (BadLocationException ex) {
+                                returnResponse();
+                            }
+                        });
+            }
 
-                    public void removeUpdate(final DocumentEvent e) {
-                        EventQueue.invokeLater(
-                                new Runnable() {
-                                    public void run() {
-                                        if ((e.getDocument().getLength() < initialPos || e.getOffset() < initialPos) && e instanceof UndoableEdit) {
-                                            ((UndoableEdit) e).undo();
-                                            run.setCaretPosition(e.getOffset() + e.getLength());
-                                        }
-                                    }
-                                });
+            public void removeUpdate(final DocumentEvent e) {
+                EventQueue.invokeLater(() -> {
+                    if ((e.getDocument().getLength() < initialPos || e.getOffset() < initialPos) && e instanceof UndoableEdit) {
+                        ((UndoableEdit) e).undo();
+                        run.setCaretPosition(e.getOffset() + e.getLength());
                     }
+                });
+            }
 
-                    public void changedUpdate(DocumentEvent e) {
-                    }
-                };
-        final Simulator.StopListener stopListener =
-                new Simulator.StopListener() {
-                    public void stopped(Simulator s) {
-                        returnResponse();
-                    }
-                };
+            public void changedUpdate(DocumentEvent e) {
+            }
+        };
+        final Simulator.StopListener stopListener = s -> returnResponse();
+
         Asker(int maxLen) {
             this.maxLen = maxLen;
             // initialPos will be set in run()
@@ -470,16 +439,13 @@ public class MessagesPane extends JTabbedPane {
         }
 
         void cleanup() { // not required to be called from the GUI thread
-            EventQueue.invokeLater(
-                    new Runnable() {
-                        public void run() {
-                            run.getDocument().removeDocumentListener(listener);
-                            run.setEditable(false);
-                            run.setNavigationFilter(null);
-                            run.setCaretPosition(run.getDocument().getLength());
-                            Simulator.getInstance().removeStopListener(stopListener);
-                        }
-                    });
+            EventQueue.invokeLater(() -> {
+                run.getDocument().removeDocumentListener(listener);
+                run.setEditable(false);
+                run.setNavigationFilter(null);
+                run.setCaretPosition(run.getDocument().getLength());
+                Simulator.getInstance().removeStopListener(stopListener);
+            });
         }
 
         void returnResponse() {

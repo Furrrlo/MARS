@@ -1,3 +1,30 @@
+/*
+Copyright (c) 2003-2006,  Pete Sanderson and Kenneth Vollmar
+
+Developed by Pete Sanderson (psanderson@otterbein.edu)
+and Kenneth Vollmar (kenvollmar@missouristate.edu)
+
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+"Software"), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject
+to the following conditions:
+
+The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR
+ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
+CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+(MIT license, http://www.opensource.org/licenses/mit-license.html)
+ */
 package mars.venus;
 
 import mars.Globals;
@@ -7,35 +34,6 @@ import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
-	
-	/*
-Copyright (c) 2003-2006,  Pete Sanderson and Kenneth Vollmar
-
-Developed by Pete Sanderson (psanderson@otterbein.edu)
-and Kenneth Vollmar (kenvollmar@missouristate.edu)
-
-Permission is hereby granted, free of charge, to any person obtaining 
-a copy of this software and associated documentation files (the 
-"Software"), to deal in the Software without restriction, including 
-without limitation the rights to use, copy, modify, merge, publish, 
-distribute, sublicense, and/or sell copies of the Software, and to 
-permit persons to whom the Software is furnished to do so, subject 
-to the following conditions:
-
-The above copyright notice and this permission notice shall be 
-included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, 
-EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF 
-MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. 
-IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR 
-ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF 
-CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION 
-WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-
-(MIT license, http://www.opensource.org/licenses/mit-license.html)
- */
 
 /**
  * Use to select base for displaying numbers.  Initially the
@@ -43,7 +41,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * a check box where checked means hex.  If base 8 (octal)
  * is added later, the Component will need to change.
  */
-
 public class NumberDisplayBaseChooser extends JCheckBox {
     public static final int DECIMAL = 10;
     public static final int HEXADECIMAL = 16;
@@ -55,34 +52,30 @@ public class NumberDisplayBaseChooser extends JCheckBox {
      * constructor. It assumes the text will be worded
      * so that a checked box means hexadecimal!
      *
-     * @param text        Text to accompany the check box.
-     * @param defaultBase Currently either DECIMAL or HEXADECIMAL
+     * @param text         Text to accompany the check box.
+     * @param displayInHex Currently either DECIMAL or HEXADECIMAL
      */
     public NumberDisplayBaseChooser(String text, boolean displayInHex) {
         super(text, displayInHex);
         base = getBase(displayInHex);
-        addItemListener(
-                new ItemListener() {
-                    public void itemStateChanged(ItemEvent ie) {
-                        NumberDisplayBaseChooser choose = (NumberDisplayBaseChooser) ie.getItem();
-                        if (ie.getStateChange() == ItemEvent.SELECTED) {
-                            choose.setBase(NumberDisplayBaseChooser.HEXADECIMAL);
-                        } else {
-                            choose.setBase(NumberDisplayBaseChooser.DECIMAL);
-                        }
-                        // Better to use notify, but I am tired...
-                        if (settingMenuItem != null) {
-                            settingMenuItem.setSelected(choose.isSelected());
-                            ActionListener[] listeners = settingMenuItem.getActionListeners();
-                            ActionEvent event = new ActionEvent(settingMenuItem, 0, "chooser");
-                            for (int i = 0; i < listeners.length; i++) {
-                                listeners[i].actionPerformed(event);
-                            }
-                        }
-                        // Better to use notify, but I am tired...
-                        Globals.getGui().getMainPane().getExecutePane().numberDisplayBaseChanged(choose);
-                    }
-                });
+        addItemListener(ie -> {
+            NumberDisplayBaseChooser choose = (NumberDisplayBaseChooser) ie.getItem();
+            if (ie.getStateChange() == ItemEvent.SELECTED) {
+                choose.setBase(NumberDisplayBaseChooser.HEXADECIMAL);
+            } else {
+                choose.setBase(NumberDisplayBaseChooser.DECIMAL);
+            }
+            // Better to use notify, but I am tired...
+            if (settingMenuItem != null) {
+                settingMenuItem.setSelected(choose.isSelected());
+                ActionListener[] listeners = settingMenuItem.getActionListeners();
+                ActionEvent event = new ActionEvent(settingMenuItem, 0, "chooser");
+                for (ActionListener listener : listeners)
+                    listener.actionPerformed(event);
+            }
+            // Better to use notify, but I am tired...
+            Globals.getGui().getMainPane().getExecutePane().numberDisplayBaseChanged(choose);
+        });
     }
 
     /**
@@ -116,21 +109,11 @@ public class NumberDisplayBaseChooser extends JCheckBox {
      * @return a String equivalent of the value rendered appropriately.
      */
     public static String formatNumber(int value, int base) {
-        String result;
-        switch (base) {
-            case HEXADECIMAL:
-                result = Binary.intToHexString(value);
-                break;
-            case DECIMAL:
-                result = Integer.toString(value);
-                break;
-            case ASCII:
-                result = Binary.intToAscii(value);
-                break;
-            default:
-                result = Integer.toString(value);
-        }
-        return result;
+        return switch (base) {
+            case HEXADECIMAL -> Binary.intToHexString(value);
+            case ASCII -> Binary.intToAscii(value);
+            default -> Integer.toString(value);
+        };
         //          if (base == NumberDisplayBaseChooser.HEXADECIMAL) {
         //             return Binary.intToHexString(value);
         //          }
@@ -273,7 +256,7 @@ public class NumberDisplayBaseChooser extends JCheckBox {
         if (base == NumberDisplayBaseChooser.HEXADECIMAL) {
             return Binary.intToHexString(value);
         } else {
-            return new Integer(value).toString();
+            return Integer.toString(value);
         }
     }
 

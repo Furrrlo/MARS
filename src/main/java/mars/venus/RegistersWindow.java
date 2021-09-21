@@ -1,3 +1,30 @@
+/*
+Copyright (c) 2003-2009,  Pete Sanderson and Kenneth Vollmar
+
+Developed by Pete Sanderson (psanderson@otterbein.edu)
+and Kenneth Vollmar (kenvollmar@missouristate.edu)
+
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+"Software"), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject
+to the following conditions:
+
+The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR
+ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
+CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+(MIT license, http://www.opensource.org/licenses/mit-license.html)
+ */
 package mars.venus;
 
 import mars.Globals;
@@ -20,40 +47,11 @@ import java.awt.event.MouseEvent;
 import java.util.Observable;
 import java.util.Observer;
 
-/*
-Copyright (c) 2003-2009,  Pete Sanderson and Kenneth Vollmar
-
-Developed by Pete Sanderson (psanderson@otterbein.edu)
-and Kenneth Vollmar (kenvollmar@missouristate.edu)
-
-Permission is hereby granted, free of charge, to any person obtaining 
-a copy of this software and associated documentation files (the 
-"Software"), to deal in the Software without restriction, including 
-without limitation the rights to use, copy, modify, merge, publish, 
-distribute, sublicense, and/or sell copies of the Software, and to 
-permit persons to whom the Software is furnished to do so, subject 
-to the following conditions:
-
-The above copyright notice and this permission notice shall be 
-included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, 
-EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF 
-MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. 
-IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR 
-ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF 
-CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION 
-WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-
-(MIT license, http://www.opensource.org/licenses/mit-license.html)
- */
-
 /**
  * Sets up a window to display registers in the UI.
  *
  * @author Sanderson, Bumgarner
  **/
-
 public class RegistersWindow extends JPanel implements Observer {
     private static final int NAME_COLUMN = 0;
     private static final int NUMBER_COLUMN = 1;
@@ -69,7 +67,6 @@ public class RegistersWindow extends JPanel implements Observer {
     /**
      * Constructor which sets up a fresh window with a table that contains the register values.
      **/
-
     public RegistersWindow() {
         Simulator.getInstance().addObserver(this);
         settings = Globals.getSettings();
@@ -92,14 +89,13 @@ public class RegistersWindow extends JPanel implements Observer {
      *
      * @return The array object with the data for the window.
      **/
-
     public Object[][] setupWindow() {
         int valueBase = NumberDisplayBaseChooser.getBase(settings.getDisplayValuesInHex());
         tableData = new Object[35][3];
         registers = RegisterFile.getRegisters();
         for (int i = 0; i < registers.length; i++) {
             tableData[i][0] = registers[i].getName();
-            tableData[i][1] = new Integer(registers[i].getNumber());
+            tableData[i][1] = registers[i].getNumber();
             tableData[i][2] = NumberDisplayBaseChooser.formatNumber(registers[i].getValue(), valueBase);
         }
         tableData[32][0] = "pc";
@@ -160,9 +156,8 @@ public class RegistersWindow extends JPanel implements Observer {
      */
     public void updateRegisters(int base) {
         registers = RegisterFile.getRegisters();
-        for (int i = 0; i < registers.length; i++) {
-            updateRegisterValue(registers[i].getNumber(), registers[i].getValue(), base);
-        }
+        for (Register register : registers)
+            updateRegisterValue(register.getNumber(), register.getValue(), base);
         updateRegisterUnsignedValue(32, RegisterFile.getProgramCounter(), base);
         updateRegisterValue(33, RegisterFile.getValue(33), base);
         updateRegisterValue(34, RegisterFile.getValue(34), base);
@@ -174,11 +169,9 @@ public class RegistersWindow extends JPanel implements Observer {
      * @param number The number of the register to update.
      * @param val    New value.
      **/
-
     public void updateRegisterValue(int number, int val, int base) {
         ((RegTableModel) table.getModel()).setDisplayAndModelValueAt(NumberDisplayBaseChooser.formatNumber(val, base), number, 2);
     }
-
 
     private void updateRegisterUnsignedValue(int number, int val, int base) {
         ((RegTableModel) table.getModel()).setDisplayAndModelValueAt(NumberDisplayBaseChooser.formatUnsignedInteger(val, base), number, 2);
@@ -209,9 +202,8 @@ public class RegistersWindow extends JPanel implements Observer {
                 // Simulated MIPS execution stops.  Stop responding.
                 RegisterFile.deleteRegistersObserver(this);
             }
-        } else if (obj instanceof RegisterAccessNotice) {
+        } else if (obj instanceof RegisterAccessNotice access) {
             // NOTE: each register is a separate Observable
-            RegisterAccessNotice access = (RegisterAccessNotice) obj;
             if (access.getAccessType() == AccessNotice.WRITE) {
                 // Uses the same highlighting technique as for Text Segment -- see
                 // AddressCellRenderer class in DataSegmentWindow.java.
@@ -274,10 +266,9 @@ public class RegistersWindow extends JPanel implements Observer {
         }
     }
 
-
     ////////////////////////////////////////////////////////////////////////////
 
-    class RegTableModel extends AbstractTableModel {
+    static class RegTableModel extends AbstractTableModel {
         final String[] columnNames = {"Name", "Number", "Value"};
         Object[][] data;
 
@@ -305,7 +296,7 @@ public class RegistersWindow extends JPanel implements Observer {
          * JTable uses this method to determine the default renderer/
          * editor for each cell.
          */
-        public Class getColumnClass(int c) {
+        public Class<?> getColumnClass(int c) {
             return getValueAt(0, c).getClass();
         }
 
@@ -320,14 +311,13 @@ public class RegistersWindow extends JPanel implements Observer {
             return col == VALUE_COLUMN && row != 0 && row != 32 && row != 31;
         }
 
-
         /*
          * Update cell contents in table model.  This method should be called
          * only when user edits cell, so input validation has to be done.  If
          * value is valid, MIPS register is updated.
          */
         public void setValueAt(Object value, int row, int col) {
-            int val = 0;
+            int val;
             try {
                 val = Binary.stringToInt((String) value);
             } catch (NumberFormatException nfe) {
@@ -343,9 +333,7 @@ public class RegistersWindow extends JPanel implements Observer {
             int valueBase = Globals.getGui().getMainPane().getExecutePane().getValueDisplayBase();
             data[row][col] = NumberDisplayBaseChooser.formatNumber(val, valueBase);
             fireTableCellUpdated(row, col);
-            return;
         }
-
 
         /**
          * Update cell contents in table model.  Does not affect MIPS register.
@@ -354,7 +342,6 @@ public class RegistersWindow extends JPanel implements Observer {
             data[row][col] = value;
             fireTableCellUpdated(row, col);
         }
-
 
         // handy for debugging....
         private void printDebugData() {
@@ -379,7 +366,7 @@ public class RegistersWindow extends JPanel implements Observer {
     // the first column. From Sun's JTable tutorial.
     // http://java.sun.com/docs/books/tutorial/uiswing/components/table.html
     //
-    private class MyTippedJTable extends JTable {
+    private static class MyTippedJTable extends JTable {
         private final String[] regToolTips = {
                 /* $zero */  "constant 0",
                 /* $at   */  "reserved for assembler",
@@ -431,8 +418,8 @@ public class RegistersWindow extends JPanel implements Observer {
 
         //Implement table cell tool tips.
         public String getToolTipText(MouseEvent e) {
-            String tip = null;
-            java.awt.Point p = e.getPoint();
+            String tip;
+            Point p = e.getPoint();
             int rowIndex = rowAtPoint(p);
             int colIndex = columnAtPoint(p);
             int realColumnIndex = convertColumnIndexToModel(colIndex);
@@ -453,16 +440,14 @@ public class RegistersWindow extends JPanel implements Observer {
 
         //Implement table header tool tips.
         protected JTableHeader createDefaultTableHeader() {
-            return
-                    new JTableHeader(columnModel) {
-                        public String getToolTipText(MouseEvent e) {
-                            String tip = null;
-                            java.awt.Point p = e.getPoint();
-                            int index = columnModel.getColumnIndexAtX(p.x);
-                            int realIndex = columnModel.getColumn(index).getModelIndex();
-                            return columnToolTips[realIndex];
-                        }
-                    };
+            return new JTableHeader(columnModel) {
+                public String getToolTipText(MouseEvent e) {
+                    Point p = e.getPoint();
+                    int index = columnModel.getColumnIndexAtX(p.x);
+                    int realIndex = columnModel.getColumn(index).getModelIndex();
+                    return columnToolTips[realIndex];
+                }
+            };
         }
     }
 

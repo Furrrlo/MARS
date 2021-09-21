@@ -1,11 +1,3 @@
-package mars.venus;
-
-import javax.swing.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-
 /////////////////////////////  CREDIT  /////////////////////////////////////
 // http://forums.sun.com/thread.jspa?threadID=499183&messageID=2505646
 // bsampieri, 4 March 2004
@@ -13,8 +5,15 @@ import java.awt.event.MouseListener;
 // Adopted/adapted by DPS 20 July 2008
 //
 // This is NOT one of the MARS buttons!  It is a subclass of JButton that can
-// be used to create buttons that fire events after being held down for a 
-// specified period of time and at a specified rate. 
+// be used to create buttons that fire events after being held down for a
+// specified period of time and at a specified rate.
+package mars.venus;
+
+import javax.swing.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 
 /**
  * <code>RepeatButton</code> is a <code>JButton</code> which contains a timer
@@ -276,7 +275,7 @@ public class RepeatButton extends JButton
         if (me.getSource() == this && this.isEnabled() && this.isRepeatEnabled()) {
             this.pressed = true;
             if (!this.timer.isRunning()) {
-                this.modifiers = me.getModifiers();
+                this.modifiers = me.getModifiersEx();
                 this.timer.setInitialDelay(this.initialDelay);
                 this.timer.start();
             }
@@ -307,7 +306,7 @@ public class RepeatButton extends JButton
         // process events only from this components
         if (me.getSource() == this && this.isEnabled() && this.isRepeatEnabled()) {
             if (this.pressed && !this.timer.isRunning()) {
-                this.modifiers = me.getModifiers();
+                this.modifiers = me.getModifiersEx();
                 this.timer.setInitialDelay(this.delay);
                 this.timer.start();
             }

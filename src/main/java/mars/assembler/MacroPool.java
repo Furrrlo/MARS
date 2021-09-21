@@ -27,14 +27,15 @@ package mars.assembler;
 import mars.MIPSprogram;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Stores information of macros defined by now. <br>
  * Will be used in first pass of assembling MIPS source code. When reached
  * <code>.macro</code> directive, parser calls
- * {@link MacroPool#BeginMacro(String, int)} and skips source code lines until
+ * {@link MacroPool#beginMacro(Token)} and skips source code lines until
  * reaches <code>.end_macro</code> directive. then calls
- * {@link MacroPool#CommitMacro(int)} and the macro information stored in a
+ * {@link MacroPool#commitMacro(Token)} and the macro information stored in a
  * {@link Macro} instance will be added to {@link #macroList}. <br>
  * Each {@link MIPSprogram} will have one {@link MacroPool}<br>
  * NOTE: Forward referencing macros (macro expansion before its definition in
@@ -45,21 +46,14 @@ import java.util.ArrayList;
  */
 public class MacroPool {
     private final MIPSprogram program;
-    /**
-     * List of macros defined by now
-     */
-    private final ArrayList<Macro> macroList;
-    private final ArrayList<Integer> callStack;
-    private final ArrayList<Integer> callStackOrigLines;
-    /**
-     * @see #BeginMacro(String, int)
-     */
+    /** List of macros defined by now */
+    private final List<Macro> macroList;
+    private final List<Integer> callStack;
+    private final List<Integer> callStackOrigLines;
+    /** @see #beginMacro(Token) */
     private Macro current;
-    /**
-     * @see #getNextCounter()
-     */
+    /** @see #getNextCounter() */
     private int counter;
-
 
     /**
      * Create an empty MacroPool for given program
@@ -68,9 +62,9 @@ public class MacroPool {
      */
     public MacroPool(MIPSprogram mipsProgram) {
         this.program = mipsProgram;
-        macroList = new ArrayList<Macro>();
-        callStack = new ArrayList<Integer>();
-        callStackOrigLines = new ArrayList<Integer>();
+        macroList = new ArrayList<>();
+        callStack = new ArrayList<>();
+        callStackOrigLines = new ArrayList<>();
         current = null;
         counter = 0;
     }
@@ -78,13 +72,12 @@ public class MacroPool {
     /**
      * This method will be called by parser when reached <code>.macro</code>
      * directive.<br>
-     * Instantiates a new {@link Macro} object and stores it in {@link #current}
-     * . {@link #current} will be added to {@link #macroList} by
-     * {@link #CommitMacro(int)}
+     * Instantiates a new {@link Macro} object and stores it in {@link #current}.
+     * {@link #current} will be added to {@link #macroList} by
+     * {@link #commitMacro(Token)}
      *
      * @param nameToken Token containing name of macro after <code>.macro</code> directive
      */
-
     public void beginMacro(Token nameToken) {
         current = new Macro();
         current.setName(nameToken.getValue());
@@ -100,7 +93,6 @@ public class MacroPool {
      *
      * @param endToken Token containing <code>.end_macro</code> directive in source code
      */
-
     public void commitMacro(Token endToken) {
         current.setToLine(endToken.getSourceLine());
         current.setOriginalToLine(endToken.getOriginalSourceLine());
@@ -132,7 +124,6 @@ public class MacroPool {
     }
 
     /**
-     * @param value
      * @return true if any macros have been defined with name <code>value</code>
      * by now, not concerning arguments count.
      */
@@ -163,11 +154,9 @@ public class MacroPool {
         return counter++;
     }
 
-
-    public ArrayList<Integer> getCallStack() {
+    public List<Integer> getCallStack() {
         return callStack;
     }
-
 
     public boolean pushOnCallStack(Token token) { //returns true if detected expansion loop
         int sourceLine = token.getSourceLine();
@@ -184,14 +173,13 @@ public class MacroPool {
         callStackOrigLines.remove(callStackOrigLines.size() - 1);
     }
 
-
     public String getExpansionHistory() {
-        String ret = "";
+        StringBuilder ret = new StringBuilder();
         for (int i = 0; i < callStackOrigLines.size(); i++) {
             if (i > 0)
-                ret += "->";
-            ret += callStackOrigLines.get(i).toString();
+                ret.append("->");
+            ret.append(callStackOrigLines.get(i).toString());
         }
-        return ret;
+        return ret.toString();
     }
 }

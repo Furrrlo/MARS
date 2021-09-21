@@ -1,3 +1,30 @@
+/*
+Copyright (c) 2003-2009,  Pete Sanderson and Kenneth Vollmar
+
+Developed by Pete Sanderson (psanderson@otterbein.edu)
+and Kenneth Vollmar (kenvollmar@missouristate.edu)
+
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+"Software"), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject
+to the following conditions:
+
+The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR
+ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
+CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+(MIT license, http://www.opensource.org/licenses/mit-license.html)
+ */
 package mars.venus;
 
 import mars.Globals;
@@ -16,36 +43,8 @@ import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
-   
-	/*
-Copyright (c) 2003-2009,  Pete Sanderson and Kenneth Vollmar
-
-Developed by Pete Sanderson (psanderson@otterbein.edu)
-and Kenneth Vollmar (kenvollmar@missouristate.edu)
-
-Permission is hereby granted, free of charge, to any person obtaining 
-a copy of this software and associated documentation files (the 
-"Software"), to deal in the Software without restriction, including 
-without limitation the rights to use, copy, modify, merge, publish, 
-distribute, sublicense, and/or sell copies of the Software, and to 
-permit persons to whom the Software is furnished to do so, subject 
-to the following conditions:
-
-The above copyright notice and this permission notice shall be 
-included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, 
-EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF 
-MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. 
-IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR 
-ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF 
-CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION 
-WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-
-(MIT license, http://www.opensource.org/licenses/mit-license.html)
- */
+import java.util.List;
 
 /**
  * Represents the Labels window, which is a type of JInternalFrame.  Venus user
@@ -53,7 +52,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  * @author Sanderson and Team JSpim
  **/
-
 public class LabelsWindow extends JInternalFrame {
     private static final int MAX_DISPLAYED_CHARS = 24;
     private static final int PREFERRED_NAME_COLUMN_WIDTH = 60;
@@ -90,6 +88,7 @@ public class LabelsWindow extends JInternalFrame {
             /*  7  */  {"Label  " + DESCENDING_SYMBOL, "Address"}
     };
     private static String[] columnNames;
+
     private final Container contentPane;
     private final JPanel labelPanel;      // holds J
     private final JCheckBox dataLabels;
@@ -110,25 +109,24 @@ public class LabelsWindow extends JInternalFrame {
     // "Click Addr" column shows which state to go to when Addr column is clicked.
     //////////////////////////////////////////////////////////////////////////////////////
     // The array of comparators; index corresponds to state in table above.
-    private final Comparator[] tableSortingComparators = {
+    private final List<Comparator<Symbol>> tableSortingComparators = List.of(
             /*  0  */  new LabelAddressAscendingComparator(),
-            /*  1  */  new DescendingComparator(new LabelAddressAscendingComparator()),
+            /*  1  */  new DescendingComparator<>(new LabelAddressAscendingComparator()),
             /*  2  */  new LabelAddressAscendingComparator(),
-            /*  3  */  new DescendingComparator(new LabelAddressAscendingComparator()),
+            /*  3  */  new DescendingComparator<>(new LabelAddressAscendingComparator()),
             /*  4  */  new LabelNameAscendingComparator(),
             /*  5  */  new LabelNameAscendingComparator(),
-            /*  6  */  new DescendingComparator(new LabelNameAscendingComparator()),
-            /*  7  */  new DescendingComparator(new LabelNameAscendingComparator())
-    };
-    private ArrayList listOfLabelsForSymbolTable;
-    private Comparator tableSortComparator;
+            /*  6  */  new DescendingComparator<>(new LabelNameAscendingComparator()),
+            /*  7  */  new DescendingComparator<>(new LabelNameAscendingComparator())
+    );
+    private List<LabelsForSymbolTable> listOfLabelsForSymbolTable;
+    private Comparator<Symbol> tableSortComparator;
     // Current sort state (0-7, see table above).  Will be set from saved Settings in construtor.
-    private int sortState = 0;
+    private int sortState;
 
     /**
      * Constructor for the Labels (symbol table) window.
      **/
-
     public LabelsWindow() {
         super("Labels", true, false, true, true);
         try {
@@ -137,7 +135,7 @@ public class LabelsWindow extends JInternalFrame {
             sortState = 0;
         }
         columnNames = sortColumnHeadings[sortState];
-        tableSortComparator = tableSortingComparators[sortState];
+        tableSortComparator = tableSortingComparators.get(sortState);
         labelsWindow = this;
         contentPane = this.getContentPane();
         labelPanel = new JPanel(new GridLayout(1, 2, 10, 0));
@@ -171,18 +169,16 @@ public class LabelsWindow extends JInternalFrame {
 
     //
     private JScrollPane generateLabelScrollPane() {
-        listOfLabelsForSymbolTable = new ArrayList();
+        listOfLabelsForSymbolTable = new ArrayList<>();
         listOfLabelsForSymbolTable.add(new LabelsForSymbolTable(null));// global symtab
-        ArrayList MIPSprogramsAssembled = RunAssembleAction.getMIPSprogramsToAssemble();
+        List<MIPSprogram> MIPSprogramsAssembled = RunAssembleAction.getMIPSprogramsToAssemble();
         Box allSymtabTables = Box.createVerticalBox();
-        for (int i = 0; i < MIPSprogramsAssembled.size(); i++) {
-            listOfLabelsForSymbolTable.add(new LabelsForSymbolTable(
-                    (MIPSprogram) MIPSprogramsAssembled.get(i)));
+        for (MIPSprogram mipSprogram : MIPSprogramsAssembled) {
+            listOfLabelsForSymbolTable.add(new LabelsForSymbolTable(mipSprogram));
         }
-        ArrayList tableNames = new ArrayList();
+        List<JComponent> tableNames = new ArrayList<>();
         JTableHeader tableHeader = null;
-        for (int i = 0; i < listOfLabelsForSymbolTable.size(); i++) {
-            LabelsForSymbolTable symtab = (LabelsForSymbolTable) listOfLabelsForSymbolTable.get(i);
+        for (LabelsForSymbolTable symtab : listOfLabelsForSymbolTable) {
             if (symtab.hasSymbols()) {
                 String name = symtab.getSymbolTableName();
                 if (name.length() > MAX_DISPLAYED_CHARS) {
@@ -217,12 +213,10 @@ public class LabelsWindow extends JInternalFrame {
         // Does it do any good?  Addressing problem that occurs when label (filename) is wider than
         // the table beneath it -- the table column widths are stretched to attain the same width and
         // the address information requires scrolling to see.  All because of a long file name.
-        for (int i = 0; i < tableNames.size(); i++) {
-            JComponent nameLabel = (JComponent) tableNames.get(i);
+        for (JComponent nameLabel : tableNames)
             nameLabel.setMaximumSize(new Dimension(
                     labelScrollPane.getViewport().getViewSize().width,
                     (int) (1.5 * nameLabel.getFontMetrics(nameLabel.getFont()).getHeight())));
-        }
         labelScrollPane.setColumnHeaderView(tableHeader);
         return labelScrollPane;
     }
@@ -233,11 +227,9 @@ public class LabelsWindow extends JInternalFrame {
      * (e.g. between base 16 hex and base 10 dec).
      */
     public void updateLabelAddresses() {
-        if (listOfLabelsForSymbolTable != null) {
-            for (int i = 0; i < listOfLabelsForSymbolTable.size(); i++) {
-                ((LabelsForSymbolTable) listOfLabelsForSymbolTable.get(i)).updateLabelAddresses();
-            }
-        }
+        if (listOfLabelsForSymbolTable != null)
+            for (LabelsForSymbolTable labelsForSymbolTable : listOfLabelsForSymbolTable)
+                labelsForSymbolTable.updateLabelAddresses();
     }
 
 
@@ -245,9 +237,8 @@ public class LabelsWindow extends JInternalFrame {
     //   Listener class to respond to "Text" or "Data" checkbox click
     private class LabelItemListener implements ItemListener {
         public void itemStateChanged(ItemEvent ie) {
-            for (int i = 0; i < listOfLabelsForSymbolTable.size(); i++) {
-                ((LabelsForSymbolTable) listOfLabelsForSymbolTable.get(i)).generateLabelTable();
-            }
+            for (LabelsForSymbolTable labelsForSymbolTable : listOfLabelsForSymbolTable)
+                labelsForSymbolTable.generateLabelTable();
         }
     }
 
@@ -258,8 +249,7 @@ public class LabelsWindow extends JInternalFrame {
     //  segment to scroll to the corresponding label/address.
     //  Suggested by Ken Vollmar, implemented by Pete Sanderson
     //  July 2007.
-
-    private class LabelDisplayMouseListener extends MouseAdapter {
+    private static class LabelDisplayMouseListener extends MouseAdapter {
         public void mouseClicked(MouseEvent e) {
             JTable table = (JTable) e.getSource();
             int row = table.rowAtPoint(e.getPoint());
@@ -295,7 +285,7 @@ public class LabelsWindow extends JInternalFrame {
         private final String tableName;
         private Object[][] labelData;
         private JTable labelTable;
-        private ArrayList symbols;
+        private List<Symbol> symbols;
 
         // Associated MIPSprogram object.  If null, this represents global symbol table.
         public LabelsForSymbolTable(MIPSprogram myMIPSprogram) {
@@ -331,13 +321,13 @@ public class LabelsWindow extends JInternalFrame {
             } else if (!textLabels.isSelected() && dataLabels.isSelected()) {
                 symbols = symbolTable.getDataSymbols();
             } else {
-                symbols = new ArrayList();
+                symbols = new ArrayList<>();
             }
-            Collections.sort(symbols, tableSortComparator); // DPS 25 Dec 2008
+            symbols.sort(tableSortComparator); // DPS 25 Dec 2008
             labelData = new Object[symbols.size()][2];
 
             for (int i = 0; i < symbols.size(); i++) {//sets up the label table
-                Symbol s = (Symbol) (symbols.get(i));
+                Symbol s = symbols.get(i);
                 labelData[i][LABEL_COLUMN] = s.getName();
                 labelData[i][ADDRESS_COLUMN] = NumberDisplayBaseChooser.formatNumber(s.getAddress(), addressBase);
             }
@@ -360,7 +350,7 @@ public class LabelsWindow extends JInternalFrame {
             String formattedAddress;
             int numSymbols = (labelData == null) ? 0 : labelData.length;
             for (int i = 0; i < numSymbols; i++) {
-                address = ((Symbol) symbols.get(i)).getAddress();
+                address = symbols.get(i).getAddress();
                 formattedAddress = NumberDisplayBaseChooser.formatNumber(address, addressBase);
                 labelTable.getModel().setValueAt(formattedAddress, i, ADDRESS_COLUMN);
             }
@@ -371,7 +361,7 @@ public class LabelsWindow extends JInternalFrame {
 
     ///////////////////////////////////////////////////////////////
     // Class representing label table data
-    class LabelTableModel extends AbstractTableModel {
+    static class LabelTableModel extends AbstractTableModel {
         String[] columns;
         Object[][] data;
 
@@ -400,7 +390,7 @@ public class LabelsWindow extends JInternalFrame {
          * JTable uses this method to determine the default renderer/
          * editor for each cell.
          */
-        public Class getColumnClass(int c) {
+        public Class<?> getColumnClass(int c) {
             return getValueAt(0, c).getClass();
         }
 
@@ -448,10 +438,8 @@ public class LabelsWindow extends JInternalFrame {
         // Implement cell tool tips.  All of them are the same (although they could be customized).
         public Component prepareRenderer(TableCellRenderer renderer, int rowIndex, int vColIndex) {
             Component c = super.prepareRenderer(renderer, rowIndex, vColIndex);
-            if (c instanceof JComponent) {
-                JComponent jc = (JComponent) c;
+            if (c instanceof JComponent jc)
                 jc.setToolTipText("Click on label or address to view it in Text/Data Segment");
-            }
             return c;
         }
 
@@ -487,9 +475,9 @@ public class LabelsWindow extends JInternalFrame {
                     int index = columnModel.getColumnIndexAtX(p.x);
                     int realIndex = columnModel.getColumn(index).getModelIndex();
                     sortState = sortStateTransitions[sortState][realIndex];
-                    tableSortComparator = tableSortingComparators[sortState];
+                    tableSortComparator = tableSortingComparators.get(sortState);
                     columnNames = sortColumnHeadings[sortState];
-                    Globals.getSettings().setLabelSortState(new Integer(sortState).toString());
+                    Globals.getSettings().setLabelSortState(Integer.toString(sortState));
                     setupTable();
                     Globals.getGui().getMainPane().getExecutePane().setLabelWindowVisibility(false);
                     Globals.getGui().getMainPane().getExecutePane().setLabelWindowVisibility(true);
@@ -514,9 +502,9 @@ public class LabelsWindow extends JInternalFrame {
     ////////////////////////////////////////////////////////////////////////////
     //
     //  Comparator class used to sort in ascending order a List of symbols alphabetically by name
-    private class LabelNameAscendingComparator implements java.util.Comparator {
-        public int compare(Object a, Object b) {
-            return ((Symbol) a).getName().toLowerCase().compareTo(((Symbol) b).getName().toLowerCase());
+    private static class LabelNameAscendingComparator implements Comparator<Symbol> {
+        public int compare(Symbol a, Symbol b) {
+            return a.getName().toLowerCase().compareTo(b.getName().toLowerCase());
         }
     }
 
@@ -530,14 +518,13 @@ public class LabelsWindow extends JInternalFrame {
     //  Remember, if not equal then any value with correct sign will work.
     //  If both have same sign, a-b will yield correct result.
     //  If signs differ, b will yield correct result (think about it).
-    private class LabelAddressAscendingComparator implements java.util.Comparator {
-        public int compare(Object a, Object b) {
-            int addrA = ((Symbol) a).getAddress();
-            int addrB = ((Symbol) b).getAddress();
+    private static class LabelAddressAscendingComparator implements Comparator<Symbol> {
+        public int compare(Symbol a, Symbol b) {
+            int addrA = a.getAddress();
+            int addrB = b.getAddress();
             return (addrA >= 0 && addrB >= 0 || addrA < 0 && addrB < 0) ? addrA - addrB : addrB;
         }
     }
-
 
     ////////////////////////////////////////////////////////////////////////////
     //
@@ -546,18 +533,16 @@ public class LabelsWindow extends JInternalFrame {
     //  Comparator object provided as the argument constructor.  This works because it
     //  is implemented by returning the result of the Ascending comparator when
     //  arguments are reversed.
-    private class DescendingComparator implements java.util.Comparator {
-        private final Comparator opposite;
+    private static class DescendingComparator<T> implements Comparator<T> {
+        private final Comparator<T> opposite;
 
-        private DescendingComparator(Comparator opposite) {
+        private DescendingComparator(Comparator<T> opposite) {
             this.opposite = opposite;
         }
 
-        public int compare(Object a, Object b) {
+        public int compare(T a, T b) {
             return opposite.compare(b, a);
         }
     }
-
-
 }
 	   	

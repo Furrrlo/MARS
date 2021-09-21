@@ -57,7 +57,6 @@ public class Token {
      * @param start             The starting position in that line number of this token's source value.
      * @see TokenTypes
      **/
-
     public Token(TokenTypes type, String value, MIPSprogram sourceMIPSprogram, int line, int start) {
         this.type = type;
         this.value = value;
@@ -127,19 +126,7 @@ public class Token {
      *
      * @return String containing source code of this token.
      **/
-
     public String getValue() {
-        return value;
-    }
-
-    /**
-     * Get a String representing the token.  This method is
-     * equivalent to getValue().
-     *
-     * @return String version of the token.
-     */
-
-    public String toString() {
         return value;
     }
 
@@ -148,7 +135,6 @@ public class Token {
      *
      * @return MIPSprogram object associated with this token.
      **/
-
     public MIPSprogram getSourceMIPSprogram() {
         return sourceMIPSprogram;
     }
@@ -158,7 +144,6 @@ public class Token {
      *
      * @return line number in source program of this token.
      **/
-
     public int getSourceLine() {
         return sourceLine;
     }
@@ -168,10 +153,19 @@ public class Token {
      *
      * @return first character position within source program line of this token.
      **/
-
     public int getStartPos() {
         return sourcePos;
     }
 
+    /**
+     * Get a String representing the token.  This method is
+     * equivalent to getValue().
+     *
+     * @return String version of the token.
+     */
+    @Override
+    public String toString() {
+        return value;
+    }
 }
 

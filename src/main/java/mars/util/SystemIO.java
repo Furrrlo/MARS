@@ -1,37 +1,36 @@
+/*
+Copyright (c) 2003-2013,  Pete Sanderson and Kenneth Vollmar
+
+Developed by Pete Sanderson (psanderson@otterbein.edu)
+and Kenneth Vollmar (kenvollmar@missouristate.edu)
+
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+"Software"), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject
+to the following conditions:
+
+The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR
+ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
+CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+(MIT license, http://www.opensource.org/licenses/mit-license.html)
+ */
 package mars.util;
 
 import mars.Globals;
 import mars.Settings;
 
 import java.io.*;
-	
-	/*
-Copyright (c) 2003-2013,  Pete Sanderson and Kenneth Vollmar
-
-Developed by Pete Sanderson (psanderson@otterbein.edu)
-and Kenneth Vollmar (kenvollmar@missouristate.edu)
-
-Permission is hereby granted, free of charge, to any person obtaining 
-a copy of this software and associated documentation files (the 
-"Software"), to deal in the Software without restriction, including 
-without limitation the rights to use, copy, modify, merge, publish, 
-distribute, sublicense, and/or sell copies of the Software, and to 
-permit persons to whom the Software is furnished to do so, subject 
-to the following conditions:
-
-The above copyright notice and this permission notice shall be 
-included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, 
-EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF 
-MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. 
-IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR 
-ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF 
-CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION 
-WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-
-(MIT license, http://www.opensource.org/licenses/mit-license.html)
- */
 
 /**
  * Provides standard i/o services needed to simulate the MIPS syscall
@@ -78,13 +77,12 @@ public class SystemIO {
      * @param serviceNumber the number assigned to Read Int syscall (default 5)
      * @return int value corresponding to user input
      */
-
     public static int readInteger(int serviceNumber) {
         String input = "0";
         if (Globals.getGui() == null) {
             try {
                 input = getInputReader().readLine();
-            } catch (IOException e) {
+            } catch (IOException ignored) {
             }
         } else {
             if (Globals.getSettings().getBooleanSetting(Settings.POPUP_SYSCALL_INPUT)) {
@@ -96,9 +94,8 @@ public class SystemIO {
         }
 
         // Client is responsible for catching NumberFormatException
-        return new Integer(input.trim()).intValue();
+        return Integer.parseInt(input.trim());
     }
-
 
     /**
      * Implements syscall to read a float value.
@@ -113,7 +110,7 @@ public class SystemIO {
         if (Globals.getGui() == null) {
             try {
                 input = getInputReader().readLine();
-            } catch (IOException e) {
+            } catch (IOException ignored) {
             }
         } else {
             if (Globals.getSettings().getBooleanSetting(Settings.POPUP_SYSCALL_INPUT)) {
@@ -123,10 +120,9 @@ public class SystemIO {
                 input = Globals.getGui().getMessagesPane().getInputString(-1);
             }
         }
-        return new Float(input.trim()).floatValue();
+        return Float.parseFloat(input.trim());
 
     }
-
 
     /**
      * Implements syscall to read a double value.
@@ -141,7 +137,7 @@ public class SystemIO {
         if (Globals.getGui() == null) {
             try {
                 input = getInputReader().readLine();
-            } catch (IOException e) {
+            } catch (IOException ignored) {
             }
         } else {
             if (Globals.getSettings().getBooleanSetting(Settings.POPUP_SYSCALL_INPUT)) {
@@ -151,10 +147,8 @@ public class SystemIO {
                 input = Globals.getGui().getMessagesPane().getInputString(-1);
             }
         }
-        return new Double(input.trim()).doubleValue();
-
+        return Double.parseDouble(input.trim());
     }
-
 
     /**
      * Implements syscall having 4 in $v0, to print a string.
@@ -165,9 +159,7 @@ public class SystemIO {
         } else {
             Globals.getGui().getMessagesPane().postRunMessage(string);
         }
-
     }
-
 
     /**
      * Implements syscall to read a string.
@@ -181,7 +173,7 @@ public class SystemIO {
         if (Globals.getGui() == null) {
             try {
                 input = getInputReader().readLine();
-            } catch (IOException e) {
+            } catch (IOException ignored) {
             }
         } else {
             if (Globals.getSettings().getBooleanSetting(Settings.POPUP_SYSCALL_INPUT)) {
@@ -204,7 +196,6 @@ public class SystemIO {
         }
     }
 
-
     /**
      * Implements syscall having 12 in $v0, to read a char value.
      *
@@ -213,11 +204,11 @@ public class SystemIO {
      */
     public static int readChar(int serviceNumber) {
         String input = "0";
-        int returnValue = 0;
+        int returnValue;
         if (Globals.getGui() == null) {
             try {
                 input = getInputReader().readLine();
-            } catch (IOException e) {
+            } catch (IOException ignored) {
             }
         } else {
             if (Globals.getSettings().getBooleanSetting(Settings.POPUP_SYSCALL_INPUT)) {
@@ -230,17 +221,16 @@ public class SystemIO {
         // The whole try-catch is not really necessary in this case since I'm
         // just propagating the runtime exception (the default behavior), but
         // I want to make it explicit.  The client needs to catch it.
+        //noinspection CaughtExceptionImmediatelyRethrown
         try {
             returnValue = input.charAt(0); // first character input
-        } catch (IndexOutOfBoundsException e) // no chars present
-        {
+        } catch (IndexOutOfBoundsException e) { // no chars present
             throw e;  // was: returnValue = 0;
         }
 
         return returnValue;
 
     }
-
 
     /**
      * Write bytes to file.
@@ -250,7 +240,6 @@ public class SystemIO {
      * @param lengthRequested number of bytes to write
      * @return number of bytes written, or -1 on error
      */
-
     public static int writeToFile(int fd, byte[] myBuffer, int lengthRequested) {
         /////////////// DPS 8-Jan-2013  ////////////////////////////////////////////////////
         /// Write to STDOUT or STDERR file descriptor while using IDE - write to Messages pane.
@@ -295,9 +284,7 @@ public class SystemIO {
         }
 
         return lengthRequested;
-
     } // end writeToFile
-
 
     /**
      * Read bytes from file.
@@ -308,7 +295,7 @@ public class SystemIO {
      * @return number of bytes read, 0 on EOF, or -1 on error
      */
     public static int readFromFile(int fd, byte[] myBuffer, int lengthRequested) {
-        int retValue = -1;
+        int retValue;
         /////////////// DPS 8-Jan-2013  //////////////////////////////////////////////////
         /// Read from STDIN file descriptor while using IDE - get input from Messages pane.
         if (fd == STDIN && Globals.getGui() != null) {
@@ -345,16 +332,14 @@ public class SystemIO {
             return -1;
         }
         return retValue;
-
     } // end readFromFile
-
 
     /**
      * Open a file for either reading or writing. Note that read/write flag is NOT
      * IMPLEMENTED.  Also note that file permission modes are also NOT IMPLEMENTED.
      *
      * @param filename string containing filename
-     * @param flag     0 for read, 1 for write
+     * @param flags    0 for read, 1 for write
      * @return file descriptor in the range 0 to SYSCALL_MAXFILES-1, or -1 if error
      * @author Ken Vollmar
      */
@@ -363,8 +348,7 @@ public class SystemIO {
         // of the filename, flag, and the File???putStream associated with
         // that file descriptor.
 
-        int retValue = -1;
-        char[] ch = {' '}; // Need an array to convert to String
+        int retValue;
         FileInputStream inputStream;
         FileOutputStream outputStream;
         int fdToUse;
@@ -444,7 +428,6 @@ public class SystemIO {
     // //////////////////////////////////////////////////////////////////////////////
     // Maintain information on files in use. The index to the arrays is the "file descriptor."
     // Ken Vollmar, August 2005
-
     private static class FileIOData {
         private static final String[] fileNames = new String[SYSCALL_MAXFILES]; // The filenames in use. Null if file descriptor i is not in use.
         private static final int[] fileFlags = new int[SYSCALL_MAXFILES]; // The flags of this file, 0=READ, 1=WRITE. Invalid if this file descriptor is not in use.
@@ -497,7 +480,6 @@ public class SystemIO {
 
             // System.out.println("Mars.SystemIO.FileIOData.filenameInUse: rtng TRUE for " + requestedFilename);
             return false;
-
         }
 
         // Determine whether a given fd is already in use with the given flag.
@@ -508,7 +490,6 @@ public class SystemIO {
                 if (fileNames[fd] != null && fileFlags[fd] == 0 && flag == 0) {  // O_RDONLY read-only
                     return true;
                 } else return fileNames[fd] != null && ((fileFlags[fd] & flag & O_WRONLY) == O_WRONLY);
-
         }
 
         // Close the file with file descriptor fd. No errors are recoverable -- if the user's
@@ -572,12 +553,9 @@ public class SystemIO {
             fileFlags[i] = flag;
             fileErrorString = "File operation OK";
             return i;
-
         }
 
     } // end private class FileIOData
     ////////////////////////////////////////////////////////////////////////////////
-
-
 }
 

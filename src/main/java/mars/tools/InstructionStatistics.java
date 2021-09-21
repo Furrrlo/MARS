@@ -37,7 +37,6 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.Observable;
 
-
 /**
  * A MARS tool for obtaining instruction statistics by instruction category.
  * <p>
@@ -138,14 +137,12 @@ public class InstructionStatistics extends AbstractMarsToolAndApplication {
         super(title, heading);
     }
 
-
     /**
      * Simple construction, likely used by the MARS Tools menu mechanism.
      */
     public InstructionStatistics() {
         super(InstructionStatistics.NAME + ", " + InstructionStatistics.VERSION, InstructionStatistics.HEADING);
     }
-
 
     /**
      * returns the name of the tool
@@ -155,7 +152,6 @@ public class InstructionStatistics extends AbstractMarsToolAndApplication {
     public String getName() {
         return NAME;
     }
-
 
     /**
      * creates the display area for the tool as required by the API
@@ -209,14 +205,12 @@ public class InstructionStatistics extends AbstractMarsToolAndApplication {
         return panel;
     }
 
-
     /**
      * registers the tool as observer for the text segment of the MIPS program
      */
     protected void addAsObserver() {
         addAsObserver(Memory.textBaseAddress, Memory.textLimitAddress);
     }
-
 
     /**
      * decodes the instruction and determines the category of the instruction.
@@ -232,6 +226,7 @@ public class InstructionStatistics extends AbstractMarsToolAndApplication {
      * @see InstructionStatistics#CATEGORY_MEM
      * @see InstructionStatistics#CATEGORY_OTHER
      */
+    @SuppressWarnings("ConstantConditions")
     protected int getInstructionCategory(ProgramStatement stmt) {
 
         int opCode = stmt.getBinaryStatement() >>> (32 - 6);
@@ -271,7 +266,6 @@ public class InstructionStatistics extends AbstractMarsToolAndApplication {
         return InstructionStatistics.CATEGORY_OTHER;
     }
 
-
     /**
      * method that is called each time the MIPS simulator accesses the text segment.
      * Before an instruction is executed by the simulator, the instruction is fetched from the program memory.
@@ -287,10 +281,7 @@ public class InstructionStatistics extends AbstractMarsToolAndApplication {
             return;
 
         // check for a read access in the text segment
-        if (notice.getAccessType() == AccessNotice.READ && notice instanceof MemoryAccessNotice) {
-
-            // now it is safe to make a cast of the notice
-            MemoryAccessNotice memAccNotice = (MemoryAccessNotice) notice;
+        if (notice.getAccessType() == AccessNotice.READ && notice instanceof MemoryAccessNotice memAccNotice) {
 
             // The next three statments are from Felipe Lessa's instruction counter.  Prevents double-counting.
             int a = memAccNotice.getAddress();
@@ -318,7 +309,6 @@ public class InstructionStatistics extends AbstractMarsToolAndApplication {
         }
     }
 
-
     /**
      * performs initialization tasks of the counters before the GUI is created.
      */
@@ -328,7 +318,6 @@ public class InstructionStatistics extends AbstractMarsToolAndApplication {
         for (int i = 0; i < InstructionStatistics.MAX_CATEGORY; i++)
             m_counters[i] = 0;
     }
-
 
     /**
      * resets the counter values of the tool and updates the display.
@@ -340,7 +329,6 @@ public class InstructionStatistics extends AbstractMarsToolAndApplication {
             m_counters[i] = 0;
         updateDisplay();
     }
-
 
     /**
      * updates the text fields and progress bars according to the current counter values.

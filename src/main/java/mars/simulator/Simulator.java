@@ -1,3 +1,30 @@
+/*
+Copyright (c) 2003-2010,  Pete Sanderson and Kenneth Vollmar
+
+Developed by Pete Sanderson (psanderson@otterbein.edu)
+and Kenneth Vollmar (kenvollmar@missouristate.edu)
+
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+"Software"), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject
+to the following conditions:
+
+The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR
+ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
+CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+(MIT license, http://www.opensource.org/licenses/mit-license.html)
+ */
 package mars.simulator;
 
 import mars.*;
@@ -16,34 +43,6 @@ import javax.swing.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Observable;
-	
-	/*
-Copyright (c) 2003-2010,  Pete Sanderson and Kenneth Vollmar
-
-Developed by Pete Sanderson (psanderson@otterbein.edu)
-and Kenneth Vollmar (kenvollmar@missouristate.edu)
-
-Permission is hereby granted, free of charge, to any person obtaining 
-a copy of this software and associated documentation files (the 
-"Software"), to deal in the Software without restriction, including 
-without limitation the rights to use, copy, modify, merge, publish, 
-distribute, sublicense, and/or sell copies of the Software, and to 
-permit persons to whom the Software is furnished to do so, subject 
-to the following conditions:
-
-The above copyright notice and this permission notice shall be 
-included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, 
-EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF 
-MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. 
-IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR 
-ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF 
-CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION 
-WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-
-(MIT license, http://www.opensource.org/licenses/mit-license.html)
- */
 
 /**
  * Used to simulate the execution of an assembled MIPS program.
@@ -51,7 +50,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * @author Pete Sanderson
  * @version August 2005
  **/
-
 public class Simulator extends Observable {
     // Others can set this true to indicate external interrupt.  Initially used
     // to simulate keyboard and display interrupts.  The device is identified
@@ -70,7 +68,7 @@ public class Simulator extends Observable {
     public static volatile int externalInterruptingDevice = NO_DEVICE;
     private static Simulator simulator = null;  // Singleton object
     private static Runnable interactiveGUIUpdater = null;
-    private final ArrayList<StopListener> stopListeners = new ArrayList<StopListener>(1);
+    private final ArrayList<StopListener> stopListeners = new ArrayList<>(1);
     private SimThread simulatorThread;
 
     private Simulator() {
@@ -105,7 +103,6 @@ public class Simulator extends Observable {
      *
      * @return true if next instruction is in delay slot, false otherwise.
      */
-
     public static boolean inDelaySlot() {
         return DelayedBranch.isTriggered();
     }
@@ -121,7 +118,6 @@ public class Simulator extends Observable {
      * @return true if execution completed, false otherwise
      * @throws ProcessingException Throws exception if run-time exception occurs.
      **/
-
     public boolean simulate(MIPSprogram p, int pc, int maxSteps, int[] breakPoints, AbstractAction actor) throws ProcessingException {
         simulatorThread = new SimThread(p, pc, maxSteps, breakPoints, actor);
         simulatorThread.start();
@@ -129,7 +125,7 @@ public class Simulator extends Observable {
         // Condition should only be true if run from command-line instead of GUI.
         // If so, just stick around until execution thread is finished.
         if (actor == null) {
-            Object dun = simulatorThread.get(); // this should emulate join()
+            @SuppressWarnings("unused") Object dun = simulatorThread.get(); // this should emulate join()
             ProcessingException pe = simulatorThread.pe;
             boolean done = simulatorThread.done;
             if (done) SystemIO.resetFiles(); // close any files opened in MIPS progra
@@ -204,8 +200,7 @@ public class Simulator extends Observable {
      * See SwingWorker.java for more details on its functionality and usage.  It is
      * provided by Sun Microsystems for download and is not part of the Swing library.
      */
-
-    class SimThread extends SwingWorker {
+    static class SimThread extends SwingWorker {
         private final MIPSprogram p;
         private final int pc;
         private final int maxSteps;
@@ -259,7 +254,6 @@ public class Simulator extends Observable {
          *
          * @return boolean value true if execution done, false otherwise
          */
-
         public Object construct() {
             // The next two statements are necessary for GUI to be consistently updated
             // before the simulation gets underway.  Without them, this happens only intermittently,
@@ -277,7 +271,7 @@ public class Simulator extends Observable {
             Simulator.getInstance().notifyObserversOfExecutionStart(maxSteps, pc);
 
             RegisterFile.initializeProgramCounter(pc);
-            ProgramStatement statement = null;
+            ProgramStatement statement;
             try {
                 statement = Globals.memory.getStatement(RegisterFile.getProgramCounter());
             } catch (AddressErrorException e) {
@@ -293,7 +287,7 @@ public class Simulator extends Observable {
                 this.done = true;
                 SystemIO.resetFiles(); // close any files opened in MIPS program
                 Simulator.getInstance().notifyObserversOfExecutionStop(maxSteps, pc);
-                return new Boolean(done);
+                return done;
             }
             int steps = 0;
 
@@ -362,7 +356,7 @@ public class Simulator extends Observable {
                             this.done = true;
                             SystemIO.resetFiles(); // close any files opened in MIPS program
                             Simulator.getInstance().notifyObserversOfExecutionStop(maxSteps, pc);
-                            return new Boolean(done); // execution completed without error.
+                            return done; // execution completed without error.
                         } else {
                             // See if an exception handler is present.  Assume this is the case
                             // if and only if memory location Memory.exceptionHandlerAddress
@@ -372,7 +366,7 @@ public class Simulator extends Observable {
                             ProgramStatement exceptionHandler = null;
                             try {
                                 exceptionHandler = Globals.memory.getStatement(Memory.exceptionHandlerAddress);
-                            } catch (AddressErrorException aee) {
+                            } catch (AddressErrorException ignored) {
                             } // will not occur with this well-known addres
                             if (exceptionHandler != null) {
                                 RegisterFile.setProgramCounter(Memory.exceptionHandlerAddress);
@@ -382,7 +376,7 @@ public class Simulator extends Observable {
                                 this.done = true;
                                 SystemIO.resetFiles(); // close any files opened in MIPS program
                                 Simulator.getInstance().notifyObserversOfExecutionStop(maxSteps, pc);
-                                return new Boolean(done);
+                                return done;
                             }
                         }
                     }
@@ -398,11 +392,11 @@ public class Simulator extends Observable {
 
                 // Volatile variable initialized false but can be set true by the main thread.
                 // Used to stop or pause a running MIPS program.  See stopSimulation() above.
-                if (stop == true) {
+                if (stop) {
                     this.constructReturnReason = PAUSE_OR_STOP;
                     this.done = false;
                     Simulator.getInstance().notifyObserversOfExecutionStop(maxSteps, pc);
-                    return new Boolean(done);
+                    return done;
                 }
                 //	Return if we've reached a breakpoint.
                 if ((breakPoints != null) &&
@@ -410,7 +404,7 @@ public class Simulator extends Observable {
                     this.constructReturnReason = BREAKPOINT;
                     this.done = false;
                     Simulator.getInstance().notifyObserversOfExecutionStop(maxSteps, pc);
-                    return new Boolean(done); // false;
+                    return done; // false;
                 }
                 // Check number of MIPS instructions executed.  Return if at limit (-1 is no limit).
                 if (maxSteps > 0) {
@@ -419,7 +413,7 @@ public class Simulator extends Observable {
                         this.constructReturnReason = MAX_STEPS;
                         this.done = false;
                         Simulator.getInstance().notifyObserversOfExecutionStop(maxSteps, pc);
-                        return new Boolean(done);// false;
+                        return done;// false;
                     }
                 }
 
@@ -436,7 +430,7 @@ public class Simulator extends Observable {
                             RunSpeedPanel.getInstance().getRunSpeed() < RunSpeedPanel.UNLIMITED_SPEED) {
                         try {
                             Thread.sleep((int) (1000 / RunSpeedPanel.getInstance().getRunSpeed())); // make sure it's never zero!
-                        } catch (InterruptedException e) {
+                        } catch (InterruptedException ignored) {
                         }
                     }
                 }
@@ -459,7 +453,7 @@ public class Simulator extends Observable {
                     this.done = true;
                     SystemIO.resetFiles(); // close any files opened in MIPS program
                     Simulator.getInstance().notifyObserversOfExecutionStop(maxSteps, pc);
-                    return new Boolean(done);
+                    return done;
                 }
             }
             // DPS July 2007.  This "if" statement is needed for correct program
@@ -476,7 +470,7 @@ public class Simulator extends Observable {
             this.done = true;
             SystemIO.resetFiles(); // close any files opened in MIPS program
             Simulator.getInstance().notifyObserversOfExecutionStop(maxSteps, pc);
-            return new Boolean(done); // true;  // execution completed
+            return done; // true;  // execution completed
         }
 
 
@@ -489,7 +483,6 @@ public class Simulator extends Observable {
          * Its action depends on what caused the return from construct() and what
          * action led to the call of construct() in the first place.
          */
-
         public void finished() {
             // If running from the command-line, then there is no GUI to update.
             if (Globals.getGui() == null) {
@@ -513,12 +506,10 @@ public class Simulator extends Observable {
                     }
                 }
             }
-            return;
         }
-
     }
 
-    private class UpdateGUI implements Runnable {
+    private static class UpdateGUI implements Runnable {
         public void run() {
             if (Globals.getGui().getRegistersPane().getSelectedComponent() ==
                     Globals.getGui().getMainPane().getExecutePane().getRegistersWindow()) {

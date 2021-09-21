@@ -7,6 +7,7 @@ import org.w3c.dom.NodeList;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
+import javax.swing.Timer;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.awt.*;
@@ -14,28 +15,26 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.io.Serial;
 import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Vector;
+import java.util.*;
+import java.util.List;
 
-
-class UnitAnimation extends JPanel
-        implements ActionListener {
-    /**
-     *
-     */
+class UnitAnimation extends JPanel implements ActionListener {
+    @Serial
     private static final long serialVersionUID = -2681757800180958534L;
+
     private static final int PWIDTH = 1000;     // size of this panel
     private static final int PHEIGHT = 574;
+    private static final int PERIOD = 8;    // velocity of frames in ms
+
     //config variables
-    private final int PERIOD = 8;    // velocity of frames in ms
     private final GraphicsConfiguration gc;
     private final GraphicsDevice gd;    // for reporting accl. memory usage
     private final int accelMemory;
     private final DecimalFormat df;
-    private final ArrayList<Vertex> vertexList;
-    private final HashMap<String, String> registerEquivalenceTable;
+    private final List<Vertex> vertexList;
+    private final Map<String, String> registerEquivalenceTable;
     private final int countRegLabel;
     private final int countALULabel;
     private final int countPCLabel;
@@ -54,8 +53,8 @@ class UnitAnimation extends JPanel
     private int indexY;
     private boolean xIsMoving, yIsMoving;        //flag for mouse movement.
     // private Vertex[][] inputGraph;
-    private Vector<Vector<Vertex>> outputGraph;
-    private ArrayList<Vertex> vertexTraversed;
+    private List<List<Vertex>> outputGraph;
+    private List<Vertex> vertexTraversed;
     private String instructionCode;
     private Boolean cursorInReg;
 
@@ -80,20 +79,18 @@ class UnitAnimation extends JPanel
         // load and initialise the images
         initImages();
 
-        vertexList = new ArrayList<Vertex>();
+        vertexList = new ArrayList<>();
         counter = 0;
         justStarted = true;
         instructionCode = instructionBinary;
 
         //declaration of labels definition.
-        registerEquivalenceTable = new HashMap<String, String>();
+        registerEquivalenceTable = new HashMap<>();
 
         countRegLabel = 400;
         countALULabel = 380;
         countPCLabel = 380;
         loadHashMapValues();
-
-
     } // end of ImagesTests()
 
     //set the binnary opcode value of the basic instructions of MIPS instruction set
@@ -111,14 +108,14 @@ class UnitAnimation extends JPanel
     }
 
     //import the list of opcodes of mips set of instructions
-    public void importXmlStringData(String xmlName, HashMap table, String elementTree, String tagId, String tagData) {
+    public void importXmlStringData(String xmlName, Map<String, String> table, String elementTree, String tagId, String tagData) {
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
         dbf.setNamespaceAware(false);
         DocumentBuilder docBuilder;
         try {
             //System.out.println();
             docBuilder = dbf.newDocumentBuilder();
-            Document doc = docBuilder.parse(getClass().getResource(xmlName).toString());
+            Document doc = docBuilder.parse(Objects.requireNonNull(getClass().getResource(xmlName)).toString());
             Element root = doc.getDocumentElement();
             Element equivalenceItem;
             NodeList bitsList, mnemonic;
@@ -176,7 +173,6 @@ class UnitAnimation extends JPanel
                     //System.out.println("immediate type");
                 }
 
-
                 other_axis = datapath_mapItem.getElementsByTagName("other_axis");
                 isMovingXaxis = datapath_mapItem.getElementsByTagName("isMovingXaxis");
                 targetVertex = datapath_mapItem.getElementsByTagName("target_vertex");
@@ -190,22 +186,18 @@ class UnitAnimation extends JPanel
                 }
             }
             //loading matrix of control of vertex.
-            outputGraph = new Vector<Vector<Vertex>>();
-            vertexTraversed = new ArrayList<Vertex>();
-            int size = vertexList.size();
+            outputGraph = new ArrayList<>();
+            vertexTraversed = new ArrayList<>();
+//            int size = vertexList.size();
             Vertex vertex;
-            ArrayList<Integer> targetList;
-            for (int i = 0; i < vertexList.size(); i++) {
-                vertex = vertexList.get(i);
+            List<Integer> targetList;
+            for (Vertex value : vertexList) {
+                vertex = value;
                 targetList = vertex.getTargetVertex();
-                Vector<Vertex> vertexOfTargets = new Vector<Vertex>();
-                for (int k = 0; k < targetList.size(); k++) {
-                    vertexOfTargets.add(vertexList.get(targetList.get(k)));
-                }
+                List<Vertex> vertexOfTargets = new ArrayList<>();
+                for (Integer integer : targetList)
+                    vertexOfTargets.add(vertexList.get(integer));
                 outputGraph.add(vertexOfTargets);
-            }
-            for (int i = 0; i < outputGraph.size(); i++) {
-                Vector<Vertex> vert = outputGraph.get(i);
             }
 
             vertexList.get(0).setActive(true);
@@ -222,10 +214,10 @@ class UnitAnimation extends JPanel
         DocumentBuilder docBuilder;
         try {
             docBuilder = dbf.newDocumentBuilder();
-            Document doc = docBuilder.parse(getClass().getResource(xmlName).toString());
+            Document doc = docBuilder.parse(Objects.requireNonNull(getClass().getResource(xmlName)).toString());
             Element root = doc.getDocumentElement();
             Element datapath_mapItem;
-            NodeList index_vertex, name, init, end, color, other_axis, isMovingXaxis, targetVertex, sourceVertex, isText;
+            NodeList index_vertex, name, init, end, color, other_axis, isMovingXaxis, targetVertex, isText;
             NodeList datapath_mapList = root.getElementsByTagName(elementTree);
             for (int i = 0; i < datapath_mapList.getLength(); i++) { //extract the vertex of the xml input and encapsulate into the vertex object
                 datapath_mapItem = (Element) datapath_mapList.item(i);
@@ -283,22 +275,18 @@ class UnitAnimation extends JPanel
                 }
             }
             //loading matrix of control of vertex.
-            outputGraph = new Vector<Vector<Vertex>>();
-            vertexTraversed = new ArrayList<Vertex>();
-            int size = vertexList.size();
+            outputGraph = new ArrayList<>();
+            vertexTraversed = new ArrayList<>();
+//            int size = vertexList.size();
             Vertex vertex;
-            ArrayList<Integer> targetList;
-            for (int i = 0; i < vertexList.size(); i++) {
-                vertex = vertexList.get(i);
+            List<Integer> targetList;
+            for (Vertex value : vertexList) {
+                vertex = value;
                 targetList = vertex.getTargetVertex();
-                Vector<Vertex> vertexOfTargets = new Vector<Vertex>();
-                for (int k = 0; k < targetList.size(); k++) {
-                    vertexOfTargets.add(vertexList.get(targetList.get(k)));
-                }
+                List<Vertex> vertexOfTargets = new ArrayList<>();
+                for (Integer integer : targetList)
+                    vertexOfTargets.add(vertexList.get(integer));
                 outputGraph.add(vertexOfTargets);
-            }
-            for (int i = 0; i < outputGraph.size(); i++) {
-                Vector<Vertex> vert = outputGraph.get(i);
             }
 
             vertexList.get(0).setActive(true);
@@ -322,16 +310,16 @@ class UnitAnimation extends JPanel
             BufferedImage im;
             if (datapatTypeUsed == register) {
                 im = ImageIO.read(
-                        getClass().getResource(Globals.imagesPath + "register.png"));
+                        Objects.requireNonNull(getClass().getResource(Globals.imagesPath + "register.png")));
             } else if (datapatTypeUsed == control) {
                 im = ImageIO.read(
-                        getClass().getResource(Globals.imagesPath + "control.png"));
+                        Objects.requireNonNull(getClass().getResource(Globals.imagesPath + "control.png")));
             } else if (datapatTypeUsed == aluControl) {
                 im = ImageIO.read(
-                        getClass().getResource(Globals.imagesPath + "ALUcontrol.png"));
+                        Objects.requireNonNull(getClass().getResource(Globals.imagesPath + "ALUcontrol.png")));
             } else {
                 im = ImageIO.read(
-                        getClass().getResource(Globals.imagesPath + "alu.png"));
+                        Objects.requireNonNull(getClass().getResource(Globals.imagesPath + "alu.png")));
             }
 
             int transparency = im.getColorModel().getTransparency();
@@ -351,9 +339,8 @@ class UnitAnimation extends JPanel
         this.repaint();
     }
 
-    public void actionPerformed(ActionEvent e)
     // triggered by the timer: update, repaint
-    {
+    public void actionPerformed(ActionEvent e) {
         if (justStarted)
             justStarted = false;
         if (xIsMoving)
@@ -377,7 +364,6 @@ class UnitAnimation extends JPanel
         executeAnimation(g);
         counter = (counter + 1) % 100;
         g2d.dispose();
-
     }
 
     private void drawImage(Graphics2D g2d, BufferedImage im, int x, int y, Color c) {
@@ -399,7 +385,7 @@ class UnitAnimation extends JPanel
         track = new int[size];
         for (int i = 0; i < size; i++)
             track[i] = v.getInit() + i;
-        if (v.isActive() == true) {
+        if (v.isActive()) {
             v.setFirst_interaction(false);
             for (int i = 0; i < size; i++) {
                 if (track[i] <= v.getCurrent()) {
@@ -410,7 +396,7 @@ class UnitAnimation extends JPanel
             if (v.getCurrent() == track[size - 1])
                 v.setActive(false);
             v.setCurrent(v.getCurrent() + 1);
-        } else if (v.isFirst_interaction() == false) {
+        } else if (!v.isFirst_interaction()) {
             for (int i = 0; i < size; i++) {
                 g2d.setColor(v.getColor());
                 g2d.fillRect(track[i], v.getOppositeAxis(), 3, 3);
@@ -431,7 +417,7 @@ class UnitAnimation extends JPanel
         for (int i = 0; i < size; i++)
             track[i] = v.getInit() - i;
 
-        if (v.isActive() == true) {
+        if (v.isActive()) {
             v.setFirst_interaction(false);
             for (int i = 0; i < size; i++) {
                 if (track[i] >= v.getCurrent()) {
@@ -443,7 +429,7 @@ class UnitAnimation extends JPanel
                 v.setActive(false);
 
             v.setCurrent(v.getCurrent() - 1);
-        } else if (v.isFirst_interaction() == false) {
+        } else if (!v.isFirst_interaction()) {
             for (int i = 0; i < size; i++) {
                 g2d.setColor(v.getColor());
                 g2d.fillRect(track[i], v.getOppositeAxis(), 3, 3);
@@ -470,7 +456,7 @@ class UnitAnimation extends JPanel
                 track[i] = v.getInit() + i;
         }
 
-        if (v.isActive() == true) {
+        if (v.isActive()) {
             v.setFirst_interaction(false);
             for (int i = 0; i < size; i++) {
                 if (track[i] >= v.getCurrent()) {
@@ -482,7 +468,7 @@ class UnitAnimation extends JPanel
                 v.setActive(false);
             v.setCurrent(v.getCurrent() - 1);
 
-        } else if (v.isFirst_interaction() == false) {
+        } else if (!v.isFirst_interaction()) {
             for (int i = 0; i < size; i++) {
                 g2d.setColor(v.getColor());
                 g2d.fillRect(v.getOppositeAxis(), track[i], 3, 3);
@@ -490,9 +476,9 @@ class UnitAnimation extends JPanel
         }
     }
 
-    //method to draw the lines that run from top to down.
-// public boolean printTrackUtoD(int init, int end ,int currentIndex, Graphics2D g2d, Color color, int otherAxis,
-//		 boolean active,  boolean firstInteraction){
+    // method to draw the lines that run from top to down.
+    // public boolean printTrackUtoD(int init, int end ,int currentIndex, Graphics2D g2d, Color color, int otherAxis,
+    //		 boolean active,  boolean firstInteraction){
     public void printTrackUtoD(Vertex v) {
 
         int size;
@@ -503,7 +489,7 @@ class UnitAnimation extends JPanel
         for (int i = 0; i < size; i++)
             track[i] = v.getInit() + i;
 
-        if (v.isActive() == true) {
+        if (v.isActive()) {
             v.setFirst_interaction(false);
             for (int i = 0; i < size; i++) {
                 if (track[i] <= v.getCurrent()) {
@@ -515,7 +501,7 @@ class UnitAnimation extends JPanel
             if (v.getCurrent() == track[size - 1])
                 v.setActive(false);
             v.setCurrent(v.getCurrent() + 1);
-        } else if (v.isFirst_interaction() == false) {
+        } else if (!v.isFirst_interaction()) {
             for (int i = 0; i < size; i++) {
                 g2d.setColor(v.getColor());
                 g2d.fillRect(v.getOppositeAxis(), track[i], 3, 3);
@@ -543,20 +529,22 @@ class UnitAnimation extends JPanel
         Vertex vert;
         for (int i = 0; i < vertexTraversed.size(); i++) {
             vert = vertexTraversed.get(i);
-            if (vert.isMovingXaxis == true) {
+            if (vert.isMovingXaxis) {
                 if (vert.getDirection() == Vertex.movingLeft) {
                     printTrackLtoR(vert);
-                    if (vert.isActive() == false) {
+                    if (!vert.isActive()) {
                         int j = vert.getTargetVertex().size();
                         Vertex tempVertex;
                         for (int k = 0; k < j; k++) {
                             tempVertex = outputGraph.get(vert.getNumIndex()).get(k);
-                            Boolean hasThisVertex = false;
-                            for (int m = 0; m < vertexTraversed.size(); m++) {
-                                if (tempVertex.getNumIndex() == vertexTraversed.get(m).getNumIndex())
+                            boolean hasThisVertex = false;
+                            for (Vertex vertex : vertexTraversed) {
+                                if (tempVertex.getNumIndex() == vertex.getNumIndex()) {
                                     hasThisVertex = true;
+                                    break;
+                                }
                             }
-                            if (hasThisVertex == false) {
+                            if (!hasThisVertex) {
                                 outputGraph.get(vert.getNumIndex()).get(k).setActive(true);
                                 vertexTraversed.add(outputGraph.get(vert.getNumIndex()).get(k));
                             }
@@ -564,17 +552,19 @@ class UnitAnimation extends JPanel
                     }
                 } else {
                     printTrackRtoL(vert);
-                    if (vert.isActive() == false) {
+                    if (!vert.isActive()) {
                         int j = vert.getTargetVertex().size();
                         Vertex tempVertex;
                         for (int k = 0; k < j; k++) {
                             tempVertex = outputGraph.get(vert.getNumIndex()).get(k);
-                            Boolean hasThisVertex = false;
-                            for (int m = 0; m < vertexTraversed.size(); m++) {
-                                if (tempVertex.getNumIndex() == vertexTraversed.get(m).getNumIndex())
+                            boolean hasThisVertex = false;
+                            for (Vertex vertex : vertexTraversed) {
+                                if (tempVertex.getNumIndex() == vertex.getNumIndex()) {
                                     hasThisVertex = true;
+                                    break;
+                                }
                             }
-                            if (hasThisVertex == false) {
+                            if (!hasThisVertex) {
                                 outputGraph.get(vert.getNumIndex()).get(k).setActive(true);
                                 vertexTraversed.add(outputGraph.get(vert.getNumIndex()).get(k));
                             }
@@ -584,22 +574,22 @@ class UnitAnimation extends JPanel
             } //end of condition of X axis
             else {
                 if (vert.getDirection() == Vertex.movingDownside) {
-                    if (vert.isText == true)
-                        ;
-                    else
+                    if (!vert.isText)
                         printTrackDtoU(vert);
 
-                    if (vert.isActive() == false) {
+                    if (!vert.isActive()) {
                         int j = vert.getTargetVertex().size();
                         Vertex tempVertex;
                         for (int k = 0; k < j; k++) {
                             tempVertex = outputGraph.get(vert.getNumIndex()).get(k);
-                            Boolean hasThisVertex = false;
-                            for (int m = 0; m < vertexTraversed.size(); m++) {
-                                if (tempVertex.getNumIndex() == vertexTraversed.get(m).getNumIndex())
+                            boolean hasThisVertex = false;
+                            for (Vertex vertex : vertexTraversed) {
+                                if (tempVertex.getNumIndex() == vertex.getNumIndex()) {
                                     hasThisVertex = true;
+                                    break;
+                                }
                             }
-                            if (hasThisVertex == false) {
+                            if (!hasThisVertex) {
                                 outputGraph.get(vert.getNumIndex()).get(k).setActive(true);
                                 vertexTraversed.add(outputGraph.get(vert.getNumIndex()).get(k));
                             }
@@ -608,17 +598,19 @@ class UnitAnimation extends JPanel
 
                 } else {
                     printTrackUtoD(vert);
-                    if (vert.isActive() == false) {
+                    if (!vert.isActive()) {
                         int j = vert.getTargetVertex().size();
                         Vertex tempVertex;
                         for (int k = 0; k < j; k++) {
                             tempVertex = outputGraph.get(vert.getNumIndex()).get(k);
-                            Boolean hasThisVertex = false;
-                            for (int m = 0; m < vertexTraversed.size(); m++) {
-                                if (tempVertex.getNumIndex() == vertexTraversed.get(m).getNumIndex())
+                            boolean hasThisVertex = false;
+                            for (Vertex vertex : vertexTraversed) {
+                                if (tempVertex.getNumIndex() == vertex.getNumIndex()) {
                                     hasThisVertex = true;
+                                    break;
+                                }
                             }
-                            if (hasThisVertex == false) {
+                            if (!hasThisVertex) {
                                 outputGraph.get(vert.getNumIndex()).get(k).setActive(true);
                                 vertexTraversed.add(outputGraph.get(vert.getNumIndex()).get(k));
                             }
@@ -629,13 +621,13 @@ class UnitAnimation extends JPanel
         }
     }
 
-    class Vertex {
+    static class Vertex {
         public static final int movingUpside = 1;
         public static final int movingDownside = 2;
         public static final int movingLeft = 3;
         public static final int movingRight = 4;
         private final boolean isText;
-        private final ArrayList<Integer> targetVertex;
+        private final List<Integer> targetVertex;
         public int direction;
         public int oppositeAxis;
         private int numIndex;
@@ -661,7 +653,7 @@ class UnitAnimation extends JPanel
             this.active = false;
             this.isText = isText;
             this.color = new Color(0, 153, 0);
-            if (isMovingXaxis == true) {
+            if (isMovingXaxis) {
                 if (init < end)
                     direction = movingLeft;
                 else
@@ -674,9 +666,9 @@ class UnitAnimation extends JPanel
                     direction = movingDownside;
             }
             String[] list = listTargetVertex.split("#");
-            targetVertex = new ArrayList<Integer>();
-            for (int i = 0; i < list.length; i++) {
-                targetVertex.add(Integer.parseInt(list[i]));
+            targetVertex = new ArrayList<>();
+            for (String s : list) {
+                targetVertex.add(Integer.parseInt(s));
                 //	System.out.println("Adding " + i + " " +  Integer.parseInt(list[i])+ " in target");
             }
             String[] listColor = listOfColors.split("#");
@@ -691,8 +683,7 @@ class UnitAnimation extends JPanel
             return this.isText;
         }
 
-
-        public ArrayList<Integer> getTargetVertex() {
+        public List<Integer> getTargetVertex() {
             return targetVertex;
         }
 

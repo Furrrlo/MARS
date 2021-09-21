@@ -33,6 +33,7 @@ import mars.mips.hardware.RegisterFile;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 
 /**
  * Stores information of a macro definition.
@@ -40,7 +41,7 @@ import java.util.Collections;
  * @author M.H.Sekhavat <sekhavat17@gmail.com>
  */
 public class Macro {
-    private final ArrayList<String> labels;
+    private final List<String> labels;
     private String name;
     private MIPSprogram program;
     /**
@@ -59,16 +60,14 @@ public class Macro {
         program = null;
         fromLine = toLine = 0;
         origFromLine = origToLine = 0;
-        args = new ArrayList<String>();
-        labels = new ArrayList<String>();
+        args = new ArrayList<>();
+        labels = new ArrayList<>();
     }
 
     /**
      * returns whether <code>tokenValue</code> is macro parameter or not
      *
-     * @param tokenValue
      * @param acceptSpimStyleParameters accepts SPIM-style parameters which begin with '$' if true
-     * @return
      */
     public static boolean tokenIsMacroParameter(String tokenValue, boolean acceptSpimStyleParameters) {
         if (acceptSpimStyleParameters) {
@@ -150,10 +149,8 @@ public class Macro {
      */
     @Override
     public boolean equals(Object obj) {
-        if (obj instanceof Macro) {
-            Macro macro = (Macro) obj;
+        if (obj instanceof Macro macro)
             return macro.getName().equals(name) && (macro.args.size() == args.size());
-        }
         return super.equals(obj);
     }
 
@@ -167,15 +164,12 @@ public class Macro {
      * Also appends "_M#" to all labels defined inside macro body where # is value of <code>counter</code>
      *
      * @param line    source line number in macro definition to be substituted
-     * @param args
      * @param counter unique macro expansion id
-     * @param errors
      * @return <code>line</code>-th line of source code, with substituted
      * arguments
      */
-
     public String getSubstitutedLine(int line, TokenList args, long counter, ErrorList errors) {
-        TokenList tokens = (TokenList) program.getTokenList().get(line - 1);
+        TokenList tokens = program.getTokenList().get(line - 1);
         String s = program.getSourceLine(line);
 
         for (int i = tokens.size() - 1; i >= 0; i--) {
@@ -205,10 +199,7 @@ public class Macro {
     }
 
     /**
-     * returns true if <code>value</code> is name of a label defined in this macro's body.
-     *
-     * @param value
-     * @return
+     * @return true if <code>value</code> is name of a label defined in this macro's body.
      */
     private boolean tokenIsMacroLabel(String value) {
         return (Collections.binarySearch(labels, value) >= 0);
@@ -216,18 +207,13 @@ public class Macro {
 
     /**
      * replaces token <code>tokenToBeReplaced</code> which is occured in <code>source</code> with <code>substitute</code>.
-     *
-     * @param source
-     * @param tokenToBeReplaced
-     * @param substitute
-     * @return
      */
-// Initially the position of the substitute was based on token position but that proved problematic
-// in that the source string does not always match the token list from which the token comes. The
-// token list has already had .eqv equivalences applied whereas the source may not.  This is because
-// the source comes from a macro definition?  That has proven to be a tough question to answer.
-// DPS 12-feb-2013
     private String replaceToken(String source, Token tokenToBeReplaced, String substitute) {
+        // Initially the position of the substitute was based on token position but that proved problematic
+        // in that the source string does not always match the token list from which the token comes. The
+        // token list has already had .eqv equivalences applied whereas the source may not.  This is because
+        // the source comes from a macro definition?  That has proven to be a tough question to answer.
+        // DPS 12-feb-2013
         String stringToBeReplaced = tokenToBeReplaced.getValue();
         int pos = source.indexOf(stringToBeReplaced);
         return (pos < 0) ? source : source.substring(0, pos) + substitute + source.substring(pos + stringToBeReplaced.length());

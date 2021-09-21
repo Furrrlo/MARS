@@ -1,3 +1,30 @@
+/*
+Copyright (c) 2003-2010,  Pete Sanderson and Kenneth Vollmar
+
+Developed by Pete Sanderson (psanderson@otterbein.edu)
+and Kenneth Vollmar (kenvollmar@missouristate.edu)
+
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+"Software"), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject
+to the following conditions:
+
+The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR
+ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
+CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+(MIT license, http://www.opensource.org/licenses/mit-license.html)
+ */
 package mars.venus.editors.generic;
 
 import mars.Globals;
@@ -5,9 +32,6 @@ import mars.venus.EditPane;
 import mars.venus.editors.MARSTextEditingArea;
 
 import javax.swing.*;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
-import javax.swing.event.UndoableEditEvent;
 import javax.swing.event.UndoableEditListener;
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
@@ -15,36 +39,7 @@ import javax.swing.undo.CompoundEdit;
 import javax.swing.undo.UndoManager;
 import java.awt.*;
 
-/*
-Copyright (c) 2003-2010,  Pete Sanderson and Kenneth Vollmar
-
-Developed by Pete Sanderson (psanderson@otterbein.edu)
-and Kenneth Vollmar (kenvollmar@missouristate.edu)
-
-Permission is hereby granted, free of charge, to any person obtaining 
-a copy of this software and associated documentation files (the 
-"Software"), to deal in the Software without restriction, including 
-without limitation the rights to use, copy, modify, merge, publish, 
-distribute, sublicense, and/or sell copies of the Software, and to 
-permit persons to whom the Software is furnished to do so, subject 
-to the following conditions:
-
-The above copyright notice and this permission notice shall be 
-included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, 
-EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF 
-MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. 
-IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR 
-ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF 
-CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION 
-WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-
-(MIT license, http://www.opensource.org/licenses/mit-license.html)
- */
-
 public class GenericTextArea extends JTextArea implements MARSTextEditingArea {
-
 
     private final EditPane editPane;
     private final UndoManager undoManager;
@@ -74,27 +69,19 @@ public class GenericTextArea extends JTextArea implements MARSTextEditingArea {
 
         this.undoManager = new UndoManager();
 
-        this.getCaret().addChangeListener(
-                new ChangeListener() {
-                    public void stateChanged(ChangeEvent e) {
-                        editPane.displayCaretPosition(getCaretPosition());
-                    }
-                });
+        this.getCaret().addChangeListener(e -> editPane.displayCaretPosition(getCaretPosition()));
 
         // Needed to support unlimited undo/redo capability
-        undoableEditListener =
-                new UndoableEditListener() {
-                    public void undoableEditHappened(UndoableEditEvent e) {
-                        //Remember the edit and update the menus.
-                        if (isCompoundEdit) {
-                            compoundEdit.addEdit(e.getEdit());
-                        } else {
-                            undoManager.addEdit(e.getEdit());
-                            editPane.updateUndoState();
-                            editPane.updateRedoState();
-                        }
-                    }
-                };
+        undoableEditListener = e -> {
+            //Remember the edit and update the menus.
+            if (isCompoundEdit) {
+                compoundEdit.addEdit(e.getEdit());
+            } else {
+                undoManager.addEdit(e.getEdit());
+                editPane.updateUndoState();
+                editPane.updateRedoState();
+            }
+        };
         this.getDocument().addUndoableEditListener(undoableEditListener);
     }
 
@@ -135,7 +122,6 @@ public class GenericTextArea extends JTextArea implements MARSTextEditingArea {
      * @param s        String containing text
      * @param editable set true if code is editable else false
      **/
-
     public void setSourceCode(String s, boolean editable) {
         this.setText(s);
         this.setBackground((editable) ? Color.WHITE : Color.GRAY);
@@ -183,7 +169,6 @@ public class GenericTextArea extends JTextArea implements MARSTextEditingArea {
         this.getCaret().setSelectionVisible(vis);
     }
 
-
     /**
      * Returns the undo manager for this editing area
      *
@@ -219,7 +204,6 @@ public class GenericTextArea extends JTextArea implements MARSTextEditingArea {
         this.setCaretVisible(true);
     }
 
-
     //////////////////////////////////////////////////////////////////////////
     //  Methods to support Find/Replace feature
     //
@@ -241,7 +225,7 @@ public class GenericTextArea extends JTextArea implements MARSTextEditingArea {
      */
     public int doFindText(String find, boolean caseSensitive) {
         int findPosn = sourceCode.getCaretPosition();
-        int nextPosn = 0;
+        int nextPosn;
         nextPosn = nextIndex(sourceCode.getText(), find, findPosn, caseSensitive);
         if (nextPosn >= 0) {
             sourceCode.requestFocus(); // guarantees visibility of the blue highlight 
@@ -303,8 +287,7 @@ public class GenericTextArea extends JTextArea implements MARSTextEditingArea {
      * successful and there is at least one additional match.
      */
     public int doReplace(String find, String replace, boolean caseSensitive) {
-        int nextPosn = 0;
-        int posn;
+        int nextPosn;
         // Will perform a "find" and return, unless positioned at the end of
         // a selected "find" result.
         if (find == null || !find.equals(sourceCode.getSelectedText()) ||
@@ -380,6 +363,4 @@ public class GenericTextArea extends JTextArea implements MARSTextEditingArea {
     }
     //
     /////////////////////////////  End Find/Replace methods //////////////////////////
-
-
 }

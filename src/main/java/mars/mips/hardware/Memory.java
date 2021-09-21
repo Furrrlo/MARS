@@ -1,3 +1,30 @@
+/*
+Copyright (c) 2003-2009,  Pete Sanderson and Kenneth Vollmar
+
+Developed by Pete Sanderson (psanderson@otterbein.edu)
+and Kenneth Vollmar (kenvollmar@missouristate.edu)
+
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+"Software"), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject
+to the following conditions:
+
+The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR
+ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
+CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+(MIT license, http://www.opensource.org/licenses/mit-license.html)
+ */
 package mars.mips.hardware;
 
 import mars.Globals;
@@ -8,34 +35,6 @@ import mars.simulator.Exceptions;
 import mars.util.Binary;
 
 import java.util.*;
-	
-	/*
-Copyright (c) 2003-2009,  Pete Sanderson and Kenneth Vollmar
-
-Developed by Pete Sanderson (psanderson@otterbein.edu)
-and Kenneth Vollmar (kenvollmar@missouristate.edu)
-
-Permission is hereby granted, free of charge, to any person obtaining 
-a copy of this software and associated documentation files (the 
-"Software"), to deal in the Software without restriction, including 
-without limitation the rights to use, copy, modify, merge, publish, 
-distribute, sublicense, and/or sell copies of the Software, and to 
-permit persons to whom the Software is furnished to do so, subject 
-to the following conditions:
-
-The above copyright notice and this permission notice shall be 
-included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, 
-EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF 
-MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. 
-IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR 
-ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF 
-CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION 
-WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-
-(MIT license, http://www.opensource.org/licenses/mit-license.html)
- */
 
 /**
  * Represents MIPS memory.  Different segments are represented by different data structs.
@@ -43,11 +42,9 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * @author Pete Sanderson
  * @version August 2003
  */
-
 /////////////////////////////////////////////////////////////////////
 // NOTE: This implementation is purely big-endian.  MIPS can handle either one.
 /////////////////////////////////////////////////////////////////////
-
 public class Memory extends Observable {
 
     /**
@@ -229,7 +226,7 @@ public class Memory extends Observable {
      * Current setting for endian (default LITTLE_ENDIAN)
      **/
     private static boolean byteOrder = LITTLE_ENDIAN;
-    Collection observables = getNewMemoryObserversCollection();
+    Collection<MemoryObservable> observables = Collections.synchronizedCollection(new ArrayList<>());
     private int[][] dataBlockTable;
     private int[][] kernelDataBlockTable;
     private int[][] stackBlockTable;
@@ -251,7 +248,6 @@ public class Memory extends Observable {
     /**
      * Returns the unique Memory instance, which becomes in essence global.
      */
-
     public static Memory getInstance() {
         return uniqueMemoryInstance;
     }
@@ -261,7 +257,6 @@ public class Memory extends Observable {
      * collection of memory segment addresses. e.g. text segment starting at
      * address 0x00400000.  Configuration can be modified starting with MARS 3.7.
      */
-
     public static void setConfiguration() {
         textBaseAddress = MemoryConfigurations.getCurrentConfiguration().getTextBaseAddress(); //0x00400000;
         dataSegmentBaseAddress = MemoryConfigurations.getCurrentConfiguration().getDataSegmentBaseAddress(); //0x10000000;
@@ -425,7 +420,6 @@ public class Memory extends Observable {
     /**
      * Explicitly clear the contents of memory.  Typically done at start of assembly.
      */
-
     public void clear() {
         setConfiguration();
         initialize();
@@ -458,7 +452,7 @@ public class Memory extends Observable {
     }
 
 
-    /********************************  THE GETTER METHODS  ******************************/
+    /* *******************************  THE GETTER METHODS  ******************************/
 
     //////////////////////////////////////////////////////////////////////////////////////////
 
@@ -519,7 +513,6 @@ public class Memory extends Observable {
      * @param length  Number of bytes to be written.
      * @return old value that was replaced by the set operation
      **/
-
     // Allocates blocks if necessary.
     public int set(int address, int value, int length) throws AddressErrorException {
         int oldValue = 0;
@@ -689,7 +682,6 @@ public class Memory extends Observable {
      * @param value   Value to be stored at that address.  Only low order 8 bits used.
      * @return old value that was replaced by setByte operation.
      **/
-
     public int setByte(int address, int value) throws AddressErrorException {
         return (Globals.getSettings().getBackSteppingEnabled())
                 ? Globals.program.getBackStepper().addMemoryRestoreByte(address, set(address, value, 1))
@@ -727,7 +719,6 @@ public class Memory extends Observable {
      * @throws AddressErrorException If address is not on word boundary or is outside Text Segment.
      * @see ProgramStatement
      **/
-
     public void setStatement(int address, ProgramStatement statement) throws AddressErrorException {
         if (address % 4 != 0 || !(inTextSegment(address) || inKernelTextSegment(address))) {
             throw new AddressErrorException(
@@ -753,7 +744,6 @@ public class Memory extends Observable {
      * @param length  Number of bytes to be read.
      * @return Value stored starting at that address.
      **/
-
     public int get(int address, int length) throws AddressErrorException {
         return get(address, length, true);
     }
@@ -762,7 +752,7 @@ public class Memory extends Observable {
 
     // Does the real work, but includes option to NOT notify observers.
     private int get(int address, int length, boolean notify) throws AddressErrorException {
-        int value = 0;
+        int value;
         int relativeByteAddress;
         if (inDataSegment(address)) {
             // in data segment.  Will read one byte at a time, w/o regard to boundaries.
@@ -806,7 +796,7 @@ public class Memory extends Observable {
     }
 
 
-    /*********************************  THE UTILITIES  *************************************/
+    /* ********************************  THE UTILITIES  *************************************/
 
     /**
      * Starting at the given word address, read a 4 byte word as an int.
@@ -817,14 +807,13 @@ public class Memory extends Observable {
      * @return Word (4-byte value) stored starting at that address.
      * @throws AddressErrorException If address is not on word boundary.
      **/
-
     // Note: the logic here is repeated in getRawWordOrNull() below.  Logic is
     // simplified by having this method just call getRawWordOrNull() then
     // return either the int of its return value, or 0 if it returns null.
     // Doing so would be detrimental to simulation runtime performance, so
     // I decided to keep the duplicate logic.
     public int getRawWord(int address) throws AddressErrorException {
-        int value = 0;
+        int value;
         int relative;
         if (address % WORD_LENGTH_BYTES != 0) {
             throw new AddressErrorException("address for fetch not aligned on word boundary",
@@ -889,10 +878,9 @@ public class Memory extends Observable {
      * that cause return value null are described above.
      * @throws AddressErrorException If address is not on word boundary.
      **/
-
     // See note above, with getRawWord(), concerning duplicated logic.
     public Integer getRawWordOrNull(int address) throws AddressErrorException {
-        Integer value = null;
+        Integer value;
         int relative;
         if (address % WORD_LENGTH_BYTES != 0) {
             throw new AddressErrorException("address for fetch not aligned on word boundary",
@@ -908,7 +896,7 @@ public class Memory extends Observable {
             value = fetchWordOrNullFromTable(stackBlockTable, relative);
         } else if (inTextSegment(address) || inKernelTextSegment(address)) {
             try {
-                value = (getStatementNoNotify(address) == null) ? null : new Integer(getStatementNoNotify(address).getBinaryStatement());
+                value = (getStatementNoNotify(address) == null) ? null : getStatementNoNotify(address).getBinaryStatement();
             } catch (AddressErrorException aee) {
                 value = null;
             }
@@ -1013,7 +1001,6 @@ public class Memory extends Observable {
      * @throws AddressErrorException If address is not on word boundary or is outside Text Segment.
      * @see ProgramStatement
      **/
-
     public ProgramStatement getStatement(int address) throws AddressErrorException {
         return getStatement(address, true);
       	/*
@@ -1046,7 +1033,6 @@ public class Memory extends Observable {
      * @throws AddressErrorException If address is not on word boundary or is outside Text Segment.
      * @see ProgramStatement
      **/
-
     public ProgramStatement getStatementNoNotify(int address) throws AddressErrorException {
         return getStatement(address, false);
       	/*
@@ -1091,7 +1077,6 @@ public class Memory extends Observable {
      *
      * @param obs the observer
      */
-
     public void addObserver(Observer obs) {
         try {  // split so start address always >= end address
             this.addObserver(obs, 0, 0x7ffffffc);
@@ -1109,7 +1094,6 @@ public class Memory extends Observable {
      * @param obs  the observer
      * @param addr the memory address which must be on word boundary
      */
-
     public void addObserver(Observer obs, int addr) throws AddressErrorException {
         this.addObserver(obs, addr, addr);
     }
@@ -1159,10 +1143,8 @@ public class Memory extends Observable {
      * @param obs Observer to be removed
      */
     public void deleteObserver(Observer obs) {
-        Iterator it = observables.iterator();
-        while (it.hasNext()) {
-            ((MemoryObservable) it.next()).deleteObserver(obs);
-        }
+        for (MemoryObservable observable : observables)
+            observable.deleteObserver(obs);
     }
 
     /**
@@ -1170,15 +1152,13 @@ public class Memory extends Observable {
      */
     public void deleteObservers() {
         // just drop the collection
-        observables = getNewMemoryObserversCollection();
+        observables = Collections.synchronizedCollection(new ArrayList<>());
     }
 
     /**
      * Overridden to be unavailable.  The notice that an Observer
      * receives does not come from the memory object itself, but
      * instead from a delegate.
-     *
-     * @throws UnsupportedOperationException
      */
     public void notifyObservers() {
         throw new UnsupportedOperationException();
@@ -1188,19 +1168,12 @@ public class Memory extends Observable {
      * Overridden to be unavailable.  The notice that an Observer
      * receives does not come from the memory object itself, but
      * instead from a delegate.
-     *
-     * @throws UnsupportedOperationException
      */
     public void notifyObservers(Object obj) {
         throw new UnsupportedOperationException();
     }
 
-    private Collection getNewMemoryObserversCollection() {
-        return new Vector();  // Vectors are thread-safe
-    }
-
     /*********************************  THE HELPERS  *************************************/
-
 
     ////////////////////////////////////////////////////////////////////////////////
     //
@@ -1210,19 +1183,14 @@ public class Memory extends Observable {
     // is from command mode, Globals.program is null but still want ability to observe.
     private void notifyAnyObservers(int type, int address, int length, int value) {
         if ((Globals.program != null || Globals.getGui() == null) && this.observables.size() > 0) {
-            Iterator it = this.observables.iterator();
-            MemoryObservable mo;
-            while (it.hasNext()) {
-                mo = (MemoryObservable) it.next();
-                if (mo.match(address)) {
+            for (MemoryObservable mo : this.observables) {
+                if (mo.match(address))
                     mo.notifyObserver(new MemoryAccessNotice(type, address, length, value));
-                }
             }
         }
     }
 
-    private int storeBytesInTable(int[][] blockTable,
-                                  int relativeByteAddress, int length, int value) {
+    private int storeBytesInTable(int[][] blockTable, int relativeByteAddress, int length, int value) {
         return storeOrFetchBytesInTable(blockTable, relativeByteAddress, length, value, STORE);
     }
 
@@ -1312,7 +1280,7 @@ public class Memory extends Observable {
     // Modified 29 Dec 2005 to return overwritten value.
 
     private synchronized int fetchWordFromTable(int[][] blockTable, int relative) {
-        int value = 0;
+        int value;
         int block, offset;
         block = relative / BLOCK_LENGTH_WORDS;
         offset = relative % BLOCK_LENGTH_WORDS;
@@ -1334,7 +1302,7 @@ public class Memory extends Observable {
     //
 
     private synchronized Integer fetchWordOrNullFromTable(int[][] blockTable, int relative) {
-        int value = 0;
+        int value;
         int block, offset;
         block = relative / BLOCK_LENGTH_WORDS;
         offset = relative % BLOCK_LENGTH_WORDS;
@@ -1344,7 +1312,7 @@ public class Memory extends Observable {
         } else {
             value = blockTable[block][offset];
         }
-        return new Integer(value);
+        return value;
     }
 
     ////////////////////////////////////////////////////////////////////////////////
@@ -1428,7 +1396,7 @@ public class Memory extends Observable {
     /////////////////////////////////////////////////////////////////////////
     // Private class whose objects will represent an observable-observer pair
     // for a given memory address or range.
-    private class MemoryObservable extends Observable implements Comparable {
+    private static class MemoryObservable extends Observable implements Comparable<MemoryObservable> {
         private final int lowAddress;
         private final int highAddress;
 
@@ -1449,11 +1417,8 @@ public class Memory extends Observable {
 
         // Useful to have for future refactoring, if it actually becomes worthwhile to sort
         // these or put 'em in a tree (rather than sequential search through list).
-        public int compareTo(Object obj) {
-            if (!(obj instanceof MemoryObservable)) {
-                throw new ClassCastException();
-            }
-            MemoryObservable mo = (MemoryObservable) obj;
+        @SuppressWarnings("ConstantConditions")
+        public int compareTo(MemoryObservable mo) {
             if (this.lowAddress < mo.lowAddress || this.lowAddress == mo.lowAddress && this.highAddress < mo.highAddress) {
                 return -1;
             }

@@ -1,3 +1,30 @@
+/*
+Copyright (c) 2003-2008,  Pete Sanderson and Kenneth Vollmar
+
+Developed by Pete Sanderson (psanderson@otterbein.edu)
+and Kenneth Vollmar (kenvollmar@missouristate.edu)
+
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+"Software"), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject
+to the following conditions:
+
+The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR
+ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
+CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+(MIT license, http://www.opensource.org/licenses/mit-license.html)
+ */
 package mars.mips.instructions.syscalls;
 
 import mars.Globals;
@@ -8,38 +35,9 @@ import mars.mips.hardware.RegisterFile;
 
 import javax.swing.*;
 
-/*
-Copyright (c) 2003-2008,  Pete Sanderson and Kenneth Vollmar
-
-Developed by Pete Sanderson (psanderson@otterbein.edu)
-and Kenneth Vollmar (kenvollmar@missouristate.edu)
-
-Permission is hereby granted, free of charge, to any person obtaining 
-a copy of this software and associated documentation files (the 
-"Software"), to deal in the Software without restriction, including 
-without limitation the rights to use, copy, modify, merge, publish, 
-distribute, sublicense, and/or sell copies of the Software, and to 
-permit persons to whom the Software is furnished to do so, subject 
-to the following conditions:
-
-The above copyright notice and this permission notice shall be 
-included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, 
-EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF 
-MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. 
-IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR 
-ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF 
-CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION 
-WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-
-(MIT license, http://www.opensource.org/licenses/mit-license.html)
- */
-
 /**
  * Service to input data.
  */
-
 public class SyscallInputDialogString extends AbstractSyscall {
     /**
      * Build an instance of the syscall with its default service number and name.
@@ -69,8 +67,7 @@ public class SyscallInputDialogString extends AbstractSyscall {
         char[] ch = {' '}; // Need an array to convert to String
         try {
             ch[0] = (char) Globals.memory.getByte(byteAddress);
-            while (ch[0] != 0) // only uses single location ch[0]
-            {
+            while (ch[0] != 0) { // only uses single location ch[0]
                 message = message.concat(new String(ch)); // parameter to String constructor is a char[] array
                 byteAddress++;
                 ch[0] = (char) Globals.memory.getByte(byteAddress);
@@ -83,24 +80,21 @@ public class SyscallInputDialogString extends AbstractSyscall {
         // A null return value means that "Cancel" was chosen rather than OK.
         // An empty string returned (that is, inputString.length() of zero)
         // means that OK was chosen but no string was input.
-        String inputString = null;
+        String inputString;
         inputString = JOptionPane.showInputDialog(message);
         byteAddress = RegisterFile.getValue(5); // byteAddress of string is in $a1
         int maxLength = RegisterFile.getValue(6); // input buffer size for input string is in $a2
 
         try {
-            if (inputString == null)  // Cancel was chosen
-            {
+            if (inputString == null) {  // Cancel was chosen
                 RegisterFile.updateRegister(5, -2);  // set $a1 to -2 flag
-            } else if (inputString.length() == 0)  // OK was chosen but there was no input
-            {
+            } else if (inputString.length() == 0) {  // OK was chosen but there was no input
                 RegisterFile.updateRegister(5, -3);  // set $a1 to -3 flag
             } else {
                 // The buffer will contain characters, a '\n' character, and the null character
                 // Copy the input data to buffer as space permits
                 for (int index = 0; (index < inputString.length()) && (index < maxLength - 1); index++) {
-                    Globals.memory.setByte(byteAddress + index,
-                            inputString.charAt(index));
+                    Globals.memory.setByte(byteAddress + index, inputString.charAt(index));
                 }
                 if (inputString.length() < maxLength - 1) {
                     Globals.memory.setByte(byteAddress + Math.min(inputString.length(), maxLength - 2), '\n');  // newline at string end
@@ -114,13 +108,8 @@ public class SyscallInputDialogString extends AbstractSyscall {
                     RegisterFile.updateRegister(5, 0);  // set $a1 to 0 flag
                 }
             } // end else
-
-        } // end try
-        catch (AddressErrorException e) {
+        } catch (AddressErrorException e) {
             throw new ProcessingException(statement, e);
         }
-
-
     }
-
 }

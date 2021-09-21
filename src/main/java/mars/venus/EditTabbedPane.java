@@ -1,3 +1,30 @@
+/*
+Copyright (c) 2003-2010,  Pete Sanderson and Kenneth Vollmar
+
+Developed by Pete Sanderson (psanderson@otterbein.edu)
+and Kenneth Vollmar (kenvollmar@missouristate.edu)
+
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+"Software"), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject
+to the following conditions:
+
+The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR
+ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
+CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+(MIT license, http://www.opensource.org/licenses/mit-license.html)
+ */
 package mars.venus;
 
 import mars.Globals;
@@ -7,8 +34,6 @@ import mars.mips.hardware.RegisterFile;
 import mars.util.FilenameFinder;
 
 import javax.swing.*;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 import javax.swing.filechooser.FileFilter;
 import java.awt.*;
 import java.beans.PropertyChangeListener;
@@ -17,41 +42,13 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
-		
-	/*
-Copyright (c) 2003-2010,  Pete Sanderson and Kenneth Vollmar
-
-Developed by Pete Sanderson (psanderson@otterbein.edu)
-and Kenneth Vollmar (kenvollmar@missouristate.edu)
-
-Permission is hereby granted, free of charge, to any person obtaining 
-a copy of this software and associated documentation files (the 
-"Software"), to deal in the Software without restriction, including 
-without limitation the rights to use, copy, modify, merge, publish, 
-distribute, sublicense, and/or sell copies of the Software, and to 
-permit persons to whom the Software is furnished to do so, subject 
-to the following conditions:
-
-The above copyright notice and this permission notice shall be 
-included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, 
-EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF 
-MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. 
-IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR 
-ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF 
-CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION 
-WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-
-(MIT license, http://www.opensource.org/licenses/mit-license.html)
- */
+import java.util.List;
 
 /**
  * Tabbed pane for the editor.  Each of its tabs represents an open file.
  *
  * @author Sanderson
  **/
-
 public class EditTabbedPane extends JTabbedPane {
     private final VenusUI mainUI;
     private final Editor editor;
@@ -62,7 +59,6 @@ public class EditTabbedPane extends JTabbedPane {
     /**
      * Constructor for the EditTabbedPane class.
      **/
-
     public EditTabbedPane(VenusUI appFrame, Editor editor, MainPane mainPane) {
         super();
         this.mainUI = appFrame;
@@ -70,23 +66,20 @@ public class EditTabbedPane extends JTabbedPane {
         this.fileOpener = new FileOpener(editor);
         this.mainPane = mainPane;
         this.editor.setEditTabbedPane(this);
-        this.addChangeListener(
-                new ChangeListener() {
-                    public void stateChanged(ChangeEvent e) {
-                        EditPane editPane = (EditPane) getSelectedComponent();
-                        if (editPane != null) {
-                            // New IF statement to permit free traversal of edit panes w/o invalidating
-                            // assembly if assemble-all is selected.  DPS 9-Aug-2011
-                            if (Globals.getSettings().getBooleanSetting(mars.Settings.ASSEMBLE_ALL_ENABLED)) {
-                                EditTabbedPane.this.updateTitles(editPane);
-                            } else {
-                                EditTabbedPane.this.updateTitlesAndMenuState(editPane);
-                                EditTabbedPane.this.mainPane.getExecutePane().clearPane();
-                            }
-                            editPane.tellEditingComponentToRequestFocusInWindow();
-                        }
-                    }
-                });
+        this.addChangeListener(e -> {
+            EditPane editPane = (EditPane) getSelectedComponent();
+            if (editPane != null) {
+                // New IF statement to permit free traversal of edit panes w/o invalidating
+                // assembly if assemble-all is selected.  DPS 9-Aug-2011
+                if (Globals.getSettings().getBooleanSetting(mars.Settings.ASSEMBLE_ALL_ENABLED)) {
+                    EditTabbedPane.this.updateTitles(editPane);
+                } else {
+                    EditTabbedPane.this.updateTitlesAndMenuState(editPane);
+                    EditTabbedPane.this.mainPane.getExecutePane().clearPane();
+                }
+                editPane.tellEditingComponentToRequestFocusInWindow();
+            }
+        });
     }
 
     /**
@@ -212,7 +205,6 @@ public class EditTabbedPane extends JTabbedPane {
      * @return true if files closed, false otherwise.
      */
     public boolean closeAllFiles() {
-        boolean result = true;
         boolean unsavedChanges = false;
         int tabCount = getTabCount();
         if (tabCount > 0) {
@@ -259,7 +251,7 @@ public class EditTabbedPane extends JTabbedPane {
                 }
             }
         }
-        return result;
+        return true;
     }
 
     /**
@@ -336,7 +328,7 @@ public class EditTabbedPane extends JTabbedPane {
     private File saveAsFile(EditPane editPane) {
         File theFile = null;
         if (editPane != null) {
-            JFileChooser saveDialog = null;
+            JFileChooser saveDialog;
             boolean operationOK = false;
             while (!operationOK) {
                 // Set Save As dialog directory in a logical way.  If file in
@@ -503,16 +495,12 @@ public class EditTabbedPane extends JTabbedPane {
     public boolean editsSavedOrAbandoned() {
         EditPane currentPane = getCurrentEditTab();
         if (currentPane != null && currentPane.hasUnsavedEdits()) {
-            switch (confirm(currentPane.getFilename())) {
-                case JOptionPane.YES_OPTION:
-                    return saveCurrentFile();
-                case JOptionPane.NO_OPTION:
-                    return true;
-                case JOptionPane.CANCEL_OPTION:
-                    return false;
-                default: // should never occur
-                    return false;
-            }
+            return switch (confirm(currentPane.getFilename())) {
+                case JOptionPane.YES_OPTION -> saveCurrentFile();
+                case JOptionPane.NO_OPTION -> true;
+                case JOptionPane.CANCEL_OPTION -> false;
+                default -> false; // should never occur
+            };
         } else {
             return true;
         }
@@ -529,7 +517,7 @@ public class EditTabbedPane extends JTabbedPane {
 
     private class FileOpener {
         private final JFileChooser fileChooser;
-        private final ArrayList fileFilterList;
+        private final List<FileFilter> fileFilterList;
         private final PropertyChangeListener listenForUserAddedFileFilter;
         private final Editor theEditor;
         private File mostRecentlyOpenedFile;
@@ -543,7 +531,7 @@ public class EditTabbedPane extends JTabbedPane {
             this.fileChooser.addPropertyChangeListener(this.listenForUserAddedFileFilter);
 
             // Note: add sequence is significant - last one added becomes default.
-            fileFilterList = new ArrayList();
+            fileFilterList = new ArrayList<>();
             fileFilterList.add(fileChooser.getAcceptAllFileFilter());
             fileFilterList.add(FilenameFinder.getFileFilter(Globals.fileExtensions, "Assembler Files", true));
             fileFilterCount = 0; // this will trigger fileChooser file filter load in next line
@@ -586,7 +574,6 @@ public class EditTabbedPane extends JTabbedPane {
         /*
          * Open the specified file.  Return true if file opened, false otherwise
          */
-
         private boolean openFile(File theFile) {
             try {
                 theFile = theFile.getCanonicalFile();
@@ -613,18 +600,18 @@ public class EditTabbedPane extends JTabbedPane {
                 Globals.program = new MIPSprogram();
                 try {
                     Globals.program.readSource(currentFilePath);
-                } catch (ProcessingException pe) {
+                } catch (ProcessingException ignored) {
                 }
                 // DPS 1 Nov 2006.  Defined a StringBuffer to receive all file contents,
                 // one line at a time, before adding to the Edit pane with one setText.
                 // StringBuffer is preallocated to full filelength to eliminate dynamic
                 // expansion as lines are added to it. Previously, each line was appended
                 // to the Edit pane as it was read, way slower due to dynamic string alloc.
-                StringBuffer fileContents = new StringBuffer((int) theFile.length());
+                StringBuilder fileContents = new StringBuilder((int) theFile.length());
                 int lineNumber = 1;
                 String line = Globals.program.getSourceLine(lineNumber++);
                 while (line != null) {
-                    fileContents.append(line + "\n");
+                    fileContents.append(line).append("\n");
                     line = Globals.program.getSourceLine(lineNumber++);
                 }
                 editPane.setSourceCode(fileContents.toString(), true);
@@ -691,9 +678,8 @@ public class EditTabbedPane extends JTabbedPane {
                 // clear out the list and populate from our own ArrayList.
                 // Last one added becomes the default.
                 fileChooser.resetChoosableFileFilters();
-                for (int i = 0; i < fileFilterList.size(); i++) {
-                    fileChooser.addChoosableFileFilter((FileFilter) fileFilterList.get(i));
-                }
+                for (FileFilter fileFilter : fileFilterList)
+                    fileChooser.addChoosableFileFilter(fileFilter);
                 // Restore listener.
                 if (activeListener) {
                     fileChooser.addPropertyChangeListener(listenForUserAddedFileFilter);
@@ -708,7 +694,7 @@ public class EditTabbedPane extends JTabbedPane {
 
         private class ChoosableFileFilterChangeListener implements PropertyChangeListener {
             public void propertyChange(java.beans.PropertyChangeEvent e) {
-                if (e.getPropertyName() == JFileChooser.CHOOSABLE_FILE_FILTER_CHANGED_PROPERTY) {
+                if (e.getPropertyName().equals(JFileChooser.CHOOSABLE_FILE_FILTER_CHANGED_PROPERTY)) {
                     FileFilter[] newFilters = (FileFilter[]) e.getNewValue();
                     FileFilter[] oldFilters = (FileFilter[]) e.getOldValue();
                     if (newFilters.length > fileFilterList.size()) {

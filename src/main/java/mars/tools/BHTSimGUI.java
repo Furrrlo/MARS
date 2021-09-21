@@ -24,14 +24,12 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 (MIT license, http://www.opensource.org/licenses/mit-license.html)
  */
-
 package mars.tools;//.bhtsim;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
 import java.awt.*;
 import java.text.DecimalFormat;
-import java.util.Vector;
 
 /**
  * Represents the GUI of the BHT Simulator Tool.
@@ -89,15 +87,15 @@ public class BHTSimGUI extends JPanel {
     /**
      * combo box for selecting the number of BHT entries
      */
-    private JComboBox m_cbBHTentries;
+    private JComboBox<Integer> m_cbBHTentries;
     /**
      * combo box for selecting the history size
      */
-    private JComboBox m_cbBHThistory;
+    private JComboBox<Integer> m_cbBHThistory;
     /**
      * combo box for selecting the initial value
      */
-    private JComboBox m_cbBHTinitVal;
+    private JComboBox<String> m_cbBHTinitVal;
     /**
      * text field for log output
      */
@@ -216,22 +214,9 @@ public class BHTSimGUI extends JPanel {
     private JPanel buildConfigPanel() {
         JPanel panel = new JPanel();
 
-        Vector sizes = new Vector();
-        sizes.add(new Integer(8));
-        sizes.add(new Integer(16));
-        sizes.add(new Integer(32));
-
-        Vector bits = new Vector();
-        bits.add(new Integer(1));
-        bits.add(new Integer(2));
-
-        Vector initVals = new Vector();
-        initVals.add(BHTSimGUI.BHT_DO_NOT_TAKE_BRANCH);
-        initVals.add(BHTSimGUI.BHT_TAKE_BRANCH);
-
-        m_cbBHTentries = new JComboBox(sizes);
-        m_cbBHThistory = new JComboBox(bits);
-        m_cbBHTinitVal = new JComboBox(initVals);
+        m_cbBHTentries = new JComboBox<>(new Integer[] { 8, 16, 32 });
+        m_cbBHThistory = new JComboBox<>(new Integer[] { 1, 2 });
+        m_cbBHTinitVal = new JComboBox<>(new String[] { BHTSimGUI.BHT_DO_NOT_TAKE_BRANCH, BHTSimGUI.BHT_TAKE_BRANCH });
 
         panel.add(new JLabel("# of BHT entries"));
         panel.add(m_cbBHTentries);
@@ -268,7 +253,7 @@ public class BHTSimGUI extends JPanel {
      *
      * @return the reference to the combo box
      */
-    public JComboBox getCbBHTentries() {
+    public JComboBox<Integer> getCbBHTentries() {
         return m_cbBHTentries;
     }
 
@@ -278,7 +263,7 @@ public class BHTSimGUI extends JPanel {
      *
      * @return the reference to the combo box
      */
-    public JComboBox getCbBHThistory() {
+    public JComboBox<Integer> getCbBHThistory() {
         return m_cbBHThistory;
     }
 
@@ -288,7 +273,7 @@ public class BHTSimGUI extends JPanel {
      *
      * @return the reference to the combo box
      */
-    public JComboBox getCbBHTinitVal() {
+    public JComboBox<String> getCbBHTinitVal() {
         return m_cbBHTinitVal;
     }
 

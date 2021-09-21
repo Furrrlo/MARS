@@ -8,32 +8,30 @@ import mars.mips.hardware.MemoryAccessNotice;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.Observable;
 
-@SuppressWarnings("serial")
 /* Add these two lines in exceptions.java file
  * public static final int EXTERNAL_INTERRUPT_TIMER = 0x00000100; //Add for digital Lab Sim
  * public static final int EXTERNAL_INTERRUPT_HEXA_KEYBOARD = 0x00000200;// Add for digital Lab Sim
- */
-
-/*
+ *//*
  * Didier Teifreto LIFC Université de franche-Comté www.lifc.univ-fcomte.fr/~teifreto
  * didier.teifreto@univ-fcomte.fr
  */
 public class DigitalLabSim extends AbstractMarsToolAndApplication {
     public static final int EXTERNAL_INTERRUPT_TIMER = 0x00000100; //Add for digital Lab Sim
     public static final int EXTERNAL_INTERRUPT_HEXA_KEYBOARD = 0x00000200;// Add for digital Lab Sim
+
     private static final String heading = "Digital Lab Sim";
     private static final String version = " Version 1.0 (Didier Teifreto)";
+
     private static final int IN_ADRESS_DISPLAY_1 = Memory.memoryMapBaseAddress + 0x10;
     private static final int IN_ADRESS_DISPLAY_2 = Memory.memoryMapBaseAddress + 0x11;
     private static final int IN_ADRESS_HEXA_KEYBOARD = Memory.memoryMapBaseAddress + 0x12;
     private static final int IN_ADRESS_COUNTER = Memory.memoryMapBaseAddress + 0x13;
     private static final int OUT_ADRESS_HEXA_KEYBOARD = Memory.memoryMapBaseAddress + 0x14;
+
     // Counter
     private static final int CounterValueMax = 30;
     // GUI Interface.
@@ -44,6 +42,7 @@ public class DigitalLabSim extends AbstractMarsToolAndApplication {
     private static int CounterValue = CounterValueMax;
     private static boolean CounterInterruptOnOff = false;
     private static OneSecondCounter SecondCounter;
+
     // Seven Segment display
     private SevenSegmentPanel sevenSegPanel;
     private HexaKeyboard hexaKeyPanel;
@@ -69,6 +68,7 @@ public class DigitalLabSim extends AbstractMarsToolAndApplication {
         addAsObserver(Memory.textBaseAddress, Memory.textLimitAddress);
     }
 
+    @Override
     public void update(Observable ressource, Object accessNotice) {
         MemoryAccessNotice notice = (MemoryAccessNotice) accessNotice;
         int address = notice.getAddress();
@@ -108,6 +108,7 @@ public class DigitalLabSim extends AbstractMarsToolAndApplication {
         return panelTools;
     }
 
+    @SuppressWarnings("ConstantConditions")
     private synchronized void updateMMIOControlAndData(int dataAddr, int dataValue) {
         if (!this.isBeingUsedAsAMarsTool || (this.isBeingUsedAsAMarsTool && connectButton.isConnected())) {
             synchronized (Globals.memoryAndRegistersLock) {
@@ -125,38 +126,34 @@ public class DigitalLabSim extends AbstractMarsToolAndApplication {
     }
 
     protected JComponent getHelpComponent() {
-        final String helpContent =
-                " This tool is composed of 3 parts : two seven-segment displays, an hexadecimal keyboard and counter \n" +
-                        "Seven segment display\n" +
-                        " Byte value at address 0xFFFF0010 : command right seven segment display \n " +
-                        " Byte value at address 0xFFFF0011 : command left seven segment display \n " +
-                        " Each bit of these two bytes are connected to segments (bit 0 for a segment, 1 for b segment and 7 for point \n \n" +
-                        "Hexadecimal keyboard\n" +
-                        " Byte value at address 0xFFFF0012 : command row number of hexadecimal keyboard (bit 0 to 3) and enable keyboard interrupt (bit 7) \n" +
-                        " Byte value at address 0xFFFF0014 : receive row and column of the key pressed, 0 if not key pressed \n" +
-                        " The mips program have to scan, one by one, each row (send 1,2,4,8...)" +
-                        " and then observe if a key is pressed (that mean byte value at adresse 0xFFFF0014 is different from zero). " +
-                        " This byte value is composed of row number (4 left bits) and column number (4 right bits)" +
-                        " Here you'll find the code for each key : 0x11,0x21,0x41,0x81,0x12,0x22,0x42,0x82,0x14,0x24,0x44,0x84,0x18,0x28,0x48,0x88. \n" +
-                        " For exemple key number 2 return 0x41, that mean the key is on column 3 and row 1. \n" +
-                        " If keyboard interruption is enable, an exception is started, with cause register bit number 11 set.\n \n" +
-                        "Counter\n" +
-                        " Byte value at address 0xFFFF0013 : If one bit of this byte is set, the counter interruption is enable.\n" +
-                        " If counter interruption is enable, every 30 instructions, an exception is started with cause register bit number 10.\n" +
-                        "   (contributed by Didier Teifreto, dteifreto@lifc.univ-fcomte.fr)";
+        final String helpContent = """
+         This tool is composed of 3 parts : two seven-segment displays, an hexadecimal keyboard and counter\s
+        Seven segment display
+         Byte value at address 0xFFFF0010 : command right seven segment display\s
+          Byte value at address 0xFFFF0011 : command left seven segment display\s
+          Each bit of these two bytes are connected to segments (bit 0 for a segment, 1 for b segment and 7 for point\s
+        \s
+        Hexadecimal keyboard
+         Byte value at address 0xFFFF0012 : command row number of hexadecimal keyboard (bit 0 to 3) and enable keyboard interrupt (bit 7)\s
+         Byte value at address 0xFFFF0014 : receive row and column of the key pressed, 0 if not key pressed\s
+         The mips program have to scan, one by one, each row (send 1,2,4,8...) and then observe if a key is pressed (that mean byte value at adresse 0xFFFF0014 is different from zero).  This byte value is composed of row number (4 left bits) and column number (4 right bits) Here you'll find the code for each key : 0x11,0x21,0x41,0x81,0x12,0x22,0x42,0x82,0x14,0x24,0x44,0x84,0x18,0x28,0x48,0x88.\s
+         For exemple key number 2 return 0x41, that mean the key is on column 3 and row 1.\s
+         If keyboard interruption is enable, an exception is started, with cause register bit number 11 set.
+        \s
+        Counter
+         Byte value at address 0xFFFF0013 : If one bit of this byte is set, the counter interruption is enable.
+         If counter interruption is enable, every 30 instructions, an exception is started with cause register bit number 10.
+           (contributed by Didier Teifreto, dteifreto@lifc.univ-fcomte.fr)""";
         JButton help = new JButton("Help");
-        help.addActionListener(
-                new ActionListener() {
-                    public void actionPerformed(ActionEvent e) {
-                        JTextArea ja = new JTextArea(helpContent);
-                        ja.setRows(20);
-                        ja.setColumns(60);
-                        ja.setLineWrap(true);
-                        ja.setWrapStyleWord(true);
-                        JOptionPane.showMessageDialog(theWindow, new JScrollPane(ja),
-                                "Simulating the Hexa Keyboard and Seven segment display", JOptionPane.INFORMATION_MESSAGE);
-                    }
-                });
+        help.addActionListener(e -> {
+            JTextArea ja = new JTextArea(helpContent);
+            ja.setRows(20);
+            ja.setColumns(60);
+            ja.setLineWrap(true);
+            ja.setWrapStyleWord(true);
+            JOptionPane.showMessageDialog(theWindow, new JScrollPane(ja),
+                    "Simulating the Hexa Keyboard and Seven segment display", JOptionPane.INFORMATION_MESSAGE);
+        });
         return help;
     }/* ....................Seven Segment display start here................................... */
 
@@ -189,7 +186,7 @@ public class DigitalLabSim extends AbstractMarsToolAndApplication {
         }
     }
 
-    public class SevenSegmentDisplay extends JComponent {
+    public static class SevenSegmentDisplay extends JComponent {
         public char aff;
 
         public SevenSegmentDisplay(char aff) {
@@ -204,65 +201,64 @@ public class DigitalLabSim extends AbstractMarsToolAndApplication {
 
         public void SwitchSegment(Graphics g, char segment) {
             switch (segment) {
-                case 'a': //a segment
+                case 'a' -> { //a segment
                     int[] pxa1 = {12, 9, 12};
                     int[] pxa2 = {36, 39, 36};
                     int[] pya = {5, 8, 11};
                     g.fillPolygon(pxa1, pya, 3);
                     g.fillPolygon(pxa2, pya, 3);
                     g.fillRect(12, 5, 24, 6);
-                    break;
-                case 'b': //b segment
+                }
+                case 'b' -> { //b segment
                     int[] pxb = {37, 40, 43};
                     int[] pyb1 = {12, 9, 12};
                     int[] pyb2 = {36, 39, 36};
                     g.fillPolygon(pxb, pyb1, 3);
                     g.fillPolygon(pxb, pyb2, 3);
                     g.fillRect(37, 12, 6, 24);
-                    break;
-                case 'c': // c segment
+                }
+                case 'c' -> { // c segment
                     int[] pxc = {37, 40, 43};
                     int[] pyc1 = {44, 41, 44};
                     int[] pyc2 = {68, 71, 68};
                     g.fillPolygon(pxc, pyc1, 3);
                     g.fillPolygon(pxc, pyc2, 3);
                     g.fillRect(37, 44, 6, 24);
-                    break;
-                case 'd': // d segment
+                }
+                case 'd' -> { // d segment
                     int[] pxd1 = {12, 9, 12};
                     int[] pxd2 = {36, 39, 36};
                     int[] pyd = {69, 72, 75};
                     g.fillPolygon(pxd1, pyd, 3);
                     g.fillPolygon(pxd2, pyd, 3);
                     g.fillRect(12, 69, 24, 6);
-                    break;
-                case 'e': // e segment
+                }
+                case 'e' -> { // e segment
                     int[] pxe = {5, 8, 11};
                     int[] pye1 = {44, 41, 44};
                     int[] pye2 = {68, 71, 68};
                     g.fillPolygon(pxe, pye1, 3);
                     g.fillPolygon(pxe, pye2, 3);
                     g.fillRect(5, 44, 6, 24);
-                    break;
-                case 'f': // f segment
+                }
+                case 'f' -> { // f segment
                     int[] pxf = {5, 8, 11};
                     int[] pyf1 = {12, 9, 12};
                     int[] pyf2 = {36, 39, 36};
                     g.fillPolygon(pxf, pyf1, 3);
                     g.fillPolygon(pxf, pyf2, 3);
                     g.fillRect(5, 12, 6, 24);
-                    break;
-                case 'g': // g segment
+                }
+                case 'g' -> { // g segment
                     int[] pxg1 = {12, 9, 12};
                     int[] pxg2 = {36, 39, 36};
                     int[] pyg = {37, 40, 43};
                     g.fillPolygon(pxg1, pyg, 3);
                     g.fillPolygon(pxg2, pyg, 3);
                     g.fillRect(12, 37, 24, 6);
-                    break;
-                case 'h': // decimal point
-                    g.fillOval(49, 68, 8, 8);
-                    break;
+                }
+                case 'h' -> // decimal point
+                        g.fillOval(49, 68, 8, 8);
             }
         }
 
@@ -280,7 +276,7 @@ public class DigitalLabSim extends AbstractMarsToolAndApplication {
         }
     }
 
-    public class SevenSegmentPanel extends JPanel {
+    public static class SevenSegmentPanel extends JPanel {
         public SevenSegmentDisplay[] display;
 
         public SevenSegmentPanel() {
@@ -368,7 +364,7 @@ public class DigitalLabSim extends AbstractMarsToolAndApplication {
         }
     }
 
-    public class OneSecondCounter {
+    public static class OneSecondCounter {
         public OneSecondCounter() {
             CounterInterruptOnOff = false;
         }

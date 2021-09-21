@@ -1,3 +1,30 @@
+/*
+Copyright (c) 2003-2006,  Pete Sanderson and Kenneth Vollmar
+
+Developed by Pete Sanderson (psanderson@otterbein.edu)
+and Kenneth Vollmar (kenvollmar@missouristate.edu)
+
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+"Software"), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject
+to the following conditions:
+
+The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR
+ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
+CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+(MIT license, http://www.opensource.org/licenses/mit-license.html)
+ */
 package mars.mips.instructions.syscalls;
 
 import mars.Globals;
@@ -7,41 +34,11 @@ import mars.mips.hardware.AddressErrorException;
 import mars.mips.hardware.RegisterFile;
 import mars.util.SystemIO;
 
-/*
-Copyright (c) 2003-2006,  Pete Sanderson and Kenneth Vollmar
-
-Developed by Pete Sanderson (psanderson@otterbein.edu)
-and Kenneth Vollmar (kenvollmar@missouristate.edu)
-
-Permission is hereby granted, free of charge, to any person obtaining 
-a copy of this software and associated documentation files (the 
-"Software"), to deal in the Software without restriction, including 
-without limitation the rights to use, copy, modify, merge, publish, 
-distribute, sublicense, and/or sell copies of the Software, and to 
-permit persons to whom the Software is furnished to do so, subject 
-to the following conditions:
-
-The above copyright notice and this permission notice shall be 
-included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, 
-EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF 
-MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. 
-IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR 
-ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF 
-CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION 
-WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-
-(MIT license, http://www.opensource.org/licenses/mit-license.html)
- */
-
-
 /**
  * Service to open file name specified by $a0. File descriptor returned in $v0.
  * (this was changed from $a0 in MARS 3.7 for SPIM compatibility.  The table
  * in COD erroneously shows $a0).
  */
-
 public class SyscallOpen extends AbstractSyscall {
     /**
      * Build an instance of the Open file syscall.  Default service number
@@ -78,8 +75,7 @@ public class SyscallOpen extends AbstractSyscall {
         char[] ch = {' '}; // Need an array to convert to String
         try {
             ch[0] = (char) Globals.memory.getByte(byteAddress);
-            while (ch[0] != 0) // only uses single location ch[0]
-            {
+            while (ch[0] != 0) { // only uses single location ch[0]
                 filename = filename.concat(new String(ch)); // parameter to String constructor is a char[] array
                 byteAddress++;
                 ch[0] = (char) Globals.memory.getByte(
@@ -88,8 +84,7 @@ public class SyscallOpen extends AbstractSyscall {
         } catch (AddressErrorException e) {
             throw new ProcessingException(statement, e);
         }
-        int retValue = SystemIO.openFile(filename,
-                RegisterFile.getValue(5));
+        int retValue = SystemIO.openFile(filename, RegisterFile.getValue(5));
         RegisterFile.updateRegister(2, retValue); // set returned fd value in register
 
         // GETTING RID OF PROCESSING EXCEPTION.  IT IS THE RESPONSIBILITY OF THE

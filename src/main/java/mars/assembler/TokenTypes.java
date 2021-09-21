@@ -89,10 +89,8 @@ public final class TokenTypes {
      * @return Returns the corresponding TokenTypes object if the parameter matches a
      * defined MIPS token type, else returns <tt>null</tt>.
      **/
-
     public static TokenTypes matchTokenType(String value) {
 
-        TokenTypes type = null;
         // If it starts with single quote ('), it is a mal-formed character literal
         // because a well-formed character literal was converted to string-ified
         // integer before getting here...
@@ -145,7 +143,7 @@ public final class TokenTypes {
 
             int i = Binary.stringToInt(value);   // KENV 1/6/05
 
-            /***************************************************************************
+            /* **************************************************************************
              *  MODIFICATION AND COMMENT, DPS 3-July-2008
              *
              * The modifications of January 2005 documented below are being rescinded.

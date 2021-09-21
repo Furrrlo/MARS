@@ -1,3 +1,30 @@
+/*
+Copyright (c) 2003-2008,  Pete Sanderson and Kenneth Vollmar
+
+Developed by Pete Sanderson (psanderson@otterbein.edu)
+and Kenneth Vollmar (kenvollmar@missouristate.edu)
+
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+"Software"), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject
+to the following conditions:
+
+The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR
+ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
+CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+(MIT license, http://www.opensource.org/licenses/mit-license.html)
+ */
 package mars;
 
 import mars.assembler.SymbolTable;
@@ -7,38 +34,7 @@ import mars.mips.instructions.syscalls.SyscallNumberOverride;
 import mars.util.PropertiesFile;
 import mars.venus.VenusUI;
 
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.Properties;
-import java.util.StringTokenizer;
-	
-/*
-Copyright (c) 2003-2008,  Pete Sanderson and Kenneth Vollmar
-
-Developed by Pete Sanderson (psanderson@otterbein.edu)
-and Kenneth Vollmar (kenvollmar@missouristate.edu)
-
-Permission is hereby granted, free of charge, to any person obtaining 
-a copy of this software and associated documentation files (the 
-"Software"), to deal in the Software without restriction, including 
-without limitation the rights to use, copy, modify, merge, publish, 
-distribute, sublicense, and/or sell copies of the Software, and to 
-permit persons to whom the Software is furnished to do so, subject 
-to the following conditions:
-
-The above copyright notice and this permission notice shall be 
-included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, 
-EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF 
-MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. 
-IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR 
-ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF 
-CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION 
-WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-
-(MIT license, http://www.opensource.org/licenses/mit-license.html)
- */
+import java.util.*;
 
 /**
  * Collection of globally-available data structures.
@@ -73,7 +69,7 @@ public class Globals {
     /**
      * List of accepted file extensions for MIPS assembly source files.
      */
-    public static final ArrayList fileExtensions = getFileExtensions();
+    public static final List<String> fileExtensions = getFileExtensions();
     /**
      * Maximum length of scrolled message window (MARS Messages and Run I/O)
      */
@@ -114,7 +110,7 @@ public class Globals {
     /**
      * Lock variable used at head of synchronized block to guard MIPS memory and registers
      **/
-    public static Object memoryAndRegistersLock = new Object();
+    public static final Object memoryAndRegistersLock = new Object();
     /**
      * Flag to determine whether or not to produce internal debugging information.
      **/
@@ -160,7 +156,6 @@ public class Globals {
     /**
      * Method called once upon system initialization to create the global data structures.
      **/
-
     public static void initialize(boolean gui) {
         if (!initialized) {
             memory = Memory.getInstance();  //clients can use Memory.getInstance instead of Globals.memory
@@ -223,16 +218,17 @@ public class Globals {
         Properties properties = PropertiesFile.loadPropertiesFromFile(propertiesFile);
         try {
             limit = Integer.parseInt(properties.getProperty(propertyName, Integer.toString(defaultValue)));
-        } catch (NumberFormatException nfe) {
-        } // do nothing, I already have a default
+        } catch (NumberFormatException ignored) {
+            // do nothing, I already have a default
+        }
         return limit;
     }
 
 
     // Read assembly language file extensions from properties file.  Resulting
     // string is tokenized into array list (assume StringTokenizer default delimiters).
-    private static ArrayList getFileExtensions() {
-        ArrayList extensionsList = new ArrayList();
+    private static List<String> getFileExtensions() {
+        List<String> extensionsList = new ArrayList<>();
         String extensions = getPropertyEntry(configPropertiesFile, "Extensions");
         if (extensions != null) {
             StringTokenizer st = new StringTokenizer(extensions);
@@ -251,8 +247,8 @@ public class Globals {
      * @return ArrayList.  Each item is file path to .class file
      * of a class that implements MarsTool.  If none, returns empty list.
      */
-    public static ArrayList getExternalTools() {
-        ArrayList toolsList = new ArrayList();
+    public static List<String> getExternalTools() {
+        List<String> toolsList = new ArrayList<>();
         String delimiter = ";";
         String tools = getPropertyEntry(configPropertiesFile, "ExternalTools");
         if (tools != null) {
@@ -281,10 +277,10 @@ public class Globals {
      *
      * @return ArrayList of SyscallNumberOverride objects
      */
-    public ArrayList getSyscallOverrides() {
-        ArrayList overrides = new ArrayList();
+    public List<SyscallNumberOverride> getSyscallOverrides() {
+        List<SyscallNumberOverride> overrides = new ArrayList<>();
         Properties properties = PropertiesFile.loadPropertiesFromFile(syscallPropertiesFile);
-        Enumeration keys = properties.keys();
+        Enumeration<Object> keys = properties.keys();
         while (keys.hasMoreElements()) {
             String key = (String) keys.nextElement();
             overrides.add(new SyscallNumberOverride(key, properties.getProperty(key)));

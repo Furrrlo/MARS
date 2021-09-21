@@ -1,3 +1,30 @@
+/*
+Copyright (c) 2003-2009,  Pete Sanderson and Kenneth Vollmar
+
+Developed by Pete Sanderson (psanderson@otterbein.edu)
+and Kenneth Vollmar (kenvollmar@missouristate.edu)
+
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+"Software"), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject
+to the following conditions:
+
+The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR
+ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
+CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+(MIT license, http://www.opensource.org/licenses/mit-license.html)
+ */
 package mars.venus;
 
 import mars.Globals;
@@ -19,40 +46,11 @@ import java.awt.event.MouseEvent;
 import java.util.Observable;
 import java.util.Observer;
 
-/*
-Copyright (c) 2003-2009,  Pete Sanderson and Kenneth Vollmar
-
-Developed by Pete Sanderson (psanderson@otterbein.edu)
-and Kenneth Vollmar (kenvollmar@missouristate.edu)
-
-Permission is hereby granted, free of charge, to any person obtaining 
-a copy of this software and associated documentation files (the 
-"Software"), to deal in the Software without restriction, including 
-without limitation the rights to use, copy, modify, merge, publish, 
-distribute, sublicense, and/or sell copies of the Software, and to 
-permit persons to whom the Software is furnished to do so, subject 
-to the following conditions:
-
-The above copyright notice and this permission notice shall be 
-included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, 
-EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF 
-MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. 
-IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR 
-ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF 
-CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION 
-WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-
-(MIT license, http://www.opensource.org/licenses/mit-license.html)
- */
-
 /**
  * Sets up a window to display Coprocessor 1 registers in the Registers pane of the UI.
  *
  * @author Pete Sanderson 2005
  **/
-
 public class Coprocessor1Window extends JPanel implements ActionListener, Observer {
     private static final int NAME_COLUMN = 0;
     private static final int FLOAT_COLUMN = 1;
@@ -69,7 +67,6 @@ public class Coprocessor1Window extends JPanel implements ActionListener, Observ
     /**
      * Constructor which sets up a fresh window with a table that contains the register values.
      **/
-
     public Coprocessor1Window() {
         Simulator.getInstance().addObserver(this);
         settings = Globals.getSettings();
@@ -136,7 +133,6 @@ public class Coprocessor1Window extends JPanel implements ActionListener, Observ
      *
      * @return The array object with the data for the window.
      **/
-
     public Object[][] setupWindow() {
         registers = Coprocessor1.getRegisters();
         this.highlighting = false;
@@ -148,8 +144,9 @@ public class Coprocessor1Window extends JPanel implements ActionListener, Observ
                 long longValue = 0;
                 try {
                     longValue = Coprocessor1.getLongFromRegisterPair(registers[i].getName());
-                } catch (InvalidRegisterAccessException e) {
-                } // cannot happen since i must be even
+                } catch (InvalidRegisterAccessException ignored) {
+                    // cannot happen since i must be even
+                }
                 tableData[i][2] = NumberDisplayBaseChooser.formatDoubleNumber(longValue, NumberDisplayBaseChooser.getBase(settings.getDisplayValuesInHex()));
             } else {
                 tableData[i][2] = "";
@@ -225,7 +222,6 @@ public class Coprocessor1Window extends JPanel implements ActionListener, Observ
      * @param val    New value.
      * @param base   the number base for display (e.g. 10, 16)
      **/
-
     public void updateFloatRegisterValue(int number, int val, int base) {
         ((RegTableModel) table.getModel()).setDisplayAndModelValueAt(NumberDisplayBaseChooser.formatFloatNumber(val, base), number, FLOAT_COLUMN);
 
@@ -242,8 +238,9 @@ public class Coprocessor1Window extends JPanel implements ActionListener, Observ
         long val = 0;
         try {
             val = Coprocessor1.getLongFromRegisterPair(registers[number].getName());
-        } catch (InvalidRegisterAccessException e) {
-        } // happens only if number is not even
+        } catch (InvalidRegisterAccessException ignored) {
+            // happens only if number is not even
+        }
         ((RegTableModel) table.getModel()).setDisplayAndModelValueAt(NumberDisplayBaseChooser.formatDoubleNumber(val, base), number, DOUBLE_COLUMN);
     }
 
@@ -272,9 +269,8 @@ public class Coprocessor1Window extends JPanel implements ActionListener, Observ
                 // Simulated MIPS execution stops.  Stop responding.
                 Coprocessor1.deleteRegistersObserver(this);
             }
-        } else if (obj instanceof RegisterAccessNotice) {
+        } else if (obj instanceof RegisterAccessNotice access) {
             // NOTE: each register is a separate Observable
-            RegisterAccessNotice access = (RegisterAccessNotice) obj;
             if (access.getAccessType() == AccessNotice.WRITE) {
                 // For now, use highlighting technique used by Label Window feature to highlight
                 // memory cell corresponding to a selected label.  The highlighting is not
@@ -355,7 +351,7 @@ public class Coprocessor1Window extends JPanel implements ActionListener, Observ
     /////////////////////////////////////////////////////////////////////////////
     //  The table model.
 
-    class RegTableModel extends AbstractTableModel {
+    static class RegTableModel extends AbstractTableModel {
         final String[] columnNames = {"Name", "Float", "Double"};
         Object[][] data;
 
@@ -383,7 +379,7 @@ public class Coprocessor1Window extends JPanel implements ActionListener, Observ
          * JTable uses this method to determine the default renderer/
          * editor for each cell.
          */
-        public Class getColumnClass(int c) {
+        public Class<?> getColumnClass(int c) {
             return getValueAt(0, c).getClass();
         }
 
@@ -465,7 +461,6 @@ public class Coprocessor1Window extends JPanel implements ActionListener, Observ
                 // Should not occur; code below will re-display original value
                 fireTableCellUpdated(row, col);
             }
-            return;
         }
 
 
@@ -501,7 +496,7 @@ public class Coprocessor1Window extends JPanel implements ActionListener, Observ
     // the first column. From Sun's JTable tutorial.
     // http://java.sun.com/docs/books/tutorial/uiswing/components/table.html
     //
-    private class MyTippedJTable extends JTable {
+    private static class MyTippedJTable extends JTable {
         private final String[] regToolTips = {
                 /* $f0  */  "floating point subprogram return value",
                 /* $f1  */  "should not be referenced explicitly in your program",
@@ -550,8 +545,8 @@ public class Coprocessor1Window extends JPanel implements ActionListener, Observ
 
         //Implement table cell tool tips.
         public String getToolTipText(MouseEvent e) {
-            String tip = null;
-            java.awt.Point p = e.getPoint();
+            String tip;
+            Point p = e.getPoint();
             int rowIndex = rowAtPoint(p);
             int colIndex = columnAtPoint(p);
             int realColumnIndex = convertColumnIndexToModel(colIndex);
@@ -572,16 +567,14 @@ public class Coprocessor1Window extends JPanel implements ActionListener, Observ
 
         //Implement table header tool tips.
         protected JTableHeader createDefaultTableHeader() {
-            return
-                    new JTableHeader(columnModel) {
-                        public String getToolTipText(MouseEvent e) {
-                            String tip = null;
-                            java.awt.Point p = e.getPoint();
-                            int index = columnModel.getColumnIndexAtX(p.x);
-                            int realIndex = columnModel.getColumn(index).getModelIndex();
-                            return columnToolTips[realIndex];
-                        }
-                    };
+            return new JTableHeader(columnModel) {
+                public String getToolTipText(MouseEvent e) {
+                    Point p = e.getPoint();
+                    int index = columnModel.getColumnIndexAtX(p.x);
+                    int realIndex = columnModel.getColumn(index).getModelIndex();
+                    return columnToolTips[realIndex];
+                }
+            };
         }
     }
 

@@ -1,37 +1,36 @@
+/*
+Copyright (c) 2003-2009,  Pete Sanderson and Kenneth Vollmar
+
+Developed by Pete Sanderson (psanderson@otterbein.edu)
+and Kenneth Vollmar (kenvollmar@missouristate.edu)
+
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+"Software"), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject
+to the following conditions:
+
+The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR
+ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
+CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+(MIT license, http://www.opensource.org/licenses/mit-license.html)
+ */
 package mars.util;
 
 import mars.Globals;
 
 import java.awt.*;
 import java.util.Arrays;
-	
-	/*
-Copyright (c) 2003-2009,  Pete Sanderson and Kenneth Vollmar
-
-Developed by Pete Sanderson (psanderson@otterbein.edu)
-and Kenneth Vollmar (kenvollmar@missouristate.edu)
-
-Permission is hereby granted, free of charge, to any person obtaining 
-a copy of this software and associated documentation files (the 
-"Software"), to deal in the Software without restriction, including 
-without limitation the rights to use, copy, modify, merge, publish, 
-distribute, sublicense, and/or sell copies of the Software, and to 
-permit persons to whom the Software is furnished to do so, subject 
-to the following conditions:
-
-The above copyright notice and this permission notice shall be 
-included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, 
-EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF 
-MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. 
-IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR 
-ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF 
-CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION 
-WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-
-(MIT license, http://www.opensource.org/licenses/mit-license.html)
- */
 
 /**
  * Specialized Font class designed to be used by both the
@@ -58,15 +57,7 @@ public class EditorFont {
      */
     private static final String[] allCommonFamilies = {"Arial", "Courier New", "Georgia",
             "Lucida Sans Typewriter", "Times New Roman", "Verdana"};
-    /**
-     * Handy utility to produce a string that substitutes spaces for all tab characters
-     * in the given string.  The number of spaces generated is based on the position of
-     * the tab character and the editor's current tab size setting.
-     *
-     * @param string The original string
-     * @return New string in which spaces are substituted for tabs
-     * @throws NullPointerException if string is null
-     */
+
     private static final String TAB_STRING = "\t";
     private static final char TAB_CHAR = '\t';
     private static final String SPACES = "                                                  ";
@@ -83,7 +74,6 @@ public class EditorFont {
      *
      * @return Array of strings, each is a common and available font family name.
      */
-
     public static String[] getCommonFamilies() {
         return commonFamilies;
     }
@@ -94,7 +84,6 @@ public class EditorFont {
      *
      * @return Array of strings, each is an available font family name.
      */
-
     public static String[] getAllFamilies() {
         return GraphicsEnvironment.getLocalGraphicsEnvironment().getAvailableFontFamilyNames();
     }
@@ -150,7 +139,7 @@ public class EditorFont {
      * as String) or greater than MAX_SIZE (returns MAX_SIZE as String).
      */
     public static String sizeIntToSizeString(int size) {
-        int result = (size < MIN_SIZE) ? MIN_SIZE : ((size > MAX_SIZE) ? MAX_SIZE : size);
+        int result = Math.max(MIN_SIZE, Math.min(MAX_SIZE, size));
         return String.valueOf(result);
     }
 
@@ -166,9 +155,9 @@ public class EditorFont {
         int result = DEFAULT_SIZE;
         try {
             result = Integer.parseInt(size);
-        } catch (NumberFormatException e) {
+        } catch (NumberFormatException ignored) {
         }
-        return (result < MIN_SIZE) ? MIN_SIZE : ((result > MAX_SIZE) ? MAX_SIZE : result);
+        return Math.max(MIN_SIZE, Math.min(result, MAX_SIZE));
     }
 
     /**
@@ -204,7 +193,7 @@ public class EditorFont {
     public static String substituteSpacesForTabs(String string, int tabSize) {
         if (!string.contains(TAB_STRING))
             return string;
-        StringBuffer result = new StringBuffer(string);
+        StringBuilder result = new StringBuilder(string);
         for (int i = 0; i < result.length(); i++) {
             if (result.charAt(i) == TAB_CHAR) {
                 result.replace(i, i + 1, SPACES.substring(0, tabSize - (i % tabSize)));
@@ -218,9 +207,9 @@ public class EditorFont {
         String[] availableFamilies = GraphicsEnvironment.getLocalGraphicsEnvironment().getAvailableFontFamilyNames();
         Arrays.sort(availableFamilies); // not sure if necessary; is the list already alphabetical?
         int k = 0;
-        for (int i = 0; i < allCommonFamilies.length; i++) {
-            if (Arrays.binarySearch(availableFamilies, allCommonFamilies[i]) >= 0) {
-                result[k++] = allCommonFamilies[i];
+        for (String allCommonFamily : allCommonFamilies) {
+            if (Arrays.binarySearch(availableFamilies, allCommonFamily) >= 0) {
+                result[k++] = allCommonFamily;
             }
         }
         // If not all are found, creat a new array with only the ones that are.

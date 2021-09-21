@@ -1,40 +1,38 @@
-package mars.venus;
-
-import java.io.File;
- 
- /*
+/*
 Copyright (c) 2003-2007,  Pete Sanderson and Kenneth Vollmar
 
 Developed by Pete Sanderson (psanderson@otterbein.edu)
 and Kenneth Vollmar (kenvollmar@missouristate.edu)
 
-Permission is hereby granted, free of charge, to any person obtaining 
-a copy of this software and associated documentation files (the 
-"Software"), to deal in the Software without restriction, including 
-without limitation the rights to use, copy, modify, merge, publish, 
-distribute, sublicense, and/or sell copies of the Software, and to 
-permit persons to whom the Software is furnished to do so, subject 
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+"Software"), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject
 to the following conditions:
 
-The above copyright notice and this permission notice shall be 
+The above copyright notice and this permission notice shall be
 included in all copies or substantial portions of the Software.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, 
-EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF 
-MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. 
-IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR 
-ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF 
-CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION 
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR
+ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
+CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 (MIT license, http://www.opensource.org/licenses/mit-license.html)
  */
+package mars.venus;
+
+import java.io.File;
 
 /**
  * Manage the file being edited.
  * Currently only manages one file at a time, but can be expanded.
  */
-
 public class Editor {
 
     public static final int MIN_TAB_SIZE = 1;
@@ -89,7 +87,6 @@ public class Editor {
      * no EditTabbedPane.  Returns default, directory MARS is launched from, if
      * no Opens have been performed.
      */
-
     public String getCurrentOpenDirectory() {
         return currentOpenDirectory;
     }
@@ -101,7 +98,6 @@ public class Editor {
      * @param currentOpenDirectory String containing pathname for current Open directory. If
      *                             it does not exist or is not a directory, the default (MARS launch directory) will be used.
      */
-
     void setCurrentOpenDirectory(String currentOpenDirectory) {
         File file = new File(currentOpenDirectory);
         if (!file.exists() || !file.isDirectory()) {
@@ -111,7 +107,6 @@ public class Editor {
         }
     }
 
-
     /**
      * Get name of current directory for Save or Save As operation.
      *
@@ -119,7 +114,6 @@ public class Editor {
      * no EditTabbedPane.  Returns default, directory MARS is launched from, if
      * no Save or Save As operations have been performed.
      */
-
     public String getCurrentSaveDirectory() {
         return currentSaveDirectory;
     }
@@ -131,7 +125,6 @@ public class Editor {
      * @param currentSaveDirectory String containing pathname for current Save directory. If
      *                             it does not exist or is not a directory, the default (MARS launch directory) will be used.
      */
-
     void setCurrentSaveDirectory(String currentSaveDirectory) {
         File file = new File(currentSaveDirectory);
         if (!file.exists() || !file.isDirectory()) {
@@ -240,7 +233,6 @@ public class Editor {
         return editTabbedPane.openFile();
     }
 
-
     /**
      * Called by several of the Action objects when there is potential
      * loss of editing changes.  Specifically: if there is a current
@@ -255,5 +247,4 @@ public class Editor {
     public boolean editsSavedOrAbandoned() {
         return editTabbedPane.editsSavedOrAbandoned();
     }
-
 }

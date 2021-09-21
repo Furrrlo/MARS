@@ -1,3 +1,30 @@
+/*
+Copyright (c) 2003-2009,  Pete Sanderson and Kenneth Vollmar
+
+Developed by Pete Sanderson (psanderson@otterbein.edu)
+and Kenneth Vollmar (kenvollmar@missouristate.edu)
+
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+"Software"), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject
+to the following conditions:
+
+The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR
+ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
+CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+(MIT license, http://www.opensource.org/licenses/mit-license.html)
+ */
 package mars.venus;
 
 import mars.Globals;
@@ -10,34 +37,6 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
 import java.awt.*;
 import java.awt.event.*;
-	
-	/*
-Copyright (c) 2003-2009,  Pete Sanderson and Kenneth Vollmar
-
-Developed by Pete Sanderson (psanderson@otterbein.edu)
-and Kenneth Vollmar (kenvollmar@missouristate.edu)
-
-Permission is hereby granted, free of charge, to any person obtaining 
-a copy of this software and associated documentation files (the 
-"Software"), to deal in the Software without restriction, including 
-without limitation the rights to use, copy, modify, merge, publish, 
-distribute, sublicense, and/or sell copies of the Software, and to 
-permit persons to whom the Software is furnished to do so, subject 
-to the following conditions:
-
-The above copyright notice and this permission notice shall be 
-included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, 
-EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF 
-MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. 
-IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR 
-ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF 
-CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION 
-WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-
-(MIT license, http://www.opensource.org/licenses/mit-license.html)
- */
 
 /**
  * Action class for the Settings menu item for text editor settings.
@@ -220,23 +219,17 @@ public class SettingsHighlightingAction extends GuiAction {
         dataHighlightButton = new JButton();
         dataHighlightButton.setText(getHighlightControlText(currentDataHighlightSetting));
         dataHighlightButton.setToolTipText(DATA_HIGHLIGHT_ENABLE_TOOL_TIP_TEXT);
-        dataHighlightButton.addActionListener(
-                new ActionListener() {
-                    public void actionPerformed(ActionEvent e) {
-                        currentDataHighlightSetting = !currentDataHighlightSetting;
-                        dataHighlightButton.setText(getHighlightControlText(currentDataHighlightSetting));
-                    }
-                });
+        dataHighlightButton.addActionListener(e -> {
+            currentDataHighlightSetting = !currentDataHighlightSetting;
+            dataHighlightButton.setText(getHighlightControlText(currentDataHighlightSetting));
+        });
         registerHighlightButton = new JButton();
         registerHighlightButton.setText(getHighlightControlText(currentRegisterHighlightSetting));
         registerHighlightButton.setToolTipText(REGISTER_HIGHLIGHT_ENABLE_TOOL_TIP_TEXT);
-        registerHighlightButton.addActionListener(
-                new ActionListener() {
-                    public void actionPerformed(ActionEvent e) {
-                        currentRegisterHighlightSetting = !currentRegisterHighlightSetting;
-                        registerHighlightButton.setText(getHighlightControlText(currentRegisterHighlightSetting));
-                    }
-                });
+        registerHighlightButton.addActionListener(e -> {
+            currentRegisterHighlightSetting = !currentRegisterHighlightSetting;
+            registerHighlightButton.setText(getHighlightControlText(currentRegisterHighlightSetting));
+        });
         JPanel dataHighlightPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         JPanel registerHighlightPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         dataHighlightPanel.add(new JLabel("* Data Segment highlighting is"));
@@ -251,37 +244,19 @@ public class SettingsHighlightingAction extends GuiAction {
         Box controlPanel = Box.createHorizontalBox();
         JButton okButton = new JButton("Apply and Close");
         okButton.setToolTipText(CLOSE_TOOL_TIP_TEXT);
-        okButton.addActionListener(
-                new ActionListener() {
-                    public void actionPerformed(ActionEvent e) {
-                        setHighlightingSettings();
-                        closeDialog();
-                    }
-                });
+        okButton.addActionListener(e -> {
+            setHighlightingSettings();
+            closeDialog();
+        });
         JButton applyButton = new JButton("Apply");
         applyButton.setToolTipText(APPLY_TOOL_TIP_TEXT);
-        applyButton.addActionListener(
-                new ActionListener() {
-                    public void actionPerformed(ActionEvent e) {
-                        setHighlightingSettings();
-                    }
-                });
+        applyButton.addActionListener(e -> setHighlightingSettings());
         JButton resetButton = new JButton("Reset");
         resetButton.setToolTipText(RESET_TOOL_TIP_TEXT);
-        resetButton.addActionListener(
-                new ActionListener() {
-                    public void actionPerformed(ActionEvent e) {
-                        resetButtonColors();
-                    }
-                });
+        resetButton.addActionListener(e -> resetButtonColors());
         JButton cancelButton = new JButton("Cancel");
         cancelButton.setToolTipText(CANCEL_TOOL_TIP_TEXT);
-        cancelButton.addActionListener(
-                new ActionListener() {
-                    public void actionPerformed(ActionEvent e) {
-                        closeDialog();
-                    }
-                });
+        cancelButton.addActionListener(e -> closeDialog());
         controlPanel.add(Box.createHorizontalGlue());
         controlPanel.add(okButton);
         controlPanel.add(Box.createHorizontalGlue());
@@ -459,7 +434,7 @@ public class SettingsHighlightingAction extends GuiAction {
         }
 
         public void actionPerformed(ActionEvent e) {
-            JButton button = (JButton) e.getSource();
+//            JButton button = (JButton) e.getSource();
             FontSettingDialog fontDialog = new FontSettingDialog(null, "Select Text Font", samples[position].getFont());
             Font newFont = fontDialog.showDialog();
             if (newFont != null) {
@@ -484,9 +459,9 @@ public class SettingsHighlightingAction extends GuiAction {
         public void itemStateChanged(ItemEvent e) {
             // If selected: disable buttons, set their bg values from default setting, set sample bg & fg
             // If deselected: enable buttons, set their bg values from current setting, set sample bg & bg
-            Color newBackground = null;
-            Color newForeground = null;
-            Font newFont = null;
+            Color newBackground;
+            Color newForeground;
+            Font newFont;
             if (e.getStateChange() == ItemEvent.SELECTED) {
                 backgroundButtons[position].setEnabled(false);
                 foregroundButtons[position].setEnabled(false);
@@ -518,7 +493,7 @@ public class SettingsHighlightingAction extends GuiAction {
     //
     // Modal dialog to set a font.
     //
-    private class FontSettingDialog extends AbstractFontSettingDialog {
+    private static class FontSettingDialog extends AbstractFontSettingDialog {
         private boolean resultOK;
 
         public FontSettingDialog(Frame owner, String title, Font currentFont) {
@@ -548,28 +523,17 @@ public class SettingsHighlightingAction extends GuiAction {
         protected Component buildControlPanel() {
             Box controlPanel = Box.createHorizontalBox();
             JButton okButton = new JButton("OK");
-            okButton.addActionListener(
-                    new ActionListener() {
-                        public void actionPerformed(ActionEvent e) {
-                            performOK();
-                            closeDialog();
-                        }
-                    });
+            okButton.addActionListener(e -> {
+                performOK();
+                closeDialog();
+            });
             JButton cancelButton = new JButton("Cancel");
-            cancelButton.addActionListener(
-                    new ActionListener() {
-                        public void actionPerformed(ActionEvent e) {
-                            performCancel();
-                            closeDialog();
-                        }
-                    });
+            cancelButton.addActionListener(e -> {
+                performCancel();
+                closeDialog();
+            });
             JButton resetButton = new JButton("Reset");
-            resetButton.addActionListener(
-                    new ActionListener() {
-                        public void actionPerformed(ActionEvent e) {
-                            reset();
-                        }
-                    });
+            resetButton.addActionListener(e -> reset());
             controlPanel.add(Box.createHorizontalGlue());
             controlPanel.add(okButton);
             controlPanel.add(Box.createHorizontalGlue());
@@ -580,14 +544,10 @@ public class SettingsHighlightingAction extends GuiAction {
             return controlPanel;
         }
 
-
         // required by Abstract super class but not used here.
         protected void apply(Font font) {
-
         }
-
     }
-
 }
 
 /////////////////////////////////////////////////////////////////

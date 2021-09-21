@@ -1,3 +1,30 @@
+/*
+Copyright (c) 2003-2006,  Pete Sanderson and Kenneth Vollmar
+
+Developed by Pete Sanderson (psanderson@otterbein.edu)
+and Kenneth Vollmar (kenvollmar@missouristate.edu)
+
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+"Software"), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject
+to the following conditions:
+
+The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR
+ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
+CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+(MIT license, http://www.opensource.org/licenses/mit-license.html)
+ */
 package mars.tools;
 
 import mars.Globals;
@@ -9,39 +36,9 @@ import mars.util.Binary;
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.util.Observable;
-	
-	/*
-Copyright (c) 2003-2006,  Pete Sanderson and Kenneth Vollmar
-
-Developed by Pete Sanderson (psanderson@otterbein.edu)
-and Kenneth Vollmar (kenvollmar@missouristate.edu)
-
-Permission is hereby granted, free of charge, to any person obtaining 
-a copy of this software and associated documentation files (the 
-"Software"), to deal in the Software without restriction, including 
-without limitation the rights to use, copy, modify, merge, publish, 
-distribute, sublicense, and/or sell copies of the Software, and to 
-permit persons to whom the Software is furnished to do so, subject 
-to the following conditions:
-
-The above copyright notice and this permission notice shall be 
-included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, 
-EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF 
-MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. 
-IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR 
-ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF 
-CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION 
-WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-
-(MIT license, http://www.opensource.org/licenses/mit-license.html)
- */
 
 /**
  * Tool to help students learn about IEEE 754 representation of 32 bit
@@ -181,6 +178,7 @@ public class FloatRepresentation extends AbstractMarsToolAndApplication {
      * @param register     the attached register
      * @param accessNotice information provided by register in RegisterAccessNotice object
      */
+    @Override
     public void update(Observable register, Object accessNotice) {
         if (((AccessNotice) accessNotice).getAccessType() == AccessNotice.WRITE) {
             updateDisplays(new FlavorsOfFloat().buildOneFromInt(attachedRegister.getValue()));
@@ -357,31 +355,27 @@ public class FloatRepresentation extends AbstractMarsToolAndApplication {
         for (int i = 0; i < fpRegisters.length; i++) {
             registerList[i + 1] = fpRegisters[i].getName();
         }
-        JComboBox registerSelect = new JComboBox(registerList);
+        JComboBox<String> registerSelect = new JComboBox<>(registerList);
         registerSelect.setSelectedIndex(0);  // No register attached
         registerSelect.setToolTipText("Attach to selected FP register");
-        registerSelect.addActionListener(
-                new ActionListener() {
-                    public void actionPerformed(ActionEvent e) {
-                        JComboBox cb = (JComboBox) e.getSource();
-                        int selectedIndex = cb.getSelectedIndex();
-                        if (isObserving()) {
-                            deleteAsObserver();
-                        }
-                        if (selectedIndex == 0) {
-                            attachedRegister = null;
-                            updateDisplays(new FlavorsOfFloat());
-                            instructions.setText("The program is not attached to any MIPS floating point registers.");
-                        } else {
-                            attachedRegister = fpRegisters[selectedIndex - 1];
-                            updateDisplays(new FlavorsOfFloat().buildOneFromInt(attachedRegister.getValue()));
-                            if (isObserving()) {
-                                addAsObserver();
-                            }
-                            instructions.setText("The program and register " + attachedRegister.getName() + " will respond to each other when MIPS program connected or running.");
-                        }
-                    }
-                });
+        registerSelect.addActionListener(e -> {
+            int selectedIndex = registerSelect.getSelectedIndex();
+            if (isObserving()) {
+                deleteAsObserver();
+            }
+            if (selectedIndex == 0) {
+                attachedRegister = null;
+                updateDisplays(new FlavorsOfFloat());
+                instructions.setText("The program is not attached to any MIPS floating point registers.");
+            } else {
+                attachedRegister = fpRegisters[selectedIndex - 1];
+                updateDisplays(new FlavorsOfFloat().buildOneFromInt(attachedRegister.getValue()));
+                if (isObserving()) {
+                    addAsObserver();
+                }
+                instructions.setText("The program and register " + attachedRegister.getName() + " will respond to each other when MIPS program connected or running.");
+            }
+        });
 
         JPanel registerPanel = new JPanel(new BorderLayout(5, 5));
         JPanel registerAndLabel = new JPanel();
@@ -447,11 +441,11 @@ public class FloatRepresentation extends AbstractMarsToolAndApplication {
         if (flavors.binaryString.substring(maxLengthBinarySign, maxLengthBinarySign + maxLengthBinaryExponent)
                 .equals(zeroes.substring(maxLengthBinarySign, maxLengthBinarySign + maxLengthBinaryExponent))) {
             // Will change text only if it truly is changing....
-            if (significandLabel.getText().indexOf("deno") < 0) {
+            if (!significandLabel.getText().contains("deno")) {
                 significandLabel.setText(denormalizedLabel);
             }
         } else {
-            if (significandLabel.getText().indexOf("unde") < 0) {
+            if (!significandLabel.getText().contains("unde")) {
                 significandLabel.setText(normalizedLabel);
             }
         }
@@ -489,7 +483,7 @@ public class FloatRepresentation extends AbstractMarsToolAndApplication {
                     ((hexString.indexOf("0X") == 0 || hexString.indexOf("0x") == 0)
                             ? hexString.substring(2) : hexString), maxLengthHex);
             this.binaryString = Binary.hexStringToBinaryString(this.hexString);
-            this.decimalString = new Float(Float.intBitsToFloat(Binary.binaryStringToInt(this.binaryString))).toString();
+            this.decimalString = Float.toString(Float.intBitsToFloat(Binary.binaryStringToInt(this.binaryString)));
             this.expansionString = buildExpansionFromBinaryString(this.binaryString);
             this.intValue = Binary.binaryStringToInt(this.binaryString);
             return this;
@@ -499,7 +493,7 @@ public class FloatRepresentation extends AbstractMarsToolAndApplication {
         private FlavorsOfFloat buildOneFromBinaryString() {
             this.binaryString = getFullBinaryStringFromDisplays();
             this.hexString = Binary.binaryStringToHexString(binaryString);
-            this.decimalString = new Float(Float.intBitsToFloat(Binary.binaryStringToInt(this.binaryString))).toString();
+            this.decimalString = Float.toString(Float.intBitsToFloat(Binary.binaryStringToInt(this.binaryString)));
             this.expansionString = buildExpansionFromBinaryString(this.binaryString);
             this.intValue = Binary.binaryStringToInt(this.binaryString);
             return this;
@@ -513,7 +507,7 @@ public class FloatRepresentation extends AbstractMarsToolAndApplication {
             } catch (NumberFormatException nfe) {
                 return null;
             }
-            this.decimalString = new Float(floatValue).toString();
+            this.decimalString = Float.toString(floatValue);
             this.intValue = Float.floatToIntBits(floatValue);// use floatToRawIntBits?
             this.binaryString = Binary.intToBinaryString(this.intValue);
             this.hexString = Binary.binaryStringToHexString(this.binaryString);
@@ -526,7 +520,7 @@ public class FloatRepresentation extends AbstractMarsToolAndApplication {
             this.intValue = intValue;
             this.binaryString = Binary.intToBinaryString(intValue);
             this.hexString = Binary.binaryStringToHexString(this.binaryString);
-            this.decimalString = new Float(Float.intBitsToFloat(Binary.binaryStringToInt(this.binaryString))).toString();
+            this.decimalString = Float.toString(Float.intBitsToFloat(Binary.binaryStringToInt(this.binaryString)));
             this.expansionString = buildExpansionFromBinaryString(this.binaryString);
             return this;
         }
@@ -614,33 +608,10 @@ public class FloatRepresentation extends AbstractMarsToolAndApplication {
 
         // handy utility.
         private boolean isHexDigit(char digit) {
-            boolean result = false;
-            switch (digit) {
-                case '0':
-                case '1':
-                case '2':
-                case '3':
-                case '4':
-                case '5':
-                case '6':
-                case '7':
-                case '8':
-                case '9':
-                case 'a':
-                case 'b':
-                case 'c':
-                case 'd':
-                case 'e':
-                case 'f':
-                case 'A':
-                case 'B':
-                case 'C':
-                case 'D':
-                case 'E':
-                case 'F':
-                    result = true;
-            }
-            return result;
+            return switch (digit) {
+                case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f', 'A', 'B', 'C', 'D', 'E', 'F' -> true;
+                default -> false;
+            };
         }
     }
 
@@ -689,13 +660,10 @@ public class FloatRepresentation extends AbstractMarsToolAndApplication {
 
         // handy utility
         private boolean isBinaryDigit(char digit) {
-            boolean result = false;
-            switch (digit) {
-                case '0':
-                case '1':
-                    result = true;
-            }
-            return result;
+            return switch (digit) {
+                case '0', '1' -> true;
+                default -> false;
+            };
         }
 
     }
@@ -710,7 +678,6 @@ public class FloatRepresentation extends AbstractMarsToolAndApplication {
         // Process user keystroke.  If not valid for the context, this
         // will consume the stroke and beep.
         public void keyTyped(KeyEvent e) {
-            JTextField source = (JTextField) e.getComponent();
             if (e.getKeyChar() == KeyEvent.VK_BACK_SPACE)
                 return;
             if (!isDecimalFloatDigit(e.getKeyChar())) {
@@ -740,26 +707,10 @@ public class FloatRepresentation extends AbstractMarsToolAndApplication {
 
         // handy utility
         private boolean isDecimalFloatDigit(char digit) {
-            boolean result = false;
-            switch (digit) {
-                case '0':
-                case '1':
-                case '2':
-                case '3':
-                case '4':
-                case '5':
-                case '6':
-                case '7':
-                case '8':
-                case '9':
-                case '-':
-                case '+':
-                case '.':
-                case 'e':
-                case 'E':
-                    result = true;
-            }
-            return result;
+            return switch (digit) {
+                case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '-', '+', '.', 'e', 'E' -> true;
+                default -> false;
+            };
         }
 
     }
@@ -913,7 +864,7 @@ public class FloatRepresentation extends AbstractMarsToolAndApplication {
     //
     //  Use this to draw custom background in the binary fraction display.
     //
-    class BinaryFractionDisplayTextField extends JTextField {
+    static class BinaryFractionDisplayTextField extends JTextField {
 
         public BinaryFractionDisplayTextField(String value, int columns) {
             super(value, columns);

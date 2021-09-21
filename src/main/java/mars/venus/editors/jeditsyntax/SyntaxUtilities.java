@@ -6,7 +6,6 @@
  * permitted, in both source and binary form, provided that this notice
  * remains intact in all source distributions of this package.
  */
-
 package mars.venus.editors.jeditsyntax;
 
 import mars.Globals;
@@ -27,20 +26,6 @@ import java.awt.event.MouseEvent;
  * @version $Id: SyntaxUtilities.java,v 1.9 1999/12/13 03:40:30 sp Exp $
  */
 public class SyntaxUtilities {
-    /**
-     * Paints the specified line onto the graphics context. Note that this
-     * method munges the offset and count values of the segment.
-     *
-     * @param line The line segment
-     * @param tokens The token list for the line
-     * @param styles The syntax style list
-     * @param expander The tab expander used to determine tab stops. May
-     * be null
-     * @param gfx The graphics context
-     * @param x The x co-ordinate
-     * @param y The y co-ordinate
-     * @return The x co-ordinate, plus the width of the painted string
-     */
     public static boolean popupShowing = false;
     public static Popup popup;
 
@@ -154,6 +139,21 @@ public class SyntaxUtilities {
         return styles;
     }
 
+    /**
+     * Paints the specified line onto the graphics context. Note that this
+     * method munges the offset and count values of the segment.
+     *
+     * @param line The line segment
+     * @param tokens The token list for the line
+     * @param styles The syntax style list
+     * @param expander The tab expander used to determine tab stops. May
+     * be null
+     * @param gfx The graphics context
+     * @param x The x co-ordinate
+     * @param y The y co-ordinate
+     * @return The x co-ordinate, plus the width of the painted string
+     */
+    @SuppressWarnings("StatementWithEmptyBody")
     public static int paintSyntaxLine(Segment line, Token tokens,
                                       SyntaxStyle[] styles, TabExpander expander, Graphics gfx,
                                       int x, int y) {

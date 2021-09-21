@@ -1,3 +1,30 @@
+/*
+Copyright (c) 2003-2007,  Pete Sanderson and Kenneth Vollmar
+
+Developed by Pete Sanderson (psanderson@otterbein.edu)
+and Kenneth Vollmar (kenvollmar@missouristate.edu)
+
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+"Software"), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject
+to the following conditions:
+
+The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR
+ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
+CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+(MIT license, http://www.opensource.org/licenses/mit-license.html)
+ */
 package mars.venus;
 
 import mars.Globals;
@@ -9,34 +36,6 @@ import mars.util.SystemIO;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
-	
-	/*
-Copyright (c) 2003-2007,  Pete Sanderson and Kenneth Vollmar
-
-Developed by Pete Sanderson (psanderson@otterbein.edu)
-and Kenneth Vollmar (kenvollmar@missouristate.edu)
-
-Permission is hereby granted, free of charge, to any person obtaining 
-a copy of this software and associated documentation files (the 
-"Software"), to deal in the Software without restriction, including 
-without limitation the rights to use, copy, modify, merge, publish, 
-distribute, sublicense, and/or sell copies of the Software, and to 
-permit persons to whom the Software is furnished to do so, subject 
-to the following conditions:
-
-The above copyright notice and this permission notice shall be 
-included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, 
-EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF 
-MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. 
-IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR 
-ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF 
-CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION 
-WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-
-(MIT license, http://www.opensource.org/licenses/mit-license.html)
- */
 
 /**
  * Action class for the Run -> Go menu item (and toolbar icon)
@@ -56,7 +55,6 @@ public class RunGoAction extends GuiAction {
     /**
      * Reset max steps limit to default value at termination of a simulated execution.
      */
-
     public static void resetMaxSteps() {
         maxSteps = defaultMaxSteps;
     }
@@ -84,8 +82,8 @@ public class RunGoAction extends GuiAction {
                 mainUI.setMenuState(FileStatus.RUNNING);
                 try {
                     int[] breakPoints = executePane.getTextSegmentWindow().getSortedBreakPointsArray();
-                    boolean done = Globals.program.simulateFromPC(breakPoints, maxSteps, this);
-                } catch (ProcessingException pe) {
+                    Globals.program.simulateFromPC(breakPoints, maxSteps, this);
+                } catch (ProcessingException ignored) {
                 }
             } else {
                 // This should never occur because at termination the Go and Step buttons are disabled.
@@ -103,7 +101,6 @@ public class RunGoAction extends GuiAction {
      * status of menu items based on FileStatus.  Set GUI as if at breakpoint or executing
      * step by step.
      */
-
     public void paused(boolean done, int pauseReason, ProcessingException pe) {
         // I doubt this can happen (pause when execution finished), but if so treat it as stopped.
         if (done) {
@@ -134,7 +131,6 @@ public class RunGoAction extends GuiAction {
      * status of menu items based on FileStatus.  Display finalized values as if execution
      * terminated due to completion or exception.
      */
-
     public void stopped(ProcessingException pe, int reason) {
         // show final register and data segment values.
         executePane.getRegistersWindow().updateRegisters();
@@ -201,6 +197,4 @@ public class RunGoAction extends GuiAction {
         }
         new ProgramArgumentList(programArguments).storeProgramArguments();
     }
-
-
 }

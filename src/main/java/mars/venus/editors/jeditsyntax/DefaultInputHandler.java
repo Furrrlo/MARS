@@ -6,7 +6,6 @@
  * permitted, in both source and binary form, provided that this notice
  * remains intact in all source distributions of this package.
  */
-
 package mars.venus.editors.jeditsyntax;
 
 import javax.swing.*;
@@ -14,7 +13,8 @@ import java.awt.*;
 import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
-import java.util.Hashtable;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.StringTokenizer;
 
 /**
@@ -26,14 +26,14 @@ import java.util.StringTokenizer;
  */
 public class DefaultInputHandler extends InputHandler {
     // private members
-    private final Hashtable bindings;
-    private Hashtable currentBindings;
+    private final Map<KeyStroke, Object> bindings;
+    private Map<KeyStroke, Object> currentBindings;
 
     /**
      * Creates a new input handler with no key bindings defined.
      */
     public DefaultInputHandler() {
-        bindings = currentBindings = new Hashtable();
+        bindings = currentBindings = new HashMap<>();
     }
 
     private DefaultInputHandler(DefaultInputHandler copy) {
@@ -57,20 +57,11 @@ public class DefaultInputHandler extends InputHandler {
         int index = keyStroke.indexOf('+');
         if (index != -1) {
             for (int i = 0; i < index; i++) {
-                switch (Character.toUpperCase(keyStroke
-                        .charAt(i))) {
-                    case 'A':
-                        modifiers |= InputEvent.ALT_MASK;
-                        break;
-                    case 'C':
-                        modifiers |= InputEvent.CTRL_MASK;
-                        break;
-                    case 'M':
-                        modifiers |= InputEvent.META_MASK;
-                        break;
-                    case 'S':
-                        modifiers |= InputEvent.SHIFT_MASK;
-                        break;
+                switch (Character.toUpperCase(keyStroke.charAt(i))) {
+                    case 'A' -> modifiers |= InputEvent.ALT_DOWN_MASK;
+                    case 'C' -> modifiers |= InputEvent.CTRL_DOWN_MASK;
+                    case 'M' -> modifiers |= InputEvent.META_DOWN_MASK;
+                    case 'S' -> modifiers |= InputEvent.SHIFT_DOWN_MASK;
                 }
             }
         }
@@ -161,8 +152,9 @@ public class DefaultInputHandler extends InputHandler {
      * @param keyBinding The key binding
      * @param action     The action
      */
+    @SuppressWarnings("unchecked")
     public void addKeyBinding(String keyBinding, ActionListener action) {
-        Hashtable current = bindings;
+        Map<KeyStroke, Object> current = bindings;
 
         StringTokenizer st = new StringTokenizer(keyBinding);
         while (st.hasMoreTokens()) {
@@ -172,12 +164,12 @@ public class DefaultInputHandler extends InputHandler {
 
             if (st.hasMoreTokens()) {
                 Object o = current.get(keyStroke);
-                if (o instanceof Hashtable)
-                    current = (Hashtable) o;
+                if (o instanceof Map)
+                    current = (Map<KeyStroke, Object>) o;
                 else {
-                    o = new Hashtable();
-                    current.put(keyStroke, o);
-                    current = (Hashtable) o;
+                    Map<KeyStroke, Object> new1 = new HashMap<>();
+                    current.put(keyStroke, new1);
+                    current = new1;
                 }
             } else
                 current.put(keyStroke, action);
@@ -214,16 +206,17 @@ public class DefaultInputHandler extends InputHandler {
      * Handle a key pressed event. This will look up the binding for
      * the key stroke and execute it.
      */
+    @SuppressWarnings("unchecked")
     public void keyPressed(KeyEvent evt) {
         int keyCode = evt.getKeyCode();
-        int modifiers = evt.getModifiers();
+        int modifiers = evt.getModifiersEx();
         if (keyCode == KeyEvent.VK_CONTROL ||
                 keyCode == KeyEvent.VK_SHIFT ||
                 keyCode == KeyEvent.VK_ALT ||
                 keyCode == KeyEvent.VK_META)
             return;
 
-        if ((modifiers & ~KeyEvent.SHIFT_MASK) != 0
+        if ((modifiers & ~KeyEvent.SHIFT_DOWN_MASK) != 0
                 || evt.isActionKey()
                 || keyCode == KeyEvent.VK_BACK_SPACE
                 || keyCode == KeyEvent.VK_DELETE
@@ -256,18 +249,15 @@ public class DefaultInputHandler extends InputHandler {
                 // (mnemonic, accelerator).  DPS 4-may-2010
                 mars.Globals.getGui().dispatchEventToMenu(evt);
                 evt.consume();
-                return;
             } else if (o instanceof ActionListener) {
                 currentBindings = bindings;
                 executeAction(((ActionListener) o),
                         evt.getSource(), null);
 
                 evt.consume();
-                return;
-            } else if (o instanceof Hashtable) {
-                currentBindings = (Hashtable) o;
+            } else if (o instanceof Map) {
+                currentBindings = (Map<KeyStroke, Object>) o;
                 evt.consume();
-                return;
             }
         }
     }
@@ -276,13 +266,13 @@ public class DefaultInputHandler extends InputHandler {
      * Handle a key typed event. This inserts the key into the text area.
      */
     public void keyTyped(KeyEvent evt) {
-        int modifiers = evt.getModifiers();
+        int modifiers = evt.getModifiersEx();
         char c = evt.getKeyChar();
         // This IF statement needed to prevent Macintosh shortcut keyChar from
         // being echoed to the text area.  E.g. Command-s, for Save, will echo
         // the 's' character unless filtered out here.  Command modifier
         // matches KeyEvent.META_MASK.   DPS 30-Nov-2010
-        if ((modifiers & KeyEvent.META_MASK) != 0)
+        if ((modifiers & KeyEvent.META_DOWN_MASK) != 0)
             return;
         // DPS 9-Jan-2013.  Umberto Villano from Italy describes Alt combinations
         // not working on Italian Mac keyboards, where # requires Alt (Option).
@@ -322,14 +312,15 @@ public class DefaultInputHandler extends InputHandler {
         //
         // Until this is resolved upstream, don't ignore characters
         // on OS X, which have been entered with the ALT modifier:
-        if (c != KeyEvent.CHAR_UNDEFINED && (((modifiers & KeyEvent.ALT_MASK) == 0) || System.getProperty("os.name").contains("OS X"))) {
+        if (c != KeyEvent.CHAR_UNDEFINED && (((modifiers & KeyEvent.ALT_DOWN_MASK) == 0) || System.getProperty("os.name").contains("OS X"))) {
             if (c >= 0x20 && c != 0x7f) {
                 KeyStroke keyStroke = KeyStroke.getKeyStroke(
                         Character.toUpperCase(c));
                 Object o = currentBindings.get(keyStroke);
 
-                if (o instanceof Hashtable) {
-                    currentBindings = (Hashtable) o;
+                if (o instanceof Map) {
+                    //noinspection unchecked
+                    currentBindings = (Map<KeyStroke, Object>) o;
                     return;
                 } else if (o instanceof ActionListener) {
                     currentBindings = bindings;
