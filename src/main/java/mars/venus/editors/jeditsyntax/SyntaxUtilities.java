@@ -9,6 +9,7 @@
 package mars.venus.editors.jeditsyntax;
 
 import mars.Globals;
+import mars.settings.Setting;
 import mars.venus.editors.jeditsyntax.tokenmarker.Token;
 
 import javax.swing.*;
@@ -95,23 +96,7 @@ public class SyntaxUtilities {
      * to use the default syntax styles.
      */
     public static SyntaxStyle[] getDefaultSyntaxStyles() {
-        SyntaxStyle[] styles = new SyntaxStyle[Token.ID_COUNT];
-
-        // SyntaxStyle constructor params: color, italic?, bold?
-        // All need to be assigned even if not used by language (no gaps in array)
-        styles[Token.NULL] = new SyntaxStyle(Color.black, false, false);
-        styles[Token.COMMENT1] = new SyntaxStyle(new Color(0x00CC33), true, false);//(Color.black,true,false);
-        styles[Token.COMMENT2] = new SyntaxStyle(new Color(0x990033), true, false);
-        styles[Token.KEYWORD1] = new SyntaxStyle(Color.blue, false, false);//(Color.black,false,true);
-        styles[Token.KEYWORD2] = new SyntaxStyle(Color.magenta, false, false);
-        styles[Token.KEYWORD3] = new SyntaxStyle(Color.red, false, false);//(new Color(0x009600),false,false);
-        styles[Token.LITERAL1] = new SyntaxStyle(new Color(0x00CC33), false, false);//(new Color(0x650099),false,false);
-        styles[Token.LITERAL2] = new SyntaxStyle(new Color(0x00CC33), false, false);//(new Color(0x650099),false,true);
-        styles[Token.LABEL] = new SyntaxStyle(Color.black, true, false);//(new Color(0x990033),false,true);
-        styles[Token.OPERATOR] = new SyntaxStyle(Color.black, false, true);
-        styles[Token.INVALID] = new SyntaxStyle(Color.red, false, false);
-        styles[Token.MACRO_ARG] = new SyntaxStyle(new Color(150, 150, 0), false, false);
-        return styles;
+        return Setting.SyntaxStyles.defaultSyntaxStyles();
     }
 
     /**

@@ -31,6 +31,7 @@ import mars.assembler.SymbolTable;
 import mars.mips.hardware.Memory;
 import mars.mips.instructions.InstructionSet;
 import mars.mips.instructions.syscalls.SyscallNumberOverride;
+import mars.settings.SettingsService;
 import mars.util.PropertiesFile;
 import mars.venus.VenusUI;
 
@@ -124,9 +125,13 @@ public class Globals {
      */
     public static int exitCode = 0;
     public static boolean runSpeedPanelExists = false;
+    /** Object that contains various settings that can be accessed modified internally. */
+    static SettingsService settingsService;
     /**
      * Object that contains various settings that can be accessed modified internally.
+     * @deprecated use {@link #settingsService}
      **/
+    @Deprecated
     static Settings settings;
     /* The GUI being used (if any) with this simulator. */
     static VenusUI gui = null;
@@ -153,6 +158,10 @@ public class Globals {
         return settings;
     }
 
+    public static SettingsService getSettingsService() {
+        return settingsService;
+    }
+
     /**
      * Method called once upon system initialization to create the global data structures.
      **/
@@ -162,7 +171,8 @@ public class Globals {
             instructionSet = new InstructionSet();
             instructionSet.populate();
             symbolTable = new SymbolTable("global");
-            settings = new Settings(gui);
+            settingsService = new SettingsService();
+            settings = new Settings(settingsService);
             initialized = true;
             debug = false;
             memory.clear(); // will establish memory configuration from setting
