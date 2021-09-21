@@ -741,6 +741,8 @@ public class VenusUI extends JFrame {
 
     JToolBar setUpToolBar() {
         JToolBar toolBar = new JToolBar();
+        // Don't really care about it being floatable + it disappears because of an NPE in DarkLaf
+        toolBar.setFloatable(false);
 
         New = new JButton(fileNewAction);
         New.setText("");
