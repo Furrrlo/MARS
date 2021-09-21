@@ -149,7 +149,7 @@ public class HelpHelpAction extends GuiAction {
         JScrollPane marsCopyrightScrollPane;
         JEditorPane marsCopyrightDisplay;
         try(BufferedReader in = new BufferedReader(new InputStreamReader(Objects.requireNonNull(this.getClass()
-                .getResourceAsStream("/MARSlicense.txt")), StandardCharsets.UTF_8))) {
+                .getResourceAsStream("/licenses/MARS-license.txt")), StandardCharsets.UTF_8))) {
             String line;
             StringBuilder text = new StringBuilder("<pre>");
             while ((line = in.readLine()) != null)

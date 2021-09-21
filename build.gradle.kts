@@ -29,6 +29,10 @@ repositories {
     mavenCentral()
 }
 
+dependencies {
+    implementation("com.github.weisj:darklaf-core:2.7.2")
+}
+
 val jarsDirectory = File(buildDir, "jpackage-jars")
 val distDirectory = File(buildDir, "jpackage-dist")
 

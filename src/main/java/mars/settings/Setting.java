@@ -148,7 +148,13 @@ public interface Setting<T> {
          * Flag to determine whether a program can write binary code to the text or data segment and
          * execute that code.
          */
-        SELF_MODIFYING_CODE_ENABLED("SelfModifyingCode", 20, false);
+        SELF_MODIFYING_CODE_ENABLED("SelfModifyingCode", 20, false),
+
+        LAF_SYSTEM_PREFERENCES_ENABLED("LafSystemPreferencesEnabled", true),
+        LAF_ACCENT_COLOR_FOLLOWS_SYSTEM("LafAccentColorFollowsSystem", true),
+        LAF_SELECTION_COLOR_FOLLOWS_SYSTEM("LafSelectionColorFollowsSystem", true),
+        LAF_FONT_SIZE_FOLLOWS_SYSTEM("LafFontSizeFollowsSystem", true),
+        LAF_THEME_FOLLOWS_SYSTEM("LafThemeFollowsSystem", true);
 
         private final String key;
         private final Integer oldId;
@@ -204,7 +210,10 @@ public interface Setting<T> {
         /**
          * Number of letters to be matched by editor's instruction guide before popup generated (if popup enabled)
          */
-        EDITOR_POPUP_PREFIX_LENGTH("EditorPopupPrefixLength", 6, "2");
+        EDITOR_POPUP_PREFIX_LENGTH("EditorPopupPrefixLength", 6, "2"),
+
+        LAF_THEME("LafTheme", null),
+        LAF_FONT_SIZE("LafFontSizePreset", "100");
 
         private final String key;
         private final Integer oldId;
@@ -373,7 +382,10 @@ public interface Setting<T> {
         /**
          * RGB color for register highlighted foreground
          */
-        REGISTER_HIGHLIGHT_FOREGROUND("RegisterHighlightForeground", 11, 0x0);
+        REGISTER_HIGHLIGHT_FOREGROUND("RegisterHighlightForeground", 11, 0x0),
+
+        LAF_ACCENT_COLOR("LafAccentColor", null),
+        LAF_SELECTION_COLOR("LafSelectionColor", null);
 
         private final String key;
         private final Integer oldId;

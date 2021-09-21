@@ -1,4 +1,5 @@
 /*
+Copyright (c) 2021,  Francesco Ferlin
 Copyright (c) 2003-2012,  Pete Sanderson and Kenneth Vollmar
 
 Developed by Pete Sanderson (psanderson@otterbein.edu)
@@ -27,9 +28,12 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 package mars;
 
+import com.github.weisj.darklaf.LafManager;
+import com.github.weisj.darklaf.theme.Theme;
 import mars.mips.dump.DumpFormat;
 import mars.mips.dump.DumpFormatLoader;
 import mars.mips.hardware.*;
+import mars.settings.LookAndFeelSettingsListener;
 import mars.simulator.ProgramArgumentList;
 import mars.util.Binary;
 import mars.util.FilenameFinder;
@@ -37,11 +41,15 @@ import mars.util.MemoryDump;
 import mars.venus.VenusUI;
 
 import javax.swing.*;
+import javax.swing.plaf.ColorUIResource;
+import java.awt.*;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.*;
+import java.util.List;
+import java.util.logging.Level;
 
 /**
  * Launch the Mars application
@@ -229,9 +237,22 @@ public class MarsLaunch {
     private void launchIDE() {
         // System.setProperty("apple.laf.useScreenMenuBar", "true"); // Puts MARS menu on Mac OS menu bar
         new MarsSplashScreen(splashDuration).showSplash();
+
+        LafManager.setLogLevel(Level.INFO);
+        LafManager.addThemeChangeListener(new LookAndFeelSettingsListener());
+        LafManager.registerDefaultsAdjustmentTask((t, d) -> {
+            if (!Theme.isDark(t))
+                return;
+
+            Object p = d.get("backgroundContainer");
+            if (p instanceof Color color)
+                d.put("backgroundContainer", new ColorUIResource(color.darker()));
+        });
+
         SwingUtilities.invokeLater(() -> {
             //Turn off metal's use of bold fonts
             //UIManager.put("swing.boldMetal", Boolean.FALSE);
+            LafManager.install();
             new VenusUI("MARS " + Globals.version);
         });
     }

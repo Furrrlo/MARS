@@ -1,4 +1,5 @@
 /*
+Copyright (c) 2021,  Francesco Ferlin
 Copyright (c) 2003-2013,  Pete Sanderson and Kenneth Vollmar
 
 Developed by Pete Sanderson (psanderson@otterbein.edu)
@@ -27,15 +28,13 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 package mars.venus;
 
+import com.github.weisj.darklaf.settings.ThemeSettings;
 import mars.Globals;
 import mars.Settings;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.KeyEvent;
-import java.awt.event.MouseListener;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
+import java.awt.event.*;
 import java.net.URL;
 
 /**
@@ -76,6 +75,7 @@ public class VenusUI extends JFrame {
             settingsExtended, settingsAssembleOnOpen, settingsAssembleAll, settingsWarningsAreErrors, settingsStartAtMain,
             settingsDelayedBranching, settingsProgramArguments, settingsSelfModifyingCode;
     private JMenuItem settingsExceptionHandler, settingsEditor, settingsHighlighting, settingsMemoryConfiguration;
+    private JMenuItem settingsLookAndFeel;
     private JMenuItem helpHelp, helpAbout;
     // components of the toolbar
     private JButton Undo, Redo, Cut, Copy, Paste, FindReplace, SelectAll;
@@ -94,7 +94,7 @@ public class VenusUI extends JFrame {
     private Action settingsLabelAction, settingsPopupInputAction, settingsValueDisplayBaseAction, settingsAddressDisplayBaseAction,
             settingsExtendedAction, settingsAssembleOnOpenAction, settingsAssembleAllAction,
             settingsWarningsAreErrorsAction, settingsStartAtMainAction, settingsProgramArgumentsAction,
-            settingsDelayedBranchingAction, settingsExceptionHandlerAction, settingsEditorAction,
+            settingsDelayedBranchingAction, settingsExceptionHandlerAction, settingsLookAndFeelAction, settingsEditorAction,
             settingsHighlightingAction, settingsMemoryConfigurationAction, settingsSelfModifyingCodeAction;
     private Action helpHelpAction, helpAboutAction;
 
@@ -514,6 +514,11 @@ public class VenusUI extends JFrame {
                     "If set, the MIPS program can write and branch to both text and data segments.",
                     null, null,
                     mainUI);
+            settingsLookAndFeelAction = new SettingsLookAndFeelAction("Look and Feel...",
+                    ThemeSettings.getIcon(),
+                    "View and modify Look and Feel theme settings",
+                    null,null,
+                    mainUI);
             settingsEditorAction = new SettingsEditorAction("Editor...",
                     null,
                     "View and modify text editor settings.",
@@ -685,6 +690,7 @@ public class VenusUI extends JFrame {
         settingsStartAtMain.setSelected(Globals.getSettings().getStartAtMain());
         settingsProgramArguments = new JCheckBoxMenuItem(settingsProgramArgumentsAction);
         settingsProgramArguments.setSelected(Globals.getSettings().getProgramArguments());
+        settingsLookAndFeel = new JMenuItem(settingsLookAndFeelAction);
         settingsEditor = new JMenuItem(settingsEditorAction);
         settingsHighlighting = new JMenuItem(settingsHighlightingAction);
         settingsExceptionHandler = new JMenuItem(settingsExceptionHandlerAction);
@@ -705,6 +711,7 @@ public class VenusUI extends JFrame {
         settings.add(settingsDelayedBranching);
         settings.add(settingsSelfModifyingCode);
         settings.addSeparator();
+        settings.add(settingsLookAndFeel);
         settings.add(settingsEditor);
         settings.add(settingsHighlighting);
         settings.add(settingsExceptionHandler);
@@ -870,7 +877,7 @@ public class VenusUI extends JFrame {
         runAssembleAction.setEnabled(true);
         // If assemble-all, allow previous Run menu settings to remain.
         // Otherwise, clear them out.  DPS 9-Aug-2011
-        if (!Globals.getSettings().getBooleanSetting(mars.Settings.ASSEMBLE_ALL_ENABLED)) {
+        if (!Globals.getSettings().getBooleanSetting(Settings.ASSEMBLE_ALL_ENABLED)) {
             runGoAction.setEnabled(false);
             runStepAction.setEnabled(false);
             runBackstepAction.setEnabled(false);

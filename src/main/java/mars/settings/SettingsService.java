@@ -182,8 +182,6 @@ public class SettingsService extends Observable {
      */
     public <T> void setSetting(Setting<T> setting, T value) {
         final var internalSetting = getSettingInternal(setting);
-        Objects.requireNonNull(value, "Setting value can't be null!");
-
         if (value != internalSetting.getValue()) {
             internalSetting.setValue(value);
             saveSetting(internalSetting);
