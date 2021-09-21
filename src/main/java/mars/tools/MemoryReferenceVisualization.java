@@ -52,7 +52,6 @@ public class MemoryReferenceVisualization extends AbstractMarsToolAndApplication
     // Some GUI settings
     private final EmptyBorder emptyBorder = new EmptyBorder(4, 4, 4, 4);
     private final Font countFonts = new Font("Times", Font.BOLD, 12);
-    private final Color backgroundColor = Color.WHITE;
     private final String[] wordsPerUnitChoices = {"1", "2", "4", "8", "16", "32", "64", "128", "256", "512", "1024", "2048"};
     private final int defaultWordsPerUnitIndex = 0;
     private final String[] visualizationUnitPixelWidthChoices = {"1", "2", "4", "8", "16", "32"};
@@ -287,7 +286,6 @@ public class MemoryReferenceVisualization extends AbstractMarsToolAndApplication
         drawHashMarksSelector.addActionListener(e -> updateDisplay());
         wordsPerUnitSelector = new JComboBox<>(wordsPerUnitChoices);
         wordsPerUnitSelector.setEditable(false);
-        wordsPerUnitSelector.setBackground(backgroundColor);
         wordsPerUnitSelector.setSelectedIndex(defaultWordsPerUnitIndex);
         wordsPerUnitSelector.setToolTipText("Number of memory words represented by one visualization element (rectangle)");
         wordsPerUnitSelector.addActionListener(e -> {
@@ -296,7 +294,6 @@ public class MemoryReferenceVisualization extends AbstractMarsToolAndApplication
         });
         visualizationUnitPixelWidthSelector = new JComboBox<>(visualizationUnitPixelWidthChoices);
         visualizationUnitPixelWidthSelector.setEditable(false);
-        visualizationUnitPixelWidthSelector.setBackground(backgroundColor);
         visualizationUnitPixelWidthSelector.setSelectedIndex(defaultVisualizationUnitPixelWidthIndex);
         visualizationUnitPixelWidthSelector.setToolTipText("Width in pixels of rectangle representing memory access");
         visualizationUnitPixelWidthSelector.addActionListener(e -> {
@@ -306,7 +303,6 @@ public class MemoryReferenceVisualization extends AbstractMarsToolAndApplication
         });
         visualizationUnitPixelHeightSelector = new JComboBox<>(visualizationUnitPixelHeightChoices);
         visualizationUnitPixelHeightSelector.setEditable(false);
-        visualizationUnitPixelHeightSelector.setBackground(backgroundColor);
         visualizationUnitPixelHeightSelector.setSelectedIndex(defaultVisualizationUnitPixelHeightIndex);
         visualizationUnitPixelHeightSelector.setToolTipText("Height in pixels of rectangle representing memory access");
         visualizationUnitPixelHeightSelector.addActionListener(e -> {
@@ -316,7 +312,6 @@ public class MemoryReferenceVisualization extends AbstractMarsToolAndApplication
         });
         visualizationPixelWidthSelector = new JComboBox<>(displayAreaPixelWidthChoices);
         visualizationPixelWidthSelector.setEditable(false);
-        visualizationPixelWidthSelector.setBackground(backgroundColor);
         visualizationPixelWidthSelector.setSelectedIndex(defaultDisplayWidthIndex);
         visualizationPixelWidthSelector.setToolTipText("Total width in pixels of visualization area");
         visualizationPixelWidthSelector.addActionListener(e -> {
@@ -329,7 +324,6 @@ public class MemoryReferenceVisualization extends AbstractMarsToolAndApplication
         });
         visualizationPixelHeightSelector = new JComboBox<>(displayAreaPixelHeightChoices);
         visualizationPixelHeightSelector.setEditable(false);
-        visualizationPixelHeightSelector.setBackground(backgroundColor);
         visualizationPixelHeightSelector.setSelectedIndex(defaultDisplayHeightIndex);
         visualizationPixelHeightSelector.setToolTipText("Total height in pixels of visualization area");
         visualizationPixelHeightSelector.addActionListener(e -> {
@@ -342,7 +336,6 @@ public class MemoryReferenceVisualization extends AbstractMarsToolAndApplication
         });
         displayBaseAddressSelector = new JComboBox<>(displayBaseAddressChoices);
         displayBaseAddressSelector.setEditable(false);
-        displayBaseAddressSelector.setBackground(backgroundColor);
         displayBaseAddressSelector.setSelectedIndex(defaultBaseAddressIndex);
         displayBaseAddressSelector.setToolTipText("Base address for visualization area (upper left corner)");
         displayBaseAddressSelector.addActionListener(e -> {

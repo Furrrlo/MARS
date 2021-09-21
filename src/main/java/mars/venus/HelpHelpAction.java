@@ -27,6 +27,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 package mars.venus;
 
+import com.github.weisj.darklaf.ui.list.DarkListUI;
 import mars.Globals;
 import mars.assembler.Directives;
 import mars.mips.instructions.Instruction;
@@ -58,8 +59,6 @@ public class HelpHelpAction extends GuiAction {
      * in help string.
      */
     public static final String descriptionDetailSeparator = ":";
-    // Light gray background color for alternating lines of the instruction lists
-    static Color altBackgroundColor = new Color(0xEE, 0xEE, 0xEE);
 
     public HelpHelpAction(String name, Icon icon, String descrip,
                           Integer mnemonic, KeyStroke accel, VenusUI gui) {
@@ -311,33 +310,8 @@ public class HelpHelpAction extends GuiAction {
         JList<String> examples = new JList<>(exampleList.toArray(new String[0]));
         JScrollPane mipsScrollPane = new JScrollPane(examples, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
         examples.setFont(new Font("Monospaced", Font.PLAIN, 12));
-        examples.setCellRenderer(new MyCellRenderer());
+        examples.putClientProperty(DarkListUI.KEY_ALTERNATE_ROW_COLOR, true);
         return mipsScrollPane;
-    }
-
-    private static class MyCellRenderer extends JLabel implements ListCellRenderer<String> {
-        // This is the only method defined by ListCellRenderer.
-        // We just reconfigure the JLabel each time we're called.
-        public Component getListCellRendererComponent(
-                JList list, // the list
-                String value, // value to display
-                int index, // cell index
-                boolean isSelected, // is the cell selected
-                boolean cellHasFocus) // does the cell have focus
-        {
-            setText(value);
-            if (isSelected) {
-                setBackground(list.getSelectionBackground());
-                setForeground(list.getSelectionForeground());
-            } else {
-                setBackground((index % 2 == 0) ? altBackgroundColor : list.getBackground());
-                setForeground(list.getForeground());
-            }
-            setEnabled(list.isEnabled());
-            setFont(list.getFont());
-            setOpaque(true);
-            return this;
-        }
     }
 
     /*

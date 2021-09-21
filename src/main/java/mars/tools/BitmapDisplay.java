@@ -49,7 +49,6 @@ public class BitmapDisplay extends AbstractMarsToolAndApplication {
     // Some GUI settings
     private final EmptyBorder emptyBorder = new EmptyBorder(4, 4, 4, 4);
     private final Font countFonts = new Font("Times", Font.BOLD, 12);
-    private final Color backgroundColor = Color.WHITE;
     private final String[] visualizationUnitPixelWidthChoices = {"1", "2", "4", "8", "16", "32"};
     private final int defaultVisualizationUnitPixelWidthIndex = 0;
     private final String[] visualizationUnitPixelHeightChoices = {"1", "2", "4", "8", "16", "32"};
@@ -266,7 +265,6 @@ public class BitmapDisplay extends AbstractMarsToolAndApplication {
 
         visualizationUnitPixelWidthSelector = new JComboBox<>(visualizationUnitPixelWidthChoices);
         visualizationUnitPixelWidthSelector.setEditable(false);
-        visualizationUnitPixelWidthSelector.setBackground(backgroundColor);
         visualizationUnitPixelWidthSelector.setSelectedIndex(defaultVisualizationUnitPixelWidthIndex);
         visualizationUnitPixelWidthSelector.setToolTipText("Width in pixels of rectangle representing memory word");
         visualizationUnitPixelWidthSelector.addActionListener(e -> {
@@ -276,7 +274,6 @@ public class BitmapDisplay extends AbstractMarsToolAndApplication {
         });
         visualizationUnitPixelHeightSelector = new JComboBox<>(visualizationUnitPixelHeightChoices);
         visualizationUnitPixelHeightSelector.setEditable(false);
-        visualizationUnitPixelHeightSelector.setBackground(backgroundColor);
         visualizationUnitPixelHeightSelector.setSelectedIndex(defaultVisualizationUnitPixelHeightIndex);
         visualizationUnitPixelHeightSelector.setToolTipText("Height in pixels of rectangle representing memory word");
         visualizationUnitPixelHeightSelector.addActionListener(e -> {
@@ -286,7 +283,6 @@ public class BitmapDisplay extends AbstractMarsToolAndApplication {
         });
         visualizationPixelWidthSelector = new JComboBox<>(displayAreaPixelWidthChoices);
         visualizationPixelWidthSelector.setEditable(false);
-        visualizationPixelWidthSelector.setBackground(backgroundColor);
         visualizationPixelWidthSelector.setSelectedIndex(defaultDisplayWidthIndex);
         visualizationPixelWidthSelector.setToolTipText("Total width in pixels of display area");
         visualizationPixelWidthSelector.addActionListener(e -> {
@@ -298,7 +294,6 @@ public class BitmapDisplay extends AbstractMarsToolAndApplication {
         });
         visualizationPixelHeightSelector = new JComboBox<>(displayAreaPixelHeightChoices);
         visualizationPixelHeightSelector.setEditable(false);
-        visualizationPixelHeightSelector.setBackground(backgroundColor);
         visualizationPixelHeightSelector.setSelectedIndex(defaultDisplayHeightIndex);
         visualizationPixelHeightSelector.setToolTipText("Total height in pixels of display area");
         visualizationPixelHeightSelector.addActionListener(e -> {
@@ -310,7 +305,6 @@ public class BitmapDisplay extends AbstractMarsToolAndApplication {
         });
         displayBaseAddressSelector = new JComboBox<>(displayBaseAddressChoices);
         displayBaseAddressSelector.setEditable(false);
-        displayBaseAddressSelector.setBackground(backgroundColor);
         displayBaseAddressSelector.setSelectedIndex(defaultBaseAddressIndex);
         displayBaseAddressSelector.setToolTipText("Base address for display area (upper left corner)");
         displayBaseAddressSelector.addActionListener(e -> {

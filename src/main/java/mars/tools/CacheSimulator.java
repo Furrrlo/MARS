@@ -68,7 +68,6 @@ public class CacheSimulator extends AbstractMarsToolAndApplication {
 
     private static final EmptyBorder emptyBorder = new EmptyBorder(4, 4, 4, 4);
     private static final Font countFonts = new Font("Times", Font.BOLD, 12);
-    private static final Color backgroundColor = Color.WHITE;
 
     // RNG used for random replacement policy.  For testing, set seed for reproducible stream
     private final Random randu = new Random(0);
@@ -158,12 +157,14 @@ public class CacheSimulator extends AbstractMarsToolAndApplication {
             debug = e.getStateChange() == ItemEvent.SELECTED;
             resetLogDisplay();
             logText.setEnabled(debug);
-            logText.setBackground(debug ? Color.WHITE : logPanel.getBackground());
+            // Fetch the bg color by creating  anew component, so that it's not dirty
+            // and it's also relative to the current theme
+            logText.setBackground(debug ? new JTextArea().getBackground() : logPanel.getBackground());
         });
         logPanel.add(logShow);
         logText = new JTextArea(5, 70);
         logText.setEnabled(debug);
-        logText.setBackground(debug ? Color.WHITE : logPanel.getBackground());
+        logText.setBackground(debug ? logText.getBackground() : logPanel.getBackground());
         logText.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
         logText.setToolTipText("Displays cache activity log if enabled");
         logScroll = new JScrollPane(logText, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
@@ -179,7 +180,6 @@ public class CacheSimulator extends AbstractMarsToolAndApplication {
         organization.setBorder(otb);
         cachePlacementSelector = new JComboBox<>(placementPolicyChoices);
         cachePlacementSelector.setEditable(false);
-        cachePlacementSelector.setBackground(backgroundColor);
         cachePlacementSelector.setSelectedIndex(defaultPlacementPolicyIndex);
         cachePlacementSelector.addActionListener(e -> {
             updateCacheSetSizeSelector();
@@ -188,12 +188,10 @@ public class CacheSimulator extends AbstractMarsToolAndApplication {
 
         cacheReplacementSelector = new JComboBox<>(replacementPolicyChoices);
         cacheReplacementSelector.setEditable(false);
-        cacheReplacementSelector.setBackground(backgroundColor);
         cacheReplacementSelector.setSelectedIndex(defaultReplacementPolicyIndex);
 
         cacheBlockSizeSelector = new JComboBox<>(cacheBlockSizeChoices);
         cacheBlockSizeSelector.setEditable(false);
-        cacheBlockSizeSelector.setBackground(backgroundColor);
         cacheBlockSizeSelector.setSelectedIndex(defaultCacheBlockSizeIndex);
         cacheBlockSizeSelector.addActionListener(e -> {
             updateCacheSizeDisplay();
@@ -201,7 +199,6 @@ public class CacheSimulator extends AbstractMarsToolAndApplication {
         });
         cacheBlockCountSelector = new JComboBox<>(cacheBlockCountChoices);
         cacheBlockCountSelector.setEditable(false);
-        cacheBlockCountSelector.setBackground(backgroundColor);
         cacheBlockCountSelector.setSelectedIndex(defaultCacheBlockCountIndex);
         cacheBlockCountSelector.addActionListener(e -> {
             updateCacheSetSizeSelector();
@@ -214,7 +211,6 @@ public class CacheSimulator extends AbstractMarsToolAndApplication {
 
         cacheSetSizeSelector = new JComboBox<>(cacheSetSizeChoices);
         cacheSetSizeSelector.setEditable(false);
-        cacheSetSizeSelector.setBackground(backgroundColor);
         cacheSetSizeSelector.setSelectedIndex(defaultCacheSetSizeIndex);
         cacheSetSizeSelector.addActionListener(e -> reset());
 
@@ -229,7 +225,6 @@ public class CacheSimulator extends AbstractMarsToolAndApplication {
         replacementPolicyRow.add(new JLabel("Block Replacement Policy "), BorderLayout.WEST);
 /*       replacementPolicyDisplay = new JTextField("N/A",6);
          replacementPolicyDisplay.setEditable(false);
-         replacementPolicyDisplay.setBackground(backgroundColor);
          replacementPolicyDisplay.setHorizontalAlignment(JTextField.RIGHT); */
         replacementPolicyRow.add(cacheReplacementSelector, BorderLayout.EAST);
 
@@ -245,7 +240,6 @@ public class CacheSimulator extends AbstractMarsToolAndApplication {
          cachableAddressesRow.add(new JLabel("Cachable Addresses "),BorderLayout.WEST);
          cachableAddressesDisplay = new JTextField("all data segment");
          cachableAddressesDisplay.setEditable(false);
-         cachableAddressesDisplay.setBackground(backgroundColor);
          cachableAddressesDisplay.setHorizontalAlignment(JTextField.RIGHT);
          cachableAddressesRow.add(cachableAddressesDisplay, BorderLayout.EAST);
       */
@@ -265,7 +259,6 @@ public class CacheSimulator extends AbstractMarsToolAndApplication {
         cacheSizeDisplay = new JTextField(8);
         cacheSizeDisplay.setHorizontalAlignment(JTextField.RIGHT);
         cacheSizeDisplay.setEditable(false);
-        cacheSizeDisplay.setBackground(backgroundColor);
         cacheSizeDisplay.setFont(countFonts);
         cacheTotalSizeRow.add(cacheSizeDisplay, BorderLayout.EAST);
         updateCacheSizeDisplay();
@@ -294,7 +287,6 @@ public class CacheSimulator extends AbstractMarsToolAndApplication {
         memoryAccessCountDisplay = new JTextField(10);
         memoryAccessCountDisplay.setHorizontalAlignment(JTextField.RIGHT);
         memoryAccessCountDisplay.setEditable(false);
-        memoryAccessCountDisplay.setBackground(backgroundColor);
         memoryAccessCountDisplay.setFont(countFonts);
         memoryAccessCountRow.add(memoryAccessCountDisplay, BorderLayout.EAST);
 
@@ -304,7 +296,6 @@ public class CacheSimulator extends AbstractMarsToolAndApplication {
         cacheHitCountDisplay = new JTextField(10);
         cacheHitCountDisplay.setHorizontalAlignment(JTextField.RIGHT);
         cacheHitCountDisplay.setEditable(false);
-        cacheHitCountDisplay.setBackground(backgroundColor);
         cacheHitCountDisplay.setFont(countFonts);
         cacheHitCountRow.add(cacheHitCountDisplay, BorderLayout.EAST);
 
@@ -314,7 +305,6 @@ public class CacheSimulator extends AbstractMarsToolAndApplication {
         cacheMissCountDisplay = new JTextField(10);
         cacheMissCountDisplay.setHorizontalAlignment(JTextField.RIGHT);
         cacheMissCountDisplay.setEditable(false);
-        cacheMissCountDisplay.setBackground(backgroundColor);
         cacheMissCountDisplay.setFont(countFonts);
         cacheMissCountRow.add(cacheMissCountDisplay, BorderLayout.EAST);
 
@@ -324,7 +314,6 @@ public class CacheSimulator extends AbstractMarsToolAndApplication {
         cacheHitRateDisplay = new JProgressBar(JProgressBar.HORIZONTAL, 0, 100);
         cacheHitRateDisplay.setStringPainted(true);
         cacheHitRateDisplay.setForeground(Color.BLUE);
-        cacheHitRateDisplay.setBackground(backgroundColor);
         cacheHitRateDisplay.setFont(countFonts);
         cacheHitRateRow.add(cacheHitRateDisplay, BorderLayout.EAST);
 

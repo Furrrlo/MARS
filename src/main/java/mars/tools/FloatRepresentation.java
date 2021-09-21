@@ -70,10 +70,9 @@ public class FloatRepresentation extends AbstractMarsToolAndApplication {
     private static final Font binaryDisplayFont = new Font("Courier", Font.PLAIN, 18);
     private static final Font decimalDisplayFont = new Font("Courier", Font.PLAIN, 18);
     private static final Color hexDisplayColor = Color.red;
-    private static final Color binaryDisplayColor = Color.black;
     private static final Color decimalDisplayColor = Color.blue;
-    private static final String expansionFontTag = "<font size=\"+1\" face=\"Courier\" color=\"#000000\">";
-    private static final String instructionFontTag = "<font size=\"+0\" face=\"Verdana, Arial, Helvetica\" color=\"#000000\">";
+    private static final String expansionFontTag = "<font size=\"+1\" face=\"Courier\">";
+    private static final String instructionFontTag = "<font size=\"+0\" face=\"Verdana, Arial, Helvetica\">";
     private static final int exponentBias = 127;  // 32 bit floating point exponent bias
     //Put here because inner class cannot have static members.
     private static final String zeroes =
@@ -229,7 +228,6 @@ public class FloatRepresentation extends AbstractMarsToolAndApplication {
 
         binarySignDisplay = new JTextField(defaultBinarySign, maxLengthBinarySign + 1);
         binarySignDisplay.setFont(binaryDisplayFont);
-        binarySignDisplay.setForeground(binaryDisplayColor);
         binarySignDisplay.setHorizontalAlignment(JTextField.RIGHT);
         binarySignDisplay.setToolTipText("The sign bit");
         binarySignDisplay.setEditable(true);
@@ -237,7 +235,6 @@ public class FloatRepresentation extends AbstractMarsToolAndApplication {
 
         binaryExponentDisplay = new JTextField(defaultBinaryExponent, maxLengthBinaryExponent + 1);
         binaryExponentDisplay.setFont(binaryDisplayFont);
-        binaryExponentDisplay.setForeground(binaryDisplayColor);
         binaryExponentDisplay.setHorizontalAlignment(JTextField.RIGHT);
         binaryExponentDisplay.setToolTipText("" + maxLengthBinaryExponent + "-bit exponent");
         binaryExponentDisplay.setEditable(true);
@@ -245,7 +242,6 @@ public class FloatRepresentation extends AbstractMarsToolAndApplication {
 
         binaryFractionDisplay = new BinaryFractionDisplayTextField(defaultBinaryFraction, maxLengthBinaryFraction + 1);
         binaryFractionDisplay.setFont(binaryDisplayFont);
-        binaryFractionDisplay.setForeground(binaryDisplayColor);
         binaryFractionDisplay.setHorizontalAlignment(JTextField.RIGHT);
         binaryFractionDisplay.setToolTipText("" + maxLengthBinaryFraction + "-bit fraction");
         binaryFractionDisplay.setEditable(true);
