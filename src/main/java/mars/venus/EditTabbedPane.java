@@ -1,4 +1,5 @@
 /*
+Copyright (c) 2021,  Francesco Ferlin
 Copyright (c) 2003-2010,  Pete Sanderson and Kenneth Vollmar
 
 Developed by Pete Sanderson (psanderson@otterbein.edu)
@@ -516,35 +517,25 @@ public class EditTabbedPane extends JTabbedPane {
 
 
     private class FileOpener {
-        private final JFileChooser fileChooser;
-        private final List<FileFilter> fileFilterList;
-        private final PropertyChangeListener listenForUserAddedFileFilter;
         private final Editor theEditor;
+
+        private final List<FileFilter> userDefinedFilters = new ArrayList<>();
+        private final PropertyChangeListener listenForUserAddedFileFilter;
+
         private File mostRecentlyOpenedFile;
-        private int fileFilterCount;
 
         public FileOpener(Editor theEditor) {
             this.mostRecentlyOpenedFile = null;
             this.theEditor = theEditor;
-            this.fileChooser = new JFileChooser();
             this.listenForUserAddedFileFilter = new ChoosableFileFilterChangeListener();
-            this.fileChooser.addPropertyChangeListener(this.listenForUserAddedFileFilter);
-
-            // Note: add sequence is significant - last one added becomes default.
-            fileFilterList = new ArrayList<>();
-            fileFilterList.add(fileChooser.getAcceptAllFileFilter());
-            fileFilterList.add(FilenameFinder.getFileFilter(Globals.fileExtensions, "Assembler Files", true));
-            fileFilterCount = 0; // this will trigger fileChooser file filter load in next line
-            setChoosableFileFilters();
         }
 
         /*
          * Launch a file chooser for name of file to open.  Return true if file opened, false otherwise
          */
         private boolean openFile() {
-            // The fileChooser's list may be rebuilt from the master ArrayList if a new filter
-            // has been added by the user.
-            setChoosableFileFilters();
+            final JFileChooser fileChooser = new JFileChooser();
+            handleChoosableFileFilters(fileChooser);
             // get name of file to be opened and load contents into text editing area.
             fileChooser.setCurrentDirectory(new File(theEditor.getCurrentOpenDirectory()));
             // Set default to previous file opened, if any.  This is useful in conjunction
@@ -646,9 +637,9 @@ public class EditTabbedPane extends JTabbedPane {
         }
 
         // Private method to generate the file chooser's list of choosable file filters.
-        // It is called when the file chooser is created, and called again each time the Open
-        // dialog is activated.  We do this because the user may have added a new filter
-        // during the previous dialog.  This can be done by entering e.g. *.txt in the file
+        // It is called when a new file chooser is created.
+        // We do this because the user may have added a new filter during the previous dialog.
+        // This can be done by entering e.g. *.txt in the file
         // name text field.  Java is funny, however, in that if the user does this then
         // cancels the dialog, the new filter will remain in the list BUT if the user does
         // this then ACCEPTS the dialog, the new filter will NOT remain in the list.  However
@@ -660,32 +651,23 @@ public class EditTabbedPane extends JTabbedPane {
         // IS FIRED!  I could obviously deal with this situation if I wanted to, but enough
         // is enough.  The limit will be one alternative filter at a time.
         // DPS... 9 July 2008
+        private void handleChoosableFileFilters(JFileChooser fileChooser) {
+            // clear out the list and populate from our own ArrayList
+            fileChooser.resetChoosableFileFilters();
 
-        private void setChoosableFileFilters() {
-            // See if a new filter has been added to the master list.  If so,
-            // regenerate the fileChooser list from the master list.
-            if (fileFilterCount < fileFilterList.size() ||
-                    fileFilterList.size() != fileChooser.getChoosableFileFilters().length) {
-                fileFilterCount = fileFilterList.size();
-                // First, "deactivate" the listener, because our addChoosableFileFilter
-                // calls would otherwise activate it!  We want it to be triggered only
-                // by MARS user action.
-                boolean activeListener = false;
-                if (fileChooser.getPropertyChangeListeners().length > 0) {
-                    fileChooser.removePropertyChangeListener(listenForUserAddedFileFilter);
-                    activeListener = true;  // we'll note this, for re-activation later
-                }
-                // clear out the list and populate from our own ArrayList.
-                // Last one added becomes the default.
-                fileChooser.resetChoosableFileFilters();
-                for (FileFilter fileFilter : fileFilterList)
-                    fileChooser.addChoosableFileFilter(fileFilter);
-                // Restore listener.
-                if (activeListener) {
-                    fileChooser.addPropertyChangeListener(listenForUserAddedFileFilter);
-                }
-            }
-        }//////////////////////////////////////////////////////////////////////////////////
+            fileChooser.addChoosableFileFilter(fileChooser.getAcceptAllFileFilter());
+
+            final FileFilter asmFilter;
+            fileChooser.addChoosableFileFilter(asmFilter = FilenameFinder.getFileFilter(Globals.fileExtensions, "Assembler Files", true));
+            fileChooser.setFileFilter(asmFilter);
+
+            for (FileFilter fileFilter : userDefinedFilters)
+                fileChooser.addChoosableFileFilter(fileFilter);
+
+            fileChooser.addPropertyChangeListener(this.listenForUserAddedFileFilter);
+        }
+
+        //////////////////////////////////////////////////////////////////////////////////
         //  Private inner class for special property change listener.  DPS 9 July 2008.
         //  If user adds a file filter, e.g. by typing *.txt into the file text field then pressing
         //  Enter, then it is automatically added to the array of choosable file filters.  BUT, unless you
@@ -697,9 +679,9 @@ public class EditTabbedPane extends JTabbedPane {
                 if (e.getPropertyName().equals(JFileChooser.CHOOSABLE_FILE_FILTER_CHANGED_PROPERTY)) {
                     FileFilter[] newFilters = (FileFilter[]) e.getNewValue();
                     FileFilter[] oldFilters = (FileFilter[]) e.getOldValue();
-                    if (newFilters.length > fileFilterList.size()) {
+                    if (newFilters.length > userDefinedFilters.size()) {
                         // new filter added, so add to end of master list.
-                        fileFilterList.add(newFilters[newFilters.length - 1]);
+                        userDefinedFilters.add(newFilters[newFilters.length - 1]);
                     }
                 }
             }
