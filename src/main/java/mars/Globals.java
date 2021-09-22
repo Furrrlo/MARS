@@ -56,7 +56,7 @@ public class Globals {
     /**
      * The current MARS version number. Can't wait for "initialize()" call to get it.
      */
-    public static final String version = "4.5";
+    public static final String version = "4.5.1";
     /**
      * MARS copyright years
      */
