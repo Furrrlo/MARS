@@ -252,32 +252,32 @@ public interface Setting<T> {
         /**
          * Font for the text editor
          */
-        EDITOR_FONT("EditorFont", 0, "Monospaced", "Plain", "12"),
+        EDITOR_FONT("EditorFont", 0, "JetBrains Mono", "Plain", "12"),
         /**
          * Font for table even row background (text, data, register displays)
          */
-        EVEN_ROW_FONT("EvenRowFont", 1, "Monospaced", "Plain", "12"),
+        EVEN_ROW_FONT("EvenRowFont", 1, "JetBrains Mono", "Plain", "12"),
         /**
          * Font for table odd row background (text, data, register displays)
          */
-        ODD_ROW_FONT("OddRowFont", 2, "Monospaced", "Plain", "12"),
+        ODD_ROW_FONT("OddRowFont", 2, "JetBrains Mono", "Plain", "12"),
         /**
          * Font for table odd row foreground (text, data, register displays)
          */
         // TODO: there is a space here D:
-        TEXTSEGMENT_HIGHLIGHT_FONT( " TextSegmentHighlightFont", 3, "Monospaced", "Plain", "12"),
+        TEXTSEGMENT_HIGHLIGHT_FONT( " TextSegmentHighlightFont", 3, "JetBrains Mono", "Plain", "12"),
         /**
          * Font for text segment delay slot highlighted background
          */
-        TEXTSEGMENT_DELAYSLOT_HIGHLIGHT_FONT( "TextSegmentDelayslotHighightFont", 4, "Monospaced", "Plain", "12"),
+        TEXTSEGMENT_DELAYSLOT_HIGHLIGHT_FONT( "TextSegmentDelayslotHighightFont", 4, "JetBrains Mono", "Plain", "12"),
         /**
          * Font for text segment highlighted background
          */
-        DATASEGMENT_HIGHLIGHT_FONT("DataSegmentHighlightFont", 5, "Monospaced", "Plain", "12"),
+        DATASEGMENT_HIGHLIGHT_FONT("DataSegmentHighlightFont", 5, "JetBrains Mono", "Plain", "12"),
         /**
          * Font for register highlighted background
          */
-        REGISTER_HIGHLIGHT_FONT("RegisterHighlightFont", 6, "Monospaced", "Plain", "12");
+        REGISTER_HIGHLIGHT_FONT("RegisterHighlightFont", 6, "JetBrains Mono", "Plain", "12");
 
         private final String key;
         private final Integer oldId;

@@ -43,12 +43,9 @@ import mars.venus.VenusUI;
 import javax.swing.*;
 import javax.swing.plaf.ColorUIResource;
 import java.awt.*;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.PrintStream;
-import java.util.*;
+import java.io.*;
 import java.util.List;
+import java.util.*;
 import java.util.logging.Level;
 
 /**
@@ -247,6 +244,21 @@ public class MarsLaunch {
             Object p = d.get("backgroundContainer");
             if (p instanceof Color color)
                 d.put("backgroundContainer", new ColorUIResource(color.darker()));
+        });
+
+        final String fontFolder = "fonts";
+        FilenameFinder.getFilenameList(this.getClass().getClassLoader(), fontFolder, ".ttf").forEach(fontFileName -> {
+            try(InputStream is = this.getClass().getClassLoader().getResourceAsStream(fontFolder + "/" + fontFileName)) {
+                if(is == null)
+                    throw new FileNotFoundException(fontFileName);
+
+                if(!GraphicsEnvironment.getLocalGraphicsEnvironment().registerFont(Font.createFont(Font.TRUETYPE_FONT, is)))
+                    System.err.println("Refused to install font " + fontFileName);
+
+            } catch (FontFormatException | IOException ex) {
+                System.err.println("Failed to install font " + fontFileName);
+                ex.printStackTrace();
+            }
         });
 
         SwingUtilities.invokeLater(() -> {
