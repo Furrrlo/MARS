@@ -235,6 +235,9 @@ public class MipsXray extends AbstractMarsToolAndApplication {
     //set the tool bar that controls the step in a time instruction running.
     private JToolBar setUpToolBar() {
         JToolBar toolBar = new JToolBar();
+        // Don't really care about it being floatable + it disappears because of an NPE in DarkLaf
+        toolBar.setFloatable(false);
+
         Assemble = new JButton(runAssembleAction);
         Assemble.setText("");
         runBackStep = new JButton(runBackstepAction);
