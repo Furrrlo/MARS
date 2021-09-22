@@ -364,7 +364,8 @@ public class SettingsEditorAction extends GuiAction {
                     samples[count].setHorizontalAlignment(SwingConstants.CENTER);
                     samples[count].setBorder(BorderFactory.createLineBorder(Color.black));
                     samples[count].setText(sampleText[i]);
-                    samples[count].setBackground(Color.WHITE);
+                    final var uiColor = UIManager.getColor("textForeground");
+                    samples[count].setForeground(uiColor != null ? uiColor : Color.WHITE);
                     samples[count].setToolTipText(SAMPLE_TOOL_TIP_TEXT);
                     foregroundButtons[count] = new ColorSelectButton(); // defined in SettingsHighlightingAction
                     foregroundButtons[count].addActionListener(new ForegroundChanger(count));

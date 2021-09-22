@@ -1,0 +1,19 @@
+Taken from https://github.com/weisJ/darklaf-extensions/tree/985272e3a0106fd8fe89b3b7e808286066bfe2e1/rsyntaxarea/src/main/resources/com/github/weisj/darklaf/extensions/rsyntaxarea/scheme
+
+Theme map:
+- IntelliJ -> IntelliJScheme
+- Darcula -> DarculaScheme
+- OneDark -> OneDarkScheme
+- High Contrast Dark -> DarkHighContrastScheme
+- Solarized Dark -> DarkScheme
+- High Contrast Light, Solarized Light -> LightScheme
+Token map:
+- Comments (Token.COMMENT1) -> COMMENT_DOCUMENTATION
+- String literal (Token.LITERAL1) -> LITERAL_STRING_DOUBLE_QUOTE
+- Character literal (Token.LITERAL2) -> LITERAL_CHAR
+- Label (Token.LABEL) -> ANNOTATION
+- MIPS instruction (Token.KEYWORD1) -> RESERVED_WORD
+- Assembler directive (Token.KEYWORD2) -> FUNCTION
+- Register (Token.KEYWORD3) -> VARIABLE
+- In-progress, invalid (Token.INVALID) -> ERROR_IDENTIFIER
+- Macro parameter (Token.MACRO_ARG) -> PREPROCESSOR

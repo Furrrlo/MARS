@@ -96,7 +96,21 @@ public class SyntaxUtilities {
      * to use the default syntax styles.
      */
     public static SyntaxStyle[] getDefaultSyntaxStyles() {
-        return Setting.SyntaxStyles.defaultSyntaxStyles();
+        SyntaxStyle[] styles = new SyntaxStyle[Token.ID_COUNT];
+
+        styles[Token.NULL] = Globals.getSettings().getDefaultEditorSyntaxStyleByPosition(Token.NULL);
+        styles[Token.COMMENT1] = Globals.getSettings().getDefaultEditorSyntaxStyleByPosition(Token.COMMENT1);
+        styles[Token.COMMENT2] = Globals.getSettings().getDefaultEditorSyntaxStyleByPosition(Token.COMMENT2);
+        styles[Token.KEYWORD1] = Globals.getSettings().getDefaultEditorSyntaxStyleByPosition(Token.KEYWORD1);
+        styles[Token.KEYWORD2] = Globals.getSettings().getDefaultEditorSyntaxStyleByPosition(Token.KEYWORD2);
+        styles[Token.KEYWORD3] = Globals.getSettings().getDefaultEditorSyntaxStyleByPosition(Token.KEYWORD3);
+        styles[Token.LITERAL1] = Globals.getSettings().getDefaultEditorSyntaxStyleByPosition(Token.LITERAL1);
+        styles[Token.LITERAL2] = Globals.getSettings().getDefaultEditorSyntaxStyleByPosition(Token.LITERAL2);
+        styles[Token.LABEL] = Globals.getSettings().getDefaultEditorSyntaxStyleByPosition(Token.LABEL);
+        styles[Token.OPERATOR] = Globals.getSettings().getDefaultEditorSyntaxStyleByPosition(Token.OPERATOR);
+        styles[Token.INVALID] = Globals.getSettings().getDefaultEditorSyntaxStyleByPosition(Token.INVALID);
+        styles[Token.MACRO_ARG] = Globals.getSettings().getDefaultEditorSyntaxStyleByPosition(Token.MACRO_ARG);
+        return styles;
     }
 
     /**

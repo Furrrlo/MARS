@@ -463,19 +463,6 @@ public interface Setting<T> {
             TOKEN_SYNTAX_STYLES = styles;
         }
 
-        private static SyntaxStyle[] DEFAULT_SYNTAX_STYLES;
-
-        public static SyntaxStyle[] defaultSyntaxStyles() {
-            if(DEFAULT_SYNTAX_STYLES != null)
-                return DEFAULT_SYNTAX_STYLES;
-
-            // Nothing missing cause the static block above us checked
-            final SyntaxStyle[] styles = new SyntaxStyle[Token.ID_COUNT];
-            Arrays.stream(Setting.SyntaxStyles.values()).forEach(setting -> styles[setting.getToken()] = setting.settingImpl.getDefaultValue());
-            DEFAULT_SYNTAX_STYLES = styles;
-            return DEFAULT_SYNTAX_STYLES;
-        }
-
         private final int token;
         final SettingImpl<SyntaxStyle> settingImpl;
 

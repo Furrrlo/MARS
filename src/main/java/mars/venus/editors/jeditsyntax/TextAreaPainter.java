@@ -103,6 +103,9 @@ public class TextAreaPainter extends JComponent implements TabExpander {
         if((uiColor = UIManager.getColor("textBackgroundSecondary")) != null)
             if((currColor = getBackground()) == null || currColor instanceof UIResource)
                 setBackground(uiColor);
+        if((uiColor = UIManager.getColor("textForeground")) != null)
+            if((currColor = getForeground()) == null || currColor instanceof UIResource)
+                setForeground(uiColor);
         if((uiColor = UIManager.getColor("caret")) != null)
             if((currColor = caretColor) == null || currColor instanceof UIResource)
                 caretColor = uiColor;
