@@ -167,7 +167,6 @@ public class JEditBasedTextArea extends JEditTextArea implements MARSTextEditing
     //
     public void setSourceCode(String s, boolean editable) {
         this.setText(s);
-        this.setBackground((editable) ? Color.WHITE : Color.GRAY);
         this.setEditable(editable);
         this.setEnabled(editable);
         //this.getCaret().setVisible(editable);

@@ -11,6 +11,7 @@ package mars.venus.editors.jeditsyntax;
 import mars.Settings;
 
 import javax.swing.*;
+import javax.swing.plaf.ColorUIResource;
 import java.awt.*;
 
 /**
@@ -69,13 +70,13 @@ public class TextAreaDefaults {
         DEFAULTS.cols = 80;
         DEFAULTS.rows = 25;
         DEFAULTS.styles = SyntaxUtilities.getCurrentSyntaxStyles(); // was getDefaultSyntaxStyles()
-        DEFAULTS.caretColor = Color.black; // Color.red;
-        DEFAULTS.selectionColor = new Color(0xccccff);
-        DEFAULTS.lineHighlightColor = new Color(0xeeeeee);//0xe0e0e0);
+        DEFAULTS.caretColor = new ColorUIResource(Color.black); // Color.red;
+        DEFAULTS.selectionColor = new ColorUIResource(0xccccff);
+        DEFAULTS.lineHighlightColor = new ColorUIResource(0xeeeeee);//0xe0e0e0);
         DEFAULTS.lineHighlight = mars.Globals.getSettings().getBooleanSetting(Settings.EDITOR_CURRENT_LINE_HIGHLIGHTING);
-        DEFAULTS.bracketHighlightColor = Color.black;
+        DEFAULTS.bracketHighlightColor = new ColorUIResource(Color.black);
         DEFAULTS.bracketHighlight = false; // assembly language doesn't need this.
-        DEFAULTS.eolMarkerColor = new Color(0x009999);
+        DEFAULTS.eolMarkerColor = new ColorUIResource(0x009999);
         DEFAULTS.eolMarkers = false; // true;
         DEFAULTS.paintInvalid = false; //true;
         DEFAULTS.document = new SyntaxDocument();

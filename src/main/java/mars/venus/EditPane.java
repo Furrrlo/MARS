@@ -85,7 +85,18 @@ public class EditPane extends JPanel implements Observer {
         // We want to be notified of editor font changes! See update() below.
         Globals.getSettings().addObserver(this);
         this.fileStatus = new FileStatus();
-        lineNumbers = new JLabel();
+        lineNumbers = new JLabel() {
+            @Override
+            public void updateUI() {
+                super.updateUI();
+
+                Color color;
+                if((color = UIManager.getColor("textForegroundSecondary")) != null)
+                    setForeground(color);
+                if((color = UIManager.getColor("textBackgroundSecondaryInactive")) != null)
+                    setBackground(color);
+            }
+        };
 
         if (Globals.getSettings().getBooleanSetting(Settings.GENERIC_TEXT_EDITOR)) {
             this.sourceCode = new GenericTextArea(this, lineNumbers);

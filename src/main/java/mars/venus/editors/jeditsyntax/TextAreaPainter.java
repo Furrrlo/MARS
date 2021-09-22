@@ -14,6 +14,9 @@ import mars.venus.editors.jeditsyntax.tokenmarker.Token;
 import mars.venus.editors.jeditsyntax.tokenmarker.TokenMarker;
 
 import javax.swing.*;
+import javax.swing.plaf.ColorUIResource;
+import javax.swing.plaf.FontUIResource;
+import javax.swing.plaf.UIResource;
 import javax.swing.text.Segment;
 import javax.swing.text.TabExpander;
 import javax.swing.text.Utilities;
@@ -70,9 +73,9 @@ public class TextAreaPainter extends JComponent implements TabExpander {
 
         setCursor(Cursor.getPredefinedCursor(Cursor.TEXT_CURSOR));
 
-        setFont(new Font("Courier New" /*"Monospaced"*/, Font.PLAIN, 14));
-        setForeground(Color.black);
-        setBackground(Color.white);
+        setFont(new FontUIResource("Courier New" /*"Monospaced"*/, Font.PLAIN, 14));
+        setForeground(new ColorUIResource(Color.black));
+        setBackground(new ColorUIResource(Color.white));
 
         tabSizeChars = defaults.tabSize;
         blockCaret = defaults.blockCaret;
@@ -88,6 +91,30 @@ public class TextAreaPainter extends JComponent implements TabExpander {
         paintInvalid = defaults.paintInvalid;
         eolMarkerColor = defaults.eolMarkerColor;
         eolMarkers = defaults.eolMarkers;
+
+        updateUI();
+    }
+
+    @Override
+    public void updateUI() {
+        super.updateUI();
+
+        Color currColor, uiColor;
+        if((uiColor = UIManager.getColor("textBackgroundSecondary")) != null)
+            if((currColor = getBackground()) == null || currColor instanceof UIResource)
+                setBackground(uiColor);
+        if((uiColor = UIManager.getColor("caret")) != null)
+            if((currColor = caretColor) == null || currColor instanceof UIResource)
+                caretColor = uiColor;
+        if((uiColor = UIManager.getColor("textSelectionBackground")) != null)
+            if((currColor = selectionColor) == null || currColor instanceof UIResource)
+                selectionColor = uiColor;
+        if((uiColor = UIManager.getColor("textSelectionBackgroundSecondary")) != null)
+            if((currColor = lineHighlightColor) == null || currColor instanceof UIResource)
+                lineHighlightColor = uiColor;
+        if((uiColor = UIManager.getColor("textBackgroundSecondary")) != null)
+            if((currColor = bracketHighlightColor) == null || currColor instanceof UIResource)
+                bracketHighlightColor = uiColor;
     }
 
     /**
