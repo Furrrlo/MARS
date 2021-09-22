@@ -70,6 +70,7 @@ public class Coprocessor1Window extends JPanel implements ActionListener, Observ
     public Coprocessor1Window() {
         Simulator.getInstance().addObserver(this);
         settings = Globals.getSettings();
+        settings.addObserver(this);
         // Display registers in table contained in scroll pane.
         this.setLayout(new BorderLayout()); // table display will occupy entire width if widened
         table = new MyTippedJTable(new RegTableModel(setupWindow()));
@@ -281,6 +282,8 @@ public class Coprocessor1Window extends JPanel implements ActionListener, Observ
                 this.highlightCellForRegister((Register) observable);
                 Globals.getGui().getRegistersPane().setSelectedComponent(this);
             }
+        } else if (observable.equals(settings)) {
+            refresh();
         }
     }
 

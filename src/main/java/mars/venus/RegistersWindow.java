@@ -70,6 +70,7 @@ public class RegistersWindow extends JPanel implements Observer {
     public RegistersWindow() {
         Simulator.getInstance().addObserver(this);
         settings = Globals.getSettings();
+        settings.addObserver(this);
         this.highlighting = false;
         table = new MyTippedJTable(new RegTableModel(setupWindow()));
         table.getColumnModel().getColumn(NAME_COLUMN).setPreferredWidth(25);
@@ -211,6 +212,8 @@ public class RegistersWindow extends JPanel implements Observer {
                 this.highlightCellForRegister((Register) observable);
                 Globals.getGui().getRegistersPane().setSelectedComponent(this);
             }
+        } else if (observable.equals(settings)) {
+            this.refresh();
         }
     }
 

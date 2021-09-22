@@ -31,13 +31,15 @@ import mars.Globals;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.Observable;
+import java.util.Observer;
 
 /**
  * Container for the execution-related windows.  Currently displayed as a tabbed pane.
  *
  * @author Sanderson and Team JSpim
  **/
-public class ExecutePane extends JDesktopPane {
+public class ExecutePane extends JDesktopPane implements Observer {
     private final RegistersWindow registerValues;
     private final Coprocessor1Window coprocessor1Values;
     private final Coprocessor0Window coprocessor0Values;
@@ -59,6 +61,7 @@ public class ExecutePane extends JDesktopPane {
      */
     public ExecutePane(VenusUI mainUI, RegistersWindow regs, Coprocessor1Window cop1Regs, Coprocessor0Window cop0Regs) {
         this.mainUI = mainUI;
+        Globals.getSettings().addObserver(this);
         // Although these are displayed in Data Segment, they apply to all three internal
         // windows within the Execute pane.  So they will be housed here.
         addressDisplayBase = new NumberDisplayBaseChooser("Hexadecimal Addresses",
@@ -231,6 +234,21 @@ public class ExecutePane extends JDesktopPane {
      */
     public NumberDisplayBaseChooser getAddressDisplayBaseChooser() {
         return addressDisplayBase;
+    }
+
+    @Override
+    public void update(Observable observable, Object arg) {
+        if(observable.equals(Globals.getSettings())) {
+            // If a successful assembly has occured, the various panes will be populated with tables
+            // and we want to apply the new settings.  If it has NOT occurred, there are no tables
+            // in the Data and Text segment windows so we don't want to disturb them.
+            // In the latter case, the component count for the Text segment window is 0 (but is 1
+            // for Data segment window).
+            if (getTextSegmentWindow().getContentPane().getComponentCount() > 0) {
+                getDataSegmentWindow().updateValues();
+                getTextSegmentWindow().highlightStepAtPC();
+            }
+        }
     }
 
     /**

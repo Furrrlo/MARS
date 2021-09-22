@@ -71,6 +71,7 @@ public class Coprocessor0Window extends JPanel implements Observer {
     public Coprocessor0Window() {
         Simulator.getInstance().addObserver(this);
         settings = Globals.getSettings();
+        settings.addObserver(this);
         this.highlighting = false;
         table = new MyTippedJTable(new RegTableModel(setupWindow()));
         table.getColumnModel().getColumn(NAME_COLUMN).setPreferredWidth(50);
@@ -199,6 +200,8 @@ public class Coprocessor0Window extends JPanel implements Observer {
                 this.highlightCellForRegister((Register) observable);
                 Globals.getGui().getRegistersPane().setSelectedComponent(this);
             }
+        } else if(observable.equals(settings)) {
+            refresh();
         }
     }
 
