@@ -43,14 +43,17 @@ public class LookAndFeelSettingsListener implements ThemeChangeListener {
         SettingsConfiguration themeConfig = new SettingsConfiguration();
 
         final var themeName = Globals.getSettingsService().getSetting(Setting.Strings.LAF_THEME);
+
+        themeConfig.setSystemPreferencesEnabled(Globals.getSettingsService().getSetting(Setting.Booleans.LAF_SYSTEM_PREFERENCES_ENABLED));
+        themeConfig.setAccentColorFollowsSystem(Globals.getSettingsService().getSetting(Setting.Booleans.LAF_ACCENT_COLOR_FOLLOWS_SYSTEM));
+        themeConfig.setSelectionColorFollowsSystem(Globals.getSettingsService().getSetting(Setting.Booleans.LAF_SELECTION_COLOR_FOLLOWS_SYSTEM));
+        themeConfig.setFontSizeFollowsSystem(Globals.getSettingsService().getSetting(Setting.Booleans.LAF_FONT_SIZE_FOLLOWS_SYSTEM));
+        themeConfig.setThemeFollowsSystem(Globals.getSettingsService().getSetting(Setting.Booleans.LAF_THEME_FOLLOWS_SYSTEM));
+
         themeConfig.setTheme(Arrays.stream(LafManager.getRegisteredThemes())
                 .filter(theme -> theme.getName().equals(themeName))
                 .findFirst()
                 .orElse(themeSettings.getTheme()));
-
-        themeConfig.setAccentColorRule(AccentColorRule.fromColor(
-                Globals.getSettingsService().getSetting(Setting.Colors.LAF_ACCENT_COLOR),
-                Globals.getSettingsService().getSetting(Setting.Colors.LAF_SELECTION_COLOR)));
 
         try {
             themeConfig.setFontSizeRule(FontSizeRule.relativeAdjustment(Integer.parseInt(
@@ -59,11 +62,20 @@ public class LookAndFeelSettingsListener implements ThemeChangeListener {
             themeConfig.setFontSizeRule(themeSettings.getFontSizeRule());
         }
 
-        themeConfig.setSystemPreferencesEnabled(Globals.getSettingsService().getSetting(Setting.Booleans.LAF_SYSTEM_PREFERENCES_ENABLED));
-        themeConfig.setAccentColorFollowsSystem(Globals.getSettingsService().getSetting(Setting.Booleans.LAF_ACCENT_COLOR_FOLLOWS_SYSTEM));
-        themeConfig.setSelectionColorFollowsSystem(Globals.getSettingsService().getSetting(Setting.Booleans.LAF_SELECTION_COLOR_FOLLOWS_SYSTEM));
-        themeConfig.setFontSizeFollowsSystem(Globals.getSettingsService().getSetting(Setting.Booleans.LAF_FONT_SIZE_FOLLOWS_SYSTEM));
-        themeConfig.setThemeFollowsSystem(Globals.getSettingsService().getSetting(Setting.Booleans.LAF_THEME_FOLLOWS_SYSTEM));
+        // Workaround cause ThemeSettings doesn't correctly respect system accent color on its own
+        // It needs help from ThemeSettingsUI.SettingsUIConfiguration#getAccentColorRule(), which this is based off of
+        if(themeConfig.isSystemPreferencesEnabled()) {
+            boolean useSystemAccent = themeConfig.isAccentColorFollowsSystem() && themeConfig.isSystemAccentColorSupported();
+            boolean useSystemSelection = themeConfig.isSelectionColorFollowsSystem() && themeConfig.isSystemSelectionColorSupported();
+            var themePreferredStyle = useSystemAccent || useSystemSelection ? LafManager.getPreferredThemeStyle() : null;
+            themeConfig.setAccentColorRule(AccentColorRule.fromColor(
+                    useSystemAccent ?
+                            themePreferredStyle.getAccentColorRule().getAccentColor() :
+                            Globals.getSettingsService().getSetting(Setting.Colors.LAF_ACCENT_COLOR),
+                    useSystemSelection ?
+                            themePreferredStyle.getAccentColorRule().getSelectionColor() :
+                            Globals.getSettingsService().getSetting(Setting.Colors.LAF_SELECTION_COLOR)));
+        }
 
         themeSettings.setConfiguration(themeConfig);
         themeSettings.peek();
