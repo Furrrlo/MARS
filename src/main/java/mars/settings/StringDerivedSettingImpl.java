@@ -67,6 +67,11 @@ abstract class StringDerivedSettingImpl<T> implements SettingImpl<T> {
     }
 
     @Override
+    public boolean isDefault() {
+        return actualSetting.isDefault();
+    }
+
+    @Override
     public void setValueToDefault() {
         actualSetting.setValueToDefault();
     }

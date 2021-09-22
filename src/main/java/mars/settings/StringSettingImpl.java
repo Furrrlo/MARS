@@ -47,6 +47,11 @@ class StringSettingImpl extends SingleValueSettingImpl<String> {
 
     @Override
     public void writeToPreferences(Preferences preferences) {
+        if(currentValue == null || isDefault()) {
+            removeFromPreferences(preferences);
+            return;
+        }
+
         preferences.put(key, currentValue);
     }
 }

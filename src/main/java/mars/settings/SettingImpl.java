@@ -35,6 +35,8 @@ interface SettingImpl<T> {
 
     void setValue(T value);
 
+    boolean isDefault();
+
     void setValueToDefault();
 
     void loadDefaultFromProperties(Properties properties);

@@ -24,6 +24,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 package mars.settings;
 
+import java.util.Objects;
 import java.util.prefs.Preferences;
 
 abstract class SingleValueSettingImpl<T> implements SettingImpl<T> {
@@ -52,6 +53,11 @@ abstract class SingleValueSettingImpl<T> implements SettingImpl<T> {
     @Override
     public void setValue(T value) {
         this.currentValue = value;
+    }
+
+    @Override
+    public boolean isDefault() {
+        return Objects.equals(defaultValue, currentValue);
     }
 
     @Override

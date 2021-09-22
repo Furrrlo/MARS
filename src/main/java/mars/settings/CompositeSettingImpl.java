@@ -79,6 +79,11 @@ abstract class CompositeSettingImpl<T> implements SettingImpl<T> {
     }
 
     @Override
+    public boolean isDefault() {
+        return settings.stream().allMatch(SettingImpl::isDefault);
+    }
+
+    @Override
     public void setValueToDefault() {
         settings.forEach(SettingImpl::setValueToDefault);
     }

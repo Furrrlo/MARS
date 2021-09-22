@@ -49,6 +49,11 @@ class BooleanSettingImpl extends StringDerivedSettingImpl<Boolean> {
 
     @Override
     public void writeToPreferences(Preferences preferences) {
+        if(isDefault()) {
+            removeFromPreferences(preferences);
+            return;
+        }
+
         preferences.putBoolean(key, getValue());
     }
 }

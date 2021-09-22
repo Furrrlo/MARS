@@ -174,6 +174,22 @@ public class SettingsService extends Observable {
     }
 
     /**
+     * Set default value of a setting given its id.
+     *
+     * @param setting setting's identifier
+     * @throws IllegalArgumentException if identifier is not valid.
+     */
+    public <T> void setSettingToDefault(Setting<T> setting) {
+        final var internalSetting = getSettingInternal(setting);
+        if (!internalSetting.isDefault()) {
+            internalSetting.setValueToDefault();
+            saveSetting(internalSetting);
+            setChanged();
+            notifyObservers();
+        }
+    }
+
+    /**
      * Set value of a setting given its id and the value.
      *
      * @param setting setting's identifier
