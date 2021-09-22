@@ -371,7 +371,7 @@ public class Settings extends DelegatingObservable {
      * on defaults stored in this class.
      */
     public Settings() {
-        this(new SettingsService());
+        this(new SettingsService(true));
     }
 
     /**
@@ -380,10 +380,9 @@ public class Settings extends DelegatingObservable {
      * on defaults stored in this class.
      *
      * @param gui true if running the graphical IDE, false if running from command line.
-     *            Ignored as of release 3.6 but retained for compatibility.
      */
-    public Settings(@SuppressWarnings("unused") boolean gui) {
-        this(new SettingsService());
+    public Settings(boolean gui) {
+        this(new SettingsService(gui));
     }
 
     protected Settings(SettingsService newService) {

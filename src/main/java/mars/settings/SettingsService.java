@@ -28,6 +28,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 package mars.settings;
 
+import com.github.weisj.darklaf.LafManager;
 import mars.MarsLaunch;
 import mars.util.PropertiesFile;
 
@@ -57,17 +58,22 @@ import java.util.prefs.Preferences;
  **/
 public class SettingsService extends Observable {
 
+    private static final String SETTINGS_LOCATION = "settings/";
     /* Properties file used to hold default settings. */
-    private static final String SETTINGS_FILE = "Settings";
+    private static final String SETTINGS_FILE = "settings";
 
+    private final boolean gui;
     private final Preferences preferences;
 
     /**
      * Create Settings object and set to saved values.  If saved values not found, will set
      * based on defaults stored in Settings.properties file.  If file problems, will set based
      * on defaults stored in this class.
+     *
+     * @param gui true if running the graphical IDE, false if running from command line.
      */
-    public SettingsService() {
+    public SettingsService(boolean gui) {
+        this.gui = gui;
         // This determines where the values are actually stored.  Actual implementation
         // is platform-dependent.  For Windows, they are stored in Registry.  To see,
         // run regedit and browse to: HKEY_CURRENT_USER\Software\JavaSoft\Prefs\mars
@@ -91,8 +97,13 @@ public class SettingsService extends Observable {
      */
     private void initialize() {
         applyDefaultSettings();
-        if (!readSettingsFromPropertiesFile(SETTINGS_FILE))
-            System.out.println("MARS System error: unable to read Settings.properties defaults. Using built-in defaults.");
+
+        String filename;
+        if (!readSettingsFromPropertiesFile(filename = (SETTINGS_LOCATION + SETTINGS_FILE)))
+            System.out.println("MARS System error: unable to read " + filename + " defaults. Using built-in defaults.");
+        if (gui &&!readSettingsFromPropertiesFile(filename = (SETTINGS_LOCATION + LafManager.getInstalledTheme().getPrefix() + "_" + SETTINGS_FILE)))
+            System.out.println("MARS System error: unable to read " + filename + " defaults. Using built-in defaults.");
+
         getSettingsFromPreferences();
     }
 
@@ -108,15 +119,11 @@ public class SettingsService extends Observable {
      * false if it didn't.  Note the properties file exists only to provide default values
      * in case the Preferences fail or have not been recorded yet.
      * <p>
-     * Any settings successfully read will be stored in both the xSettingsValues and
-     * defaultXSettingsValues arrays (x=boolean,string,color).  The latter will overwrite the
-     * last-resort default values hardcoded into the arrays above.
+     * Any settings successfully read will be stored as both the current value and the default value.
+     * The latter will overwrite the last-resort default values hardcoded into the arrays above.
      *
-     * @implNote if there is NO ENTRY for the specified property, Globals.getPropertyEntry() returns
-     * null.  This is no cause for alarm.  It will occur during system development or upon the
-     * first use of a new MARS release in which new settings have been defined.
-     * In that case, this method will NOT make an assignment to the settings array!
-     * So consider it a precondition of this method: the settings arrays must already be
+     * @implNote if there is NO ENTRY for the specified property, this method will NOT make an assignment
+     * to the settings! So consider it a precondition of this method: the settings must already be
      * initialized with last-resort default values.
      */
     private boolean readSettingsFromPropertiesFile(String filename) {
@@ -149,6 +156,8 @@ public class SettingsService extends Observable {
     /** Reset settings to default values, as described in the constructor comments. */
     public void reset() {
         initialize();
+        setChanged();
+        notifyObservers();
     }
 
     /**

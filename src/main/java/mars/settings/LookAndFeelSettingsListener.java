@@ -95,5 +95,7 @@ public class LookAndFeelSettingsListener implements ThemeChangeListener {
 
     @Override
     public void themeInstalled(ThemeChangeEvent e) {
+        // Reset the service to reload the default values
+        Globals.getSettingsService().reset();
     }
 }

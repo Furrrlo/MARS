@@ -171,7 +171,7 @@ public class Globals {
             instructionSet = new InstructionSet();
             instructionSet.populate();
             symbolTable = new SymbolTable("global");
-            settingsService = new SettingsService();
+            settingsService = new SettingsService(gui);
             settings = new Settings(settingsService);
             initialized = true;
             debug = false;
