@@ -36,12 +36,20 @@ dependencies {
 val jarsDirectory = File(buildDir, "jpackage-jars")
 val distDirectory = File(buildDir, "jpackage-dist")
 
+val cleanJarsDirectory = tasks.register<Delete>("cleanJarsDirectory") {
+    delete(jarsDirectory)
+}
+
 val copyDependencies = tasks.register<Copy>("copyDependencies") {
     from(configurations.runtimeClasspath).into(jarsDirectory)
+    dependsOn(cleanJarsDirectory)
+    mustRunAfter(cleanJarsDirectory)
 }
 
 val copyJar = task("copyJar", Copy::class) {
     from(tasks.jar).into(jarsDirectory)
+    dependsOn(cleanJarsDirectory)
+    mustRunAfter(cleanJarsDirectory)
 }
 
 tasks.jpackage {
