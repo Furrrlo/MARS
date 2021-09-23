@@ -26,7 +26,6 @@ package mars.settings;
 
 import java.util.*;
 import java.util.prefs.Preferences;
-import java.util.stream.Collectors;
 
 abstract class CompositeSettingImpl<T> implements SettingImpl<T> {
 
@@ -60,16 +59,16 @@ abstract class CompositeSettingImpl<T> implements SettingImpl<T> {
 
     @Override
     public T getDefaultValue() {
-        return parseFromValues(settings.stream().collect(Collectors.toMap(
-                s -> s,
-                SettingImpl::getDefaultValue)));
+        final Map<SettingImpl<?>, Object> values = new HashMap<>(settings.size());
+        settings.forEach(s -> values.put(s, s.getDefaultValue()));
+        return parseFromValues(values);
     }
 
     @Override
     public T getValue() {
-        return parseFromValues(settings.stream().collect(Collectors.toMap(
-                s -> s,
-                SettingImpl::getValue)));
+        final Map<SettingImpl<?>, Object> values = new HashMap<>(settings.size());
+        settings.forEach(s -> values.put(s, s.getValue()));
+        return parseFromValues(values);
     }
 
     @Override
