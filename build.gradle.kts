@@ -31,6 +31,13 @@ repositories {
 
 dependencies {
     implementation("com.github.weisj:darklaf-core:2.7.2")
+
+    testImplementation("org.junit.jupiter:junit-jupiter-api:5.8.1")
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")
+}
+
+tasks.getByName<Test>("test") {
+    useJUnitPlatform()
 }
 
 val jarsDirectory = File(buildDir, "jpackage-jars")
