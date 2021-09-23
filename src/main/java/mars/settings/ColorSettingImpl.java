@@ -80,14 +80,16 @@ class ColorSettingImpl extends StringDerivedSettingImpl<Color> {
 
             Integer currValue;
             try {
-                currValue = Integer.decode(getValue()) & 0xFFFFFF;
+                final var sValue = getValue();
+                currValue = sValue == null ? null : Integer.decode(sValue) & 0xFFFFFF;
             } catch (NumberFormatException ex) {
                 currValue = null;
             }
 
             Integer defaultValue;
             try {
-                defaultValue = Integer.decode(getDefaultValue()) & 0xFFFFFF;
+                final var sValue = getDefaultValue();
+                defaultValue = sValue == null ? null : Integer.decode(sValue) & 0xFFFFFF;
             } catch (NumberFormatException ex) {
                 defaultValue = null;
             }
