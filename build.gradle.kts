@@ -10,7 +10,7 @@ tasks.withType<Wrapper>().configureEach {
 }
 
 group = "mars"
-version = "4.5.1"
+version = "4.5.2"
 
 application {
     mainClass.set("Mars")
